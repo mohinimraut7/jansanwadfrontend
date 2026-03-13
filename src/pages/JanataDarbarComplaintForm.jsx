@@ -65,6 +65,9 @@ export default function JanataDarbarComplaintForm() {
     documents: null, status: "Pending",
   });
 
+
+  const wards = ["Ward-A","Ward-B","Ward-C","Ward-D","Ward-E","Ward-F","Ward-G","Ward-H","Ward-I","General"];
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -149,11 +152,12 @@ export default function JanataDarbarComplaintForm() {
       const res = await axiosInstance.post("/inwardAdd", formPayload, { headers: { "Content-Type": "multipart/form-data" } });
       const data = res.data;
       if (!data.success) { alert(data.message || "Something went wrong"); return; }
-      alert("Inward Application Added Successfully");
+      // alert("Inward Application Added Successfully");
+      alert(`✅ Application submitted successfully!\nToken Number: ${data.tokenNo}`);
       setFormData({
         inwardNo: generateReferenceNumber(), submissionDate: new Date().toISOString().split("T")[0],
         fullName: "", mobile: "", email: "", wardNo: "", address: "", pincode: "",
-        category: "", identityType: "", identityNumber: "", taluka: "", district: "",
+        category: "", identityType: "", identityNumber: "", taluka: "",ward:"",district: "",
         subject: "", description: "", office: "Mahanagarpalika Office", mainDepartment: "", subDepartment: "",
         priority: "Normal", tagTo: [], followUp: "Yes", documents: null, status: "Pending",
       });
@@ -188,9 +192,20 @@ export default function JanataDarbarComplaintForm() {
 
             {/* ── Location ── */}
             {/* <SectionTitle title="Location" /> */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
               <Select label="Taluka" name="taluka" value={formData.taluka} onChange={handleChange} options={talukas}/>
-            </div>
+            </div> */}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+  <Select
+    label="Ward"
+    name="ward"
+    value={formData.ward}
+    onChange={handleChange}
+    options={wards}
+  />
+</div>
 
             {/* ── Complaint ── */}
             {/* <SectionTitle title="Complaint" /> */}
@@ -220,7 +235,7 @@ export default function JanataDarbarComplaintForm() {
                 </div>
               </div>
             )}
-            <Select label="Priority" name="priority" value={formData.priority} onChange={handleChange} options={["Normal","Urgent","Emergency"]}/>
+            <Select label="Priority" name="priority" value={formData.priority} onChange={handleChange} options={["Low","Medium","High"]}/>
 
             {/* ── Documents ── */}
             <SectionTitle title="Documents" />
