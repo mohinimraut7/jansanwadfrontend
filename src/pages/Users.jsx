@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axiosInstance from "../services/axiosInstance";
 import { toast } from "react-toastify";
 
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const avatarColors = [
   "bg-blue-500","bg-teal-500","bg-violet-500","bg-pink-500",
@@ -21,6 +22,7 @@ function formatDate(dateStr) {
   if (!dateStr) return "—";
   return new Date(dateStr).toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" });
 }
+
 
 // ── Detail Modal ──────────────────────────────────────────────────────────────
 function DetailModal({ user, onClose }) {
