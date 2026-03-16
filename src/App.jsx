@@ -19,6 +19,7 @@ import JanataDarbarComplaintForm from "./pages/JanataDarbarComplaintForm";
 import AllApplication from "./pages/Allapplication";
 import Users from "./pages/Users";
 import Availability from "./pages/Availability";
+import ApplicationCitizens from "./pages/ApplicationCitizens";
 
 
 
@@ -69,6 +70,11 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/allapplication" element={<AllApplication />} />
+
+          <Route path="/allapplicationcitizens" element={<ApplicationCitizens/>} />
+
+
+         
           
           <Route path="/availability" element={<Availability />} />
 

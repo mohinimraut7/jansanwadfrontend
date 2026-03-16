@@ -3,7 +3,11 @@ import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/slices/authSlice";
-import { FiChevronLeft, FiLayout, FiFileText, FiSend, FiSettings } from "react-icons/fi";
+import { FiChevronLeft, FiLayout, FiFileText, FiSend, FiSettings,FiChevronRight } from "react-icons/fi";
+
+
+import logo from "../../assets/vvcmclogo.jpg";
+
 
 export default function Sidebar() {
   const dispatch = useDispatch();
@@ -39,7 +43,7 @@ export default function Sidebar() {
         onClick={() => setMode("open")}
         className="fixed top-5 left-5 z-50 bg-white text-indigo-600 p-3 rounded-xl shadow-lg border border-gray-200 hover:scale-110 transition-all"
       >
-        <FiSettings size={22} />
+        <FiChevronRight size={22} />
       </button>
     );
   }
@@ -67,7 +71,8 @@ export default function Sidebar() {
             </div>
           )}
         </div> */}
-        <div className="flex items-center gap-2.5 overflow-hidden lg:hidden">
+        {/* >>>>> */}
+        {/* <div className="flex items-center gap-2.5 overflow-hidden lg:hidden">
   <div className="h-9 w-9 flex-shrink-0 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-extrabold text-base shadow">
     JD
   </div>
@@ -75,10 +80,29 @@ export default function Sidebar() {
   {mode === "open" && (
     <div className="flex flex-col">
       <h2 className="text-gray-900 font-extrabold text-base tracking-tight whitespace-nowrap leading-tight">
-        Janata Darbar
+        जन संवाद
       </h2>
       <p className="text-[10px] uppercase tracking-widest text-indigo-500 font-bold">
         Admin Panel
+      </p>
+    </div>
+  )}
+</div> */}
+
+{/* ++++++++++ */}
+
+<div className="flex items-center gap-2.5 overflow-hidden lg:hidden">
+  <div className="h-9 w-9 flex-shrink-0 rounded-xl overflow-hidden border-2 border-indigo-200 shadow bg-white">
+    <img src={logo} alt="VVCMC" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+  </div>
+
+  {mode === "open" && (
+    <div className="flex flex-col">
+      <h2 className="text-gray-900 font-extrabold text-base tracking-tight whitespace-nowrap leading-tight">
+        जन संवाद
+      </h2>
+      <p className="text-[10px] uppercase tracking-widest text-indigo-500 font-bold">
+        Admin Panel · VVCMC
       </p>
     </div>
   )}
@@ -110,6 +134,11 @@ export default function Sidebar() {
         <NavLink to="/allapplication" className={linkClass}>
           <FiFileText size={18} className="flex-shrink-0" />
           {mode === "open" && <span className="text-[14px]">All Application</span>}
+        </NavLink>
+
+        <NavLink to="/allapplicationcitizens" className={linkClass}>
+          <FiFileText size={18} className="flex-shrink-0" />
+          {mode === "open" && <span className="text-[14px]">All Application Citizens</span>}
         </NavLink>
 
         {FULL_ACCESS_ROLES.includes(user?.role) && (
