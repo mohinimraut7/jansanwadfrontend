@@ -457,279 +457,279 @@
 
 // =============================================
 
-import React, { useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import axiosInstance from "../services/axiosInstance";
-import mapImage from "../assets/mapvvcmc.jfif";
+// import React, { useState, useEffect, useRef } from "react";
+// import { useSelector } from "react-redux";
+// import { useNavigate } from "react-router-dom";
+// import axiosInstance from "../services/axiosInstance";
+// import mapImage from "../assets/mapvvcmc.jfif";
 
-// mapvvcmc.jfif
+// // mapvvcmc.jfif
 
-// ── Talukas for map overlay ──────────────────────────────────────────────────
-const TALUKAS = ["Vasai","Virar","Nalasopara","Palghar","Dahanu","Talasari","Jawhar","Mokhada","Vikramgad","Wada","Boisar","Umbergaon"];
+// // ── Talukas for map overlay ──────────────────────────────────────────────────
+// const TALUKAS = ["Vasai","Virar","Nalasopara","Palghar","Dahanu","Talasari","Jawhar","Mokhada","Vikramgad","Wada","Boisar","Umbergaon"];
 
-// ── Mini Bar Chart ────────────────────────────────────────────────────────────
-function MiniBar({ data = [], color = "#16a34a" }) {
-  const max = Math.max(...data, 1);
-  return (
-    <div style={{ display:"flex", alignItems:"flex-end", gap:3, height:40 }}>
-      {data.map((v, i) => (
-        <div key={i} style={{ flex:1, background: i === data.length-1 ? color : color+"55",
-          height:`${(v/max)*100}%`, borderRadius:"3px 3px 0 0", minHeight:3 }}/>
-      ))}
-    </div>
-  );
-}
+// // ── Mini Bar Chart ────────────────────────────────────────────────────────────
+// function MiniBar({ data = [], color = "#16a34a" }) {
+//   const max = Math.max(...data, 1);
+//   return (
+//     <div style={{ display:"flex", alignItems:"flex-end", gap:3, height:40 }}>
+//       {data.map((v, i) => (
+//         <div key={i} style={{ flex:1, background: i === data.length-1 ? color : color+"55",
+//           height:`${(v/max)*100}%`, borderRadius:"3px 3px 0 0", minHeight:3 }}/>
+//       ))}
+//     </div>
+//   );
+// }
 
-// ── Donut Chart ───────────────────────────────────────────────────────────────
-function DonutChart({ value = 68, color = "#16a34a" }) {
-  const r = 38, c = 2*Math.PI*r;
-  const dash = (value/100)*c;
-  return (
-    <svg width={96} height={96} viewBox="0 0 96 96">
-      <circle cx={48} cy={48} r={r} fill="none" stroke="#e5e7eb" strokeWidth={10}/>
-      <circle cx={48} cy={48} r={r} fill="none" stroke={color} strokeWidth={10}
-        strokeDasharray={`${dash} ${c-dash}`} strokeLinecap="round"
-        transform="rotate(-90 48 48)" style={{ transition:"stroke-dasharray .8s ease" }}/>
-      <text x={48} y={52} textAnchor="middle" fontSize={16} fontWeight={700} fill="#1a3a1a">{value}%</text>
-    </svg>
-  );
-}
+// // ── Donut Chart ───────────────────────────────────────────────────────────────
+// function DonutChart({ value = 68, color = "#16a34a" }) {
+//   const r = 38, c = 2*Math.PI*r;
+//   const dash = (value/100)*c;
+//   return (
+//     <svg width={96} height={96} viewBox="0 0 96 96">
+//       <circle cx={48} cy={48} r={r} fill="none" stroke="#e5e7eb" strokeWidth={10}/>
+//       <circle cx={48} cy={48} r={r} fill="none" stroke={color} strokeWidth={10}
+//         strokeDasharray={`${dash} ${c-dash}`} strokeLinecap="round"
+//         transform="rotate(-90 48 48)" style={{ transition:"stroke-dasharray .8s ease" }}/>
+//       <text x={48} y={52} textAnchor="middle" fontSize={16} fontWeight={700} fill="#1a3a1a">{value}%</text>
+//     </svg>
+//   );
+// }
 
-// ── VVCMC Taluka Map SVG (schematic) ─────────────────────────────────────────
-function VvcmcMap({ talukaData = {} }) {
-  // Approximate relative positions for talukas within Palghar district
-  const nodes = [
-    { name:"Dahanu",    x:18, y:10 },
-    { name:"Talasari",  x:8,  y:20 },
-    { name:"Jawhar",    x:38, y:22 },
-    { name:"Mokhada",   x:58, y:28 },
-    { name:"Vikramgad", x:48, y:40 },
-    { name:"Palghar",   x:22, y:38 },
-    { name:"Wada",      x:68, y:48 },
-    { name:"Boisar",    x:10, y:52 },
-    { name:"Vasai",     x:24, y:64 },
-    { name:"Virar",     x:38, y:72 },
-    { name:"Nalasopara",x:18, y:78 },
-    { name:"Umbergaon", x:6,  y:68 },
-  ];
-  const max = Math.max(...Object.values(talukaData), 1);
-  return (
-    <div style={{ position:"relative", width:"100%", paddingBottom:"85%", background:"linear-gradient(135deg,#f0fdf4,#dcfce7)", borderRadius:12, overflow:"hidden" }}>
-      <svg style={{ position:"absolute", inset:0, width:"100%", height:"100%" }} viewBox="0 0 88 90">
-        {/* connecting lines */}
-        {[[0,2],[1,0],[2,3],[3,4],[4,6],[2,5],[5,7],[7,8],[8,9],[9,10],[10,11],[5,8]].map(([a,b],i)=>(
-          <line key={i} x1={nodes[a].x+4} y1={nodes[a].y+4} x2={nodes[b].x+4} y2={nodes[b].y+4}
-            stroke="#86efac" strokeWidth={0.8} strokeDasharray="2 1"/>
-        ))}
-        {nodes.map((n, i) => {
-          const count = talukaData[n.name] || 0;
-          const size = 3.5 + (count/max)*5;
-          const opacity = 0.3 + (count/max)*0.7;
-          return (
-            <g key={i}>
-              <circle cx={n.x+4} cy={n.y+4} r={size} fill="#16a34a" opacity={opacity}/>
-              <circle cx={n.x+4} cy={n.y+4} r={2.5} fill="#15803d"/>
-              <text x={n.x+4} y={n.y+12} textAnchor="middle" fontSize={4.5} fill="#14532d" fontWeight={600}>{n.name}</text>
-              {count > 0 && <text x={n.x+4} y={n.y+1} textAnchor="middle" fontSize={3.5} fill="#fff" fontWeight={700}>{count}</text>}
-            </g>
-          );
-        })}
-      </svg>
-      <div style={{ position:"absolute", bottom:8, right:10, fontSize:10, color:"#15803d", fontWeight:600, background:"#fff8", borderRadius:6, padding:"2px 8px" }}>
-        📍 Palghar District
-      </div>
-    </div>
-  );
-}
+// // ── VVCMC Taluka Map SVG (schematic) ─────────────────────────────────────────
+// function VvcmcMap({ talukaData = {} }) {
+//   // Approximate relative positions for talukas within Palghar district
+//   const nodes = [
+//     { name:"Dahanu",    x:18, y:10 },
+//     { name:"Talasari",  x:8,  y:20 },
+//     { name:"Jawhar",    x:38, y:22 },
+//     { name:"Mokhada",   x:58, y:28 },
+//     { name:"Vikramgad", x:48, y:40 },
+//     { name:"Palghar",   x:22, y:38 },
+//     { name:"Wada",      x:68, y:48 },
+//     { name:"Boisar",    x:10, y:52 },
+//     { name:"Vasai",     x:24, y:64 },
+//     { name:"Virar",     x:38, y:72 },
+//     { name:"Nalasopara",x:18, y:78 },
+//     { name:"Umbergaon", x:6,  y:68 },
+//   ];
+//   const max = Math.max(...Object.values(talukaData), 1);
+//   return (
+//     <div style={{ position:"relative", width:"100%", paddingBottom:"85%", background:"linear-gradient(135deg,#f0fdf4,#dcfce7)", borderRadius:12, overflow:"hidden" }}>
+//       <svg style={{ position:"absolute", inset:0, width:"100%", height:"100%" }} viewBox="0 0 88 90">
+//         {/* connecting lines */}
+//         {[[0,2],[1,0],[2,3],[3,4],[4,6],[2,5],[5,7],[7,8],[8,9],[9,10],[10,11],[5,8]].map(([a,b],i)=>(
+//           <line key={i} x1={nodes[a].x+4} y1={nodes[a].y+4} x2={nodes[b].x+4} y2={nodes[b].y+4}
+//             stroke="#86efac" strokeWidth={0.8} strokeDasharray="2 1"/>
+//         ))}
+//         {nodes.map((n, i) => {
+//           const count = talukaData[n.name] || 0;
+//           const size = 3.5 + (count/max)*5;
+//           const opacity = 0.3 + (count/max)*0.7;
+//           return (
+//             <g key={i}>
+//               <circle cx={n.x+4} cy={n.y+4} r={size} fill="#16a34a" opacity={opacity}/>
+//               <circle cx={n.x+4} cy={n.y+4} r={2.5} fill="#15803d"/>
+//               <text x={n.x+4} y={n.y+12} textAnchor="middle" fontSize={4.5} fill="#14532d" fontWeight={600}>{n.name}</text>
+//               {count > 0 && <text x={n.x+4} y={n.y+1} textAnchor="middle" fontSize={3.5} fill="#fff" fontWeight={700}>{count}</text>}
+//             </g>
+//           );
+//         })}
+//       </svg>
+//       <div style={{ position:"absolute", bottom:8, right:10, fontSize:10, color:"#15803d", fontWeight:600, background:"#fff8", borderRadius:6, padding:"2px 8px" }}>
+//         📍 Palghar District
+//       </div>
+//     </div>
+//   );
+// }
 
-// ── Stat Card ─────────────────────────────────────────────────────────────────
-function StatCard({ icon, label, value, sub, trend, color = "#16a34a", chart }) {
-  return (
-    <div style={{ background:"#fff", borderRadius:14, padding:"18px 20px", boxShadow:"0 2px 12px #0001", border:"1px solid #f0f0f0", display:"flex", flexDirection:"column", gap:8 }}>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-          <div style={{ width:36, height:36, borderRadius:10, background:color+"18", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>{icon}</div>
-          <span style={{ fontSize:12, color:"#6b7280", fontWeight:500 }}>{label}</span>
-        </div>
-        {trend !== undefined && (
-          <span style={{ fontSize:11, fontWeight:700, color: trend >= 0 ? "#16a34a" : "#dc2626", background: trend >= 0 ? "#dcfce7" : "#fee2e2", borderRadius:20, padding:"2px 8px" }}>
-            {trend >= 0 ? "▲" : "▼"} {Math.abs(trend)}%
-          </span>
-        )}
-      </div>
-      <div style={{ fontSize:26, fontWeight:800, color:"#111827", letterSpacing:-1 }}>{value}</div>
-      {sub && <div style={{ fontSize:11, color:"#9ca3af" }}>{sub}</div>}
-      {chart && <MiniBar data={chart} color={color}/>}
-    </div>
-  );
-}
+// // ── Stat Card ─────────────────────────────────────────────────────────────────
+// function StatCard({ icon, label, value, sub, trend, color = "#16a34a", chart }) {
+//   return (
+//     <div style={{ background:"#fff", borderRadius:14, padding:"18px 20px", boxShadow:"0 2px 12px #0001", border:"1px solid #f0f0f0", display:"flex", flexDirection:"column", gap:8 }}>
+//       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+//         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+//           <div style={{ width:36, height:36, borderRadius:10, background:color+"18", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>{icon}</div>
+//           <span style={{ fontSize:12, color:"#6b7280", fontWeight:500 }}>{label}</span>
+//         </div>
+//         {trend !== undefined && (
+//           <span style={{ fontSize:11, fontWeight:700, color: trend >= 0 ? "#16a34a" : "#dc2626", background: trend >= 0 ? "#dcfce7" : "#fee2e2", borderRadius:20, padding:"2px 8px" }}>
+//             {trend >= 0 ? "▲" : "▼"} {Math.abs(trend)}%
+//           </span>
+//         )}
+//       </div>
+//       <div style={{ fontSize:26, fontWeight:800, color:"#111827", letterSpacing:-1 }}>{value}</div>
+//       {sub && <div style={{ fontSize:11, color:"#9ca3af" }}>{sub}</div>}
+//       {chart && <MiniBar data={chart} color={color}/>}
+//     </div>
+//   );
+// }
 
-// ── Main Dashboard ────────────────────────────────────────────────────────────
-export default function Dashboard() {
-  const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
+// // ── Main Dashboard ────────────────────────────────────────────────────────────
+// export default function Dashboard() {
+//   const navigate = useNavigate();
+//   const { user } = useSelector((state) => state.auth);
 
-  const [stats, setStats]         = useState({ total:0, pending:0, resolved:0, inProgress:0 });
-  const [recent, setRecent]       = useState([]);
-  const [talukaData, setTalukaData] = useState({});
-  const [peopleOnline, setPeopleOnline] = useState(0);
-  const [weeklyData, setWeeklyData]   = useState([4,7,5,9,12,8,15]);
-  const [loading, setLoading]     = useState(true);
-  const [activeTab, setActiveTab] = useState("all");
+//   const [stats, setStats]         = useState({ total:0, pending:0, resolved:0, inProgress:0 });
+//   const [recent, setRecent]       = useState([]);
+//   const [talukaData, setTalukaData] = useState({});
+//   const [peopleOnline, setPeopleOnline] = useState(0);
+//   const [weeklyData, setWeeklyData]   = useState([4,7,5,9,12,8,15]);
+//   const [loading, setLoading]     = useState(true);
+//   const [activeTab, setActiveTab] = useState("all");
 
-  useEffect(() => {
-    fetchDashboard();
-    // Simulate live people count
-    const interval = setInterval(() => {
-      setPeopleOnline(Math.floor(12 + Math.random() * 8));
-    }, 4000);
-    setPeopleOnline(Math.floor(12 + Math.random() * 8));
-    return () => clearInterval(interval);
-  }, []);
+//   useEffect(() => {
+//     fetchDashboard();
+//     // Simulate live people count
+//     const interval = setInterval(() => {
+//       setPeopleOnline(Math.floor(12 + Math.random() * 8));
+//     }, 4000);
+//     setPeopleOnline(Math.floor(12 + Math.random() * 8));
+//     return () => clearInterval(interval);
+//   }, []);
 
-  const fetchDashboard = async () => {
-    setLoading(true);
-    try {
-      const res = await axiosInstance.get("/inwardAll");
-      const data = res.data?.data || [];
+//   const fetchDashboard = async () => {
+//     setLoading(true);
+//     try {
+//       const res = await axiosInstance.get("/inwardAll");
+//       const data = res.data?.data || [];
 
-      const total      = data.length;
-      const pending    = data.filter(d => d.status === "Pending").length;
-      const resolved   = data.filter(d => d.status === "Resolved").length;
-      const inProgress = data.filter(d => d.status === "In Progress").length;
-      setStats({ total, pending, resolved, inProgress });
+//       const total      = data.length;
+//       const pending    = data.filter(d => d.status === "Pending").length;
+//       const resolved   = data.filter(d => d.status === "Resolved").length;
+//       const inProgress = data.filter(d => d.status === "In Progress").length;
+//       setStats({ total, pending, resolved, inProgress });
 
-      // Taluka frequency map
-      const tMap = {};
-      data.forEach(d => { if(d.taluka) tMap[d.taluka] = (tMap[d.taluka]||0) + 1; });
-      setTalukaData(tMap);
+//       // Taluka frequency map
+//       const tMap = {};
+//       data.forEach(d => { if(d.taluka) tMap[d.taluka] = (tMap[d.taluka]||0) + 1; });
+//       setTalukaData(tMap);
 
-      // Weekly trend (last 7 days simulated from data)
-      const now = Date.now();
-      const wk = Array(7).fill(0);
-      data.forEach(d => {
-        const diff = Math.floor((now - new Date(d.createdAt)) / 86400000);
-        if (diff >= 0 && diff < 7) wk[6-diff]++;
-      });
-      setWeeklyData(wk.map((v,i) => v || Math.floor(2+Math.random()*6)));
+//       // Weekly trend (last 7 days simulated from data)
+//       const now = Date.now();
+//       const wk = Array(7).fill(0);
+//       data.forEach(d => {
+//         const diff = Math.floor((now - new Date(d.createdAt)) / 86400000);
+//         if (diff >= 0 && diff < 7) wk[6-diff]++;
+//       });
+//       setWeeklyData(wk.map((v,i) => v || Math.floor(2+Math.random()*6)));
 
-      setRecent(data.slice(0, 8));
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
+//       setRecent(data.slice(0, 8));
+//     } catch (e) {
+//       console.error(e);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
 
-  const resolutionRate = stats.total > 0 ? Math.round((stats.resolved / stats.total) * 100) : 0;
+//   const resolutionRate = stats.total > 0 ? Math.round((stats.resolved / stats.total) * 100) : 0;
 
-  const statusColor = { "Pending":"#f59e0b", "Resolved":"#16a34a", "In Progress":"#3b82f6", "Rejected":"#ef4444" };
-  const statusBg    = { "Pending":"#fef3c7", "Resolved":"#dcfce7", "In Progress":"#dbeafe", "Rejected":"#fee2e2" };
+//   const statusColor = { "Pending":"#f59e0b", "Resolved":"#16a34a", "In Progress":"#3b82f6", "Rejected":"#ef4444" };
+//   const statusBg    = { "Pending":"#fef3c7", "Resolved":"#dcfce7", "In Progress":"#dbeafe", "Rejected":"#fee2e2" };
 
-  const filtered = activeTab === "all" ? recent : recent.filter(r => r.status === activeTab);
+//   const filtered = activeTab === "all" ? recent : recent.filter(r => r.status === activeTab);
 
-  return (
-    <div style={{ minHeight:"100vh", background:"#f6faf6", fontFamily:"'Segoe UI',sans-serif" }}>
+//   return (
+//     <div style={{ minHeight:"100vh", background:"#f6faf6", fontFamily:"'Segoe UI',sans-serif" }}>
 
-      {/* ── Top Header Bar ── */}
-      {/* <div style={{ background:"linear-gradient(135deg,#14532d,#15803d)", padding:"14px 28px", display:"flex", alignItems:"center", justifyContent:"space-between", boxShadow:"0 2px 16px #14532d33" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-          <img src="/src/assets/vvcmclogo.jpg" alt="VVCMC" style={{ width:44, height:44, borderRadius:"50%", border:"2px solid #a16207", objectFit:"cover" }} onError={e=>e.target.style.display="none"}/>
-          <div>
-            <div style={{ color:"#fef9c3", fontSize:17, fontWeight:800, letterSpacing:0.3 }}>वसई-विरार शहर महानगरपालिका</div>
-            <div style={{ color:"#86efac", fontSize:11, fontWeight:500 }}>Janata Darbar — Admin Dashboard</div>
-          </div>
-        </div>
-        <div style={{ display:"flex", alignItems:"center", gap:16 }}>
+//       {/* ── Top Header Bar ── */}
+//       {/* <div style={{ background:"linear-gradient(135deg,#14532d,#15803d)", padding:"14px 28px", display:"flex", alignItems:"center", justifyContent:"space-between", boxShadow:"0 2px 16px #14532d33" }}>
+//         <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+//           <img src="/src/assets/vvcmclogo.jpg" alt="VVCMC" style={{ width:44, height:44, borderRadius:"50%", border:"2px solid #a16207", objectFit:"cover" }} onError={e=>e.target.style.display="none"}/>
+//           <div>
+//             <div style={{ color:"#fef9c3", fontSize:17, fontWeight:800, letterSpacing:0.3 }}>वसई-विरार शहर महानगरपालिका</div>
+//             <div style={{ color:"#86efac", fontSize:11, fontWeight:500 }}>Janata Darbar — Admin Dashboard</div>
+//           </div>
+//         </div>
+//         <div style={{ display:"flex", alignItems:"center", gap:16 }}>
         
-          <div style={{ background:"#ffffff18", borderRadius:12, padding:"6px 16px", display:"flex", alignItems:"center", gap:8 }}>
-            <span style={{ width:8, height:8, borderRadius:"50%", background:"#4ade80", display:"inline-block", boxShadow:"0 0 6px #4ade80", animation:"pulse 2s infinite" }}/>
-            <span style={{ color:"#fff", fontSize:12, fontWeight:600 }}>{peopleOnline} Online</span>
-          </div>
-          <div style={{ color:"#86efac", fontSize:13 }}>👤 {user?.fullName || "Admin"}</div>
-        </div>
-      </div> */}
+//           <div style={{ background:"#ffffff18", borderRadius:12, padding:"6px 16px", display:"flex", alignItems:"center", gap:8 }}>
+//             <span style={{ width:8, height:8, borderRadius:"50%", background:"#4ade80", display:"inline-block", boxShadow:"0 0 6px #4ade80", animation:"pulse 2s infinite" }}/>
+//             <span style={{ color:"#fff", fontSize:12, fontWeight:600 }}>{peopleOnline} Online</span>
+//           </div>
+//           <div style={{ color:"#86efac", fontSize:13 }}>👤 {user?.fullName || "Admin"}</div>
+//         </div>
+//       </div> */}
 
-      <style>{`
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
-        .dash-card { animation: fadeUp .4s ease both; }
-        .tab-btn { border:none; cursor:pointer; border-radius:8px; padding:6px 16px; font-size:12px; font-weight:600; transition:all .2s; }
-        .tab-btn.active { background:#15803d; color:#fff; }
-        .tab-btn:not(.active) { background:#f0fdf4; color:#15803d; }
-        .tbl-row:hover { background:#f0fdf4 !important; }
-      `}</style>
+//       <style>{`
+//         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+//         @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
+//         .dash-card { animation: fadeUp .4s ease both; }
+//         .tab-btn { border:none; cursor:pointer; border-radius:8px; padding:6px 16px; font-size:12px; font-weight:600; transition:all .2s; }
+//         .tab-btn.active { background:#15803d; color:#fff; }
+//         .tab-btn:not(.active) { background:#f0fdf4; color:#15803d; }
+//         .tbl-row:hover { background:#f0fdf4 !important; }
+//       `}</style>
 
-      <div style={{ padding:"24px 28px", maxWidth:1400, margin:"0 auto" }}>
+//       <div style={{ padding:"24px 28px", maxWidth:1400, margin:"0 auto" }}>
 
-        {/* ── Gold accent bar ── */}
-        <div style={{ height:3, background:"linear-gradient(90deg,#a16207,#ca8a04,#fde68a,#ca8a04,#a16207)", borderRadius:99, marginBottom:24 }}/>
+//         {/* ── Gold accent bar ── */}
+//         <div style={{ height:3, background:"linear-gradient(90deg,#a16207,#ca8a04,#fde68a,#ca8a04,#a16207)", borderRadius:99, marginBottom:24 }}/>
 
-        {/* ── Greeting ── */}
-        <div style={{ marginBottom:20 }}>
-          <h1 style={{ fontSize:22, fontWeight:800, color:"#14532d", margin:0 }}>Good {new Date().getHours()<12?"Morning":new Date().getHours()<17?"Afternoon":"Evening"}, {user?.fullName?.split(" ")[0] || "Admin"} 👋</h1>
-          <p style={{ color:"#6b7280", fontSize:13, margin:"2px 0 0" }}>Here's what's happening with Janata Darbar today.</p>
-        </div>
+//         {/* ── Greeting ── */}
+//         <div style={{ marginBottom:20 }}>
+//           <h1 style={{ fontSize:22, fontWeight:800, color:"#14532d", margin:0 }}>Good {new Date().getHours()<12?"Morning":new Date().getHours()<17?"Afternoon":"Evening"}, {user?.fullName?.split(" ")[0] || "Admin"} 👋</h1>
+//           <p style={{ color:"#6b7280", fontSize:13, margin:"2px 0 0" }}>Here's what's happening with Janata Darbar today.</p>
+//         </div>
 
-        {/* ── Stat Cards Row ── */}
-        {loading ? (
-          <div style={{ textAlign:"center", padding:60, color:"#15803d", fontWeight:600 }}>Loading dashboard...</div>
-        ) : (
-          <>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))", gap:16, marginBottom:24 }}>
-              <div className="dash-card" style={{ animationDelay:"0s" }}>
-                <StatCard icon="📋" label="Total Applications" value={stats.total.toLocaleString()} sub="All time" trend={12} color="#15803d" chart={weeklyData}/>
-              </div>
-              <div className="dash-card" style={{ animationDelay:".07s" }}>
-                <StatCard icon="⏳" label="Pending" value={stats.pending} sub="Awaiting action" trend={-5} color="#f59e0b"/>
-              </div>
-              <div className="dash-card" style={{ animationDelay:".14s" }}>
-                <StatCard icon="✅" label="Resolved" value={stats.resolved} sub="Completed" trend={8} color="#16a34a"/>
-              </div>
-              <div className="dash-card" style={{ animationDelay:".21s" }}>
-                <StatCard icon="🔄" label="In Progress" value={stats.inProgress} sub="Being processed" color="#3b82f6"/>
-              </div>
-              <div className="dash-card" style={{ animationDelay:".28s" }}>
-                {/* People Present Today */}
-                {/* <div style={{ background:"linear-gradient(135deg,#14532d,#15803d)", borderRadius:14, padding:"18px 20px", boxShadow:"0 2px 12px #14532d22", color:"#fff", display:"flex", flexDirection:"column", gap:8 }}>
-                  <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                    <div style={{ width:36, height:36, borderRadius:10, background:"#ffffff22", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>🧑‍💼</div>
-                    <span style={{ fontSize:12, color:"#86efac", fontWeight:500 }}>People Present</span>
-                  </div>
-                  <div style={{ fontSize:32, fontWeight:800, letterSpacing:-1 }}>{peopleOnline}</div>
-                  <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-                    <span style={{ width:8, height:8, borderRadius:"50%", background:"#4ade80", display:"inline-block", boxShadow:"0 0 6px #4ade80", animation:"pulse 2s infinite" }}/>
-                    <span style={{ fontSize:11, color:"#86efac" }}>Live count — updates every 4s</span>
-                  </div>
-                </div> */}
-              </div>
-            </div>
+//         {/* ── Stat Cards Row ── */}
+//         {loading ? (
+//           <div style={{ textAlign:"center", padding:60, color:"#15803d", fontWeight:600 }}>Loading dashboard...</div>
+//         ) : (
+//           <>
+//             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))", gap:16, marginBottom:24 }}>
+//               <div className="dash-card" style={{ animationDelay:"0s" }}>
+//                 <StatCard icon="📋" label="Total Applications" value={stats.total.toLocaleString()} sub="All time" trend={12} color="#15803d" chart={weeklyData}/>
+//               </div>
+//               <div className="dash-card" style={{ animationDelay:".07s" }}>
+//                 <StatCard icon="⏳" label="Pending" value={stats.pending} sub="Awaiting action" trend={-5} color="#f59e0b"/>
+//               </div>
+//               <div className="dash-card" style={{ animationDelay:".14s" }}>
+//                 <StatCard icon="✅" label="Resolved" value={stats.resolved} sub="Completed" trend={8} color="#16a34a"/>
+//               </div>
+//               <div className="dash-card" style={{ animationDelay:".21s" }}>
+//                 <StatCard icon="🔄" label="In Progress" value={stats.inProgress} sub="Being processed" color="#3b82f6"/>
+//               </div>
+//               <div className="dash-card" style={{ animationDelay:".28s" }}>
+//                 {/* People Present Today */}
+//                 {/* <div style={{ background:"linear-gradient(135deg,#14532d,#15803d)", borderRadius:14, padding:"18px 20px", boxShadow:"0 2px 12px #14532d22", color:"#fff", display:"flex", flexDirection:"column", gap:8 }}>
+//                   <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+//                     <div style={{ width:36, height:36, borderRadius:10, background:"#ffffff22", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>🧑‍💼</div>
+//                     <span style={{ fontSize:12, color:"#86efac", fontWeight:500 }}>People Present</span>
+//                   </div>
+//                   <div style={{ fontSize:32, fontWeight:800, letterSpacing:-1 }}>{peopleOnline}</div>
+//                   <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+//                     <span style={{ width:8, height:8, borderRadius:"50%", background:"#4ade80", display:"inline-block", boxShadow:"0 0 6px #4ade80", animation:"pulse 2s infinite" }}/>
+//                     <span style={{ fontSize:11, color:"#86efac" }}>Live count — updates every 4s</span>
+//                   </div>
+//                 </div> */}
+//               </div>
+//             </div>
 
-            {/* ── Middle Row: Map + Donut ── */}
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 340px", gap:20, marginBottom:24 }}>
+//             {/* ── Middle Row: Map + Donut ── */}
+//             <div style={{ display:"grid", gridTemplateColumns:"1fr 340px", gap:20, marginBottom:24 }}>
 
-              {/* MAP */}
-              {/* <div className="dash-card" style={{ animationDelay:".35s", background:"#fff", borderRadius:14, padding:20, boxShadow:"0 2px 12px #0001", border:"1px solid #f0f0f0" }}>
-                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
-                  <div>
-                    <h3 style={{ margin:0, fontSize:15, fontWeight:700, color:"#14532d" }}>📍 Application Heatmap</h3>
-                    <p style={{ margin:0, fontSize:11, color:"#9ca3af" }}>Complaints by Taluka — Palghar District</p>
-                  </div>
-                  <div style={{ background:"#f0fdf4", borderRadius:8, padding:"4px 12px", fontSize:11, color:"#15803d", fontWeight:600 }}>
-                    {Object.keys(talukaData).length} Talukas Active
-                  </div>
-                </div>
-                <VvcmcMap talukaData={talukaData}/>
+//               {/* MAP */}
+//               {/* <div className="dash-card" style={{ animationDelay:".35s", background:"#fff", borderRadius:14, padding:20, boxShadow:"0 2px 12px #0001", border:"1px solid #f0f0f0" }}>
+//                 <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
+//                   <div>
+//                     <h3 style={{ margin:0, fontSize:15, fontWeight:700, color:"#14532d" }}>📍 Application Heatmap</h3>
+//                     <p style={{ margin:0, fontSize:11, color:"#9ca3af" }}>Complaints by Taluka — Palghar District</p>
+//                   </div>
+//                   <div style={{ background:"#f0fdf4", borderRadius:8, padding:"4px 12px", fontSize:11, color:"#15803d", fontWeight:600 }}>
+//                     {Object.keys(talukaData).length} Talukas Active
+//                   </div>
+//                 </div>
+//                 <VvcmcMap talukaData={talukaData}/>
            
-                <div style={{ marginTop:12, display:"flex", flexWrap:"wrap", gap:8 }}>
-                  {Object.entries(talukaData).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([t,c])=>(
-                    <div key={t} style={{ background:"#f0fdf4", borderRadius:20, padding:"3px 10px", fontSize:11, color:"#15803d", fontWeight:600 }}>
-                      {t}: {c}
-                    </div>
-                  ))}
-                </div>
-              </div> */}
+//                 <div style={{ marginTop:12, display:"flex", flexWrap:"wrap", gap:8 }}>
+//                   {Object.entries(talukaData).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([t,c])=>(
+//                     <div key={t} style={{ background:"#f0fdf4", borderRadius:20, padding:"3px 10px", fontSize:11, color:"#15803d", fontWeight:600 }}>
+//                       {t}: {c}
+//                     </div>
+//                   ))}
+//                 </div>
+//               </div> */}
 
 
               
@@ -738,179 +738,627 @@ export default function Dashboard() {
 
 
 
-{/* MAP */}
-<div className="dash-card" style={{ animationDelay:".35s", background:"#fff", borderRadius:14, padding:20, boxShadow:"0 2px 12px #0001", border:"1px solid #f0f0f0" }}>
-  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
-    <div>
-      <h3 style={{ margin:0, fontSize:15, fontWeight:700, color:"#14532d" }}>📍 Application Heatmap</h3>
-      <p style={{ margin:0, fontSize:11, color:"#9ca3af" }}>Complaints by Taluka — Palghar District</p>
+// {/* MAP */}
+// <div className="dash-card" style={{ animationDelay:".35s", background:"#fff", borderRadius:14, padding:20, boxShadow:"0 2px 12px #0001", border:"1px solid #f0f0f0" }}>
+//   <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
+//     <div>
+//       <h3 style={{ margin:0, fontSize:15, fontWeight:700, color:"#14532d" }}>📍 Application Heatmap</h3>
+//       <p style={{ margin:0, fontSize:11, color:"#9ca3af" }}>Complaints by Taluka — Palghar District</p>
+//     </div>
+//     <div style={{ background:"#f0fdf4", borderRadius:8, padding:"4px 12px", fontSize:11, color:"#15803d", fontWeight:600 }}>
+//       {Object.keys(talukaData).length} Talukas Active
+//     </div>
+//   </div>
+
+//   {/* Replaced SVG with actual map image */}
+//   {/* <div style={{ position:"relative", width:"100%", paddingBottom:"85%", background:"linear-gradient(135deg,#f0fdf4,#dcfce7)", borderRadius:12, overflow:"hidden" }}>
+//     <img
+//       src={mapImage}
+//       alt="VVCMC Palghar District Map"
+//       style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"cover", borderRadius:12 }}
+//     />
+//     <div style={{ position:"absolute", bottom:8, right:10, fontSize:10, color:"#15803d", fontWeight:600, background:"#fff8", borderRadius:6, padding:"2px 8px" }}>
+//       📍 Palghar District
+//     </div>
+//   </div> */}
+
+
+//   {/* Replaced SVG with actual map image */}
+// <div style={{ position:"relative", width:"100%", paddingBottom:"60%", background:"linear-gradient(135deg,#f0fdf4,#dcfce7)", borderRadius:12, overflow:"hidden" }}>
+//   <img
+//     src={mapImage}
+//     alt="VVCMC Palghar District Map"
+//     style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"contain", borderRadius:12 }}
+//   />
+//   <div style={{ position:"absolute", bottom:8, right:10, fontSize:10, color:"#15803d", fontWeight:600, background:"#fff8", borderRadius:6, padding:"2px 8px" }}>
+//     📍 Palghar District
+//   </div>
+// </div>
+
+//   {/* Legend */}
+//   <div style={{ marginTop:12, display:"flex", flexWrap:"wrap", gap:8 }}>
+//     {Object.entries(talukaData).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([t,c])=>(
+//       <div key={t} style={{ background:"#f0fdf4", borderRadius:20, padding:"3px 10px", fontSize:11, color:"#15803d", fontWeight:600 }}>
+//         {t}: {c}
+//       </div>
+//     ))}
+//   </div>
+// </div>
+
+
+
+
+
+
+//               {/* RIGHT COLUMN */}
+//               <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+
+//                 {/* Resolution Rate Donut */}
+//                 <div className="dash-card" style={{ animationDelay:".42s", background:"#fff", borderRadius:14, padding:20, boxShadow:"0 2px 12px #0001", border:"1px solid #f0f0f0", textAlign:"center" }}>
+//                   <h3 style={{ margin:"0 0 12px", fontSize:14, fontWeight:700, color:"#14532d" }}>Resolution Rate</h3>
+//                   <div style={{ display:"flex", justifyContent:"center" }}>
+//                     <DonutChart value={resolutionRate} color="#16a34a"/>
+//                   </div>
+//                   <p style={{ margin:"8px 0 0", fontSize:11, color:"#6b7280" }}>
+//                     {resolutionRate >= 70 ? "🟢 On track — great performance!" : resolutionRate >= 40 ? "🟡 Moderate — needs attention" : "🔴 Low — action required"}
+//                   </p>
+//                 </div>
+
+//                 {/* Weekly Trend */}
+//                 <div className="dash-card" style={{ animationDelay:".49s", background:"#fff", borderRadius:14, padding:20, boxShadow:"0 2px 12px #0001", border:"1px solid #f0f0f0" }}>
+//                   <h3 style={{ margin:"0 0 12px", fontSize:14, fontWeight:700, color:"#14532d" }}>📈 Weekly Trend</h3>
+//                   <MiniBar data={weeklyData} color="#15803d"/>
+//                   <div style={{ display:"flex", justifyContent:"space-between", marginTop:6 }}>
+//                     {["M","T","W","T","F","S","S"].map((d,i)=>(
+//                       <span key={i} style={{ fontSize:10, color:"#9ca3af", flex:1, textAlign:"center" }}>{d}</span>
+//                     ))}
+//                   </div>
+//                 </div>
+
+//                 {/* Category Breakdown */}
+//                 <div className="dash-card" style={{ animationDelay:".56s", background:"#fff", borderRadius:14, padding:20, boxShadow:"0 2px 12px #0001", border:"1px solid #f0f0f0" }}>
+//                   <h3 style={{ margin:"0 0 12px", fontSize:14, fontWeight:700, color:"#14532d" }}>Priority Split</h3>
+//                   {[
+//                     { label:"Normal",    color:"#15803d", pct: stats.total ? Math.round(((stats.total - stats.pending - stats.inProgress)*0.6/Math.max(stats.total,1))*100) : 60 },
+//                     { label:"Urgent",    color:"#f59e0b", pct: stats.total ? Math.round((stats.pending/Math.max(stats.total,1))*55) : 25 },
+//                     { label:"Emergency", color:"#ef4444", pct: stats.total ? Math.round((stats.inProgress/Math.max(stats.total,1))*40) : 15 },
+//                   ].map(({ label, color, pct }) => (
+//                     <div key={label} style={{ marginBottom:10 }}>
+//                       <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, fontWeight:600, color:"#374151", marginBottom:3 }}>
+//                         <span>{label}</span><span>{pct}%</span>
+//                       </div>
+//                       <div style={{ background:"#f3f4f6", borderRadius:99, height:7, overflow:"hidden" }}>
+//                         <div style={{ width:`${pct}%`, height:"100%", background:color, borderRadius:99, transition:"width 1s ease" }}/>
+//                       </div>
+//                     </div>
+//                   ))}
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* ── Recent Applications Table ── */}
+//             <div className="dash-card" style={{ animationDelay:".63s", background:"#fff", borderRadius:14, padding:20, boxShadow:"0 2px 12px #0001", border:"1px solid #f0f0f0" }}>
+//               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16, flexWrap:"wrap", gap:10 }}>
+//                 <div>
+//                   <h3 style={{ margin:0, fontSize:15, fontWeight:700, color:"#14532d" }}>Recent Applications</h3>
+//                   <p style={{ margin:0, fontSize:11, color:"#9ca3af" }}>Latest inward complaints</p>
+//                 </div>
+//                 <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+//                   {["all","Pending","Resolved","In Progress"].map(tab => (
+//                     <button key={tab} className={`tab-btn ${activeTab===tab?"active":""}`}
+//                       onClick={() => setActiveTab(tab)}>
+//                       {tab === "all" ? "All" : tab}
+//                     </button>
+//                   ))}
+//                 </div>
+//               </div>
+//               <div style={{ overflowX:"auto" }}>
+//                 <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
+//                   <thead>
+//                     <tr style={{ background:"#f0fdf4" }}>
+//                       {["Inward No","Applicant","Subject","Taluka","Department","Priority","Status","Date"].map(h => (
+//                         <th key={h} style={{ padding:"10px 12px", textAlign:"left", color:"#15803d", fontWeight:700, fontSize:12, whiteSpace:"nowrap" }}>{h}</th>
+//                       ))}
+//                     </tr>
+//                   </thead>
+//                   <tbody>
+//                     {filtered.length === 0 ? (
+//                       <tr><td colSpan={8} style={{ textAlign:"center", padding:32, color:"#9ca3af" }}>No applications found</td></tr>
+//                     ) : filtered.map((item, i) => (
+//                       <tr key={i} className="tbl-row" style={{ borderBottom:"1px solid #f3f4f6", transition:"background .15s" }}>
+//                         <td style={{ padding:"10px 12px", color:"#15803d", fontWeight:600, whiteSpace:"nowrap" }}>{item.inwardNo || "—"}</td>
+//                         <td style={{ padding:"10px 12px", fontWeight:500 }}>{item.fullName || "—"}</td>
+//                         <td style={{ padding:"10px 12px", color:"#374151", maxWidth:180, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{item.subject || "—"}</td>
+//                         <td style={{ padding:"10px 12px", color:"#6b7280" }}>{item.taluka || "—"}</td>
+//                         <td style={{ padding:"10px 12px", color:"#6b7280", whiteSpace:"nowrap" }}>{item.mainDepartment || "—"}</td>
+//                         <td style={{ padding:"10px 12px" }}>
+//                           <span style={{ fontSize:11, fontWeight:700, padding:"2px 10px", borderRadius:20,
+//                             background: item.priority==="Emergency"?"#fee2e2":item.priority==="Urgent"?"#fef3c7":"#dcfce7",
+//                             color:       item.priority==="Emergency"?"#dc2626":item.priority==="Urgent"?"#92400e":"#15803d" }}>
+//                             {item.priority || "Normal"}
+//                           </span>
+//                         </td>
+//                         <td style={{ padding:"10px 12px" }}>
+//                           <span style={{ fontSize:11, fontWeight:700, padding:"2px 10px", borderRadius:20,
+//                             background: statusBg[item.status] || "#f3f4f6",
+//                             color:      statusColor[item.status] || "#374151" }}>
+//                             {item.status || "—"}
+//                           </span>
+//                         </td>
+//                         <td style={{ padding:"10px 12px", color:"#9ca3af", whiteSpace:"nowrap" }}>
+//                           {item.submissionDate || (item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : "—")}
+//                         </td>
+//                       </tr>
+//                     ))}
+//                   </tbody>
+//                 </table>
+//               </div>
+//               <div style={{ marginTop:12, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+//                 <span style={{ fontSize:11, color:"#9ca3af" }}>Showing {filtered.length} of {stats.total} applications</span>
+//                 <button onClick={() => navigate("/allapplication")}
+//                   style={{ background:"#f0fdf4", color:"#15803d", border:"1px solid #86efac", borderRadius:8, padding:"6px 16px", fontSize:12, fontWeight:600, cursor:"pointer" }}>
+//                   View All →
+//                 </button>
+//               </div>
+//             </div>
+
+//           </>
+//         )}
+
+//         {/* Footer */}
+//         <div style={{ marginTop:24, textAlign:"center", color:"#9ca3af", fontSize:11 }}>
+//           © {new Date().getFullYear()} Vasai-Virar City Municipal Corporation · Janata Darbar System
+//           <span style={{ margin:"0 8px", color:"#ca8a04" }}>◆</span>
+//           स्थापना : ३ जुलै २००९
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import axiosInstance from "../services/axiosInstance";
+import mapImage from "../assets/mapvvcmc.jfif";
+
+// ─── Palette ──────────────────────────────────────────────────────────────────
+const P = {
+  teal:       "#4CABC1",
+  tealDeep:   "#49ACC3",
+  tealDark:   "#187484",
+  gold:       "#CE9A54",
+  goldDeep:   "#CA9D28",
+  sage:       "#66A962",
+  cream:      "#F5E7C2",
+  card1From:  "#4CABC1",  card1To: "#49ACC3",
+  card2From:  "#CE9A54",  card2To: "#CA9D28",
+  card3From:  "#66A962",  card3To: "#4a8f47",
+  card4From:  "#F5E7C2",  card4To: "#e0c98a",
+  bg:         "#f0f7f9",
+  white:      "#ffffff",
+  text:       "#1a3a40",
+  muted:      "#6b8f95",
+  border:     "#d8edf1",
+};
+
+// ─── Sparkline SVG ────────────────────────────────────────────────────────────
+function Sparkline({ color = "#fff", data = [30,45,35,60,40,70,55] }) {
+  const w = 90, h = 36;
+  const max = Math.max(...data), min = Math.min(...data);
+  const pts = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = h - ((v - min) / (max - min + 1)) * (h - 4) - 2;
+    return `${x},${y}`;
+  }).join(" ");
+  const area = `0,${h} ` + pts + ` ${w},${h}`;
+  const gid = `sg${color.replace('#','')}`;
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ opacity:0.75 }}>
+      <defs>
+        <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.45"/>
+          <stop offset="100%" stopColor={color} stopOpacity="0"/>
+        </linearGradient>
+      </defs>
+      <polygon points={area} fill={`url(#${gid})`}/>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+// ─── Area Chart ───────────────────────────────────────────────────────────────
+function AreaChart() {
+  const w = 520, h = 160;
+  const income  = [60,80,55,110,85,140,100,155,120,165,130,180];
+  const outcome = [40,55,45,70,60,95,75,100,85,110,90,120];
+  const months  = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const max = 200;
+  const toPoints = (arr) => arr.map((v,i) => {
+    const x = 30 + (i / (arr.length-1)) * (w-60);
+    const y = h - 20 - (v/max) * (h-40);
+    return `${x},${y}`;
+  });
+  const incPts = toPoints(income);
+  const outPts = toPoints(outcome);
+  const incArea = `30,${h-20} ${incPts.join(" ")} ${w-30},${h-20}`;
+  const outArea = `30,${h-20} ${outPts.join(" ")} ${w-30},${h-20}`;
+  const peakIdx = income.indexOf(Math.max(...income));
+  const [px,py] = incPts[peakIdx].split(",").map(Number);
+  return (
+    <svg width="100%" viewBox={`0 0 ${w} ${h}`} style={{ overflow:"visible" }}>
+      <defs>
+        <linearGradient id="incGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={P.teal} stopOpacity="0.35"/>
+          <stop offset="100%" stopColor={P.teal} stopOpacity="0.02"/>
+        </linearGradient>
+        <linearGradient id="outGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={P.gold} stopOpacity="0.28"/>
+          <stop offset="100%" stopColor={P.gold} stopOpacity="0.02"/>
+        </linearGradient>
+      </defs>
+      {[0.25,0.5,0.75,1].map((f,i) => (
+        <line key={i} x1={30} y1={h-20-(f*(h-40))} x2={w-30} y2={h-20-(f*(h-40))}
+          stroke={P.border} strokeWidth="1" strokeDasharray="4 3"/>
+      ))}
+      {[50,100,150,200].map((v,i) => (
+        <text key={i} x={24} y={h-20-(v/max*(h-40))+4} fontSize="9" fill={P.muted} textAnchor="end">{v}</text>
+      ))}
+      <polygon points={incArea} fill="url(#incGrad)"/>
+      <polygon points={outArea} fill="url(#outGrad)"/>
+      <polyline points={incPts.join(" ")} fill="none" stroke={P.teal} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <polyline points={outPts.join(" ")} fill="none" stroke={P.gold} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="5 3"/>
+      <circle cx={px} cy={py} r={5} fill={P.teal} stroke="#fff" strokeWidth={2}/>
+      <rect x={px-18} y={py-24} width={36} height={17} rx={5} fill={P.teal}/>
+      <text x={px} y={py-12} fontSize="8.5" fill="#fff" textAnchor="middle" fontWeight="800">{Math.max(...income)}K</text>
+      {months.map((m,i) => {
+        const x = 30 + (i/(months.length-1))*(w-60);
+        return <text key={i} x={x} y={h-4} fontSize="9" fill={P.muted} textAnchor="middle">{m}</text>;
+      })}
+    </svg>
+  );
+}
+
+// ─── Donut ────────────────────────────────────────────────────────────────────
+function Donut({ pct = 46 }) {
+  const r = 46, c = 2*Math.PI*r;
+  const dash = (pct/100)*c;
+  return (
+    <svg width={112} height={112} viewBox="0 0 112 112">
+      <circle cx={56} cy={56} r={r} fill="none" stroke={P.border} strokeWidth={12}/>
+      <circle cx={56} cy={56} r={r} fill="none" stroke={P.teal} strokeWidth={12}
+        strokeDasharray={`${dash} ${c-dash}`} strokeLinecap="round"
+        transform="rotate(-90 56 56)"
+        style={{ transition:"stroke-dasharray 1s ease", filter:`drop-shadow(0 0 8px ${P.teal}99)` }}/>
+      <text x={56} y={52} textAnchor="middle" fontSize={20} fontWeight={900} fill={P.tealDark}>{pct}%</text>
+      <text x={56} y={66} textAnchor="middle" fontSize={9} fill={P.muted} fontWeight={700} letterSpacing={0.8}>RESOLVED</text>
+    </svg>
+  );
+}
+
+// ─── Mini Bar ─────────────────────────────────────────────────────────────────
+function MiniBar({ data = [], color = P.teal }) {
+  const max = Math.max(...data, 1);
+  return (
+    <div style={{ display:"flex", alignItems:"flex-end", gap:3, height:38 }}>
+      {data.map((v,i) => (
+        <div key={i} style={{
+          flex:1, borderRadius:"3px 3px 0 0", minHeight:4,
+          background: i===data.length-1 ? color : `${color}66`,
+          height:`${(v/max)*100}%`,
+        }}/>
+      ))}
     </div>
-    <div style={{ background:"#f0fdf4", borderRadius:8, padding:"4px 12px", fontSize:11, color:"#15803d", fontWeight:600 }}>
-      {Object.keys(talukaData).length} Talukas Active
-    </div>
-  </div>
+  );
+}
 
-  {/* Replaced SVG with actual map image */}
-  {/* <div style={{ position:"relative", width:"100%", paddingBottom:"85%", background:"linear-gradient(135deg,#f0fdf4,#dcfce7)", borderRadius:12, overflow:"hidden" }}>
-    <img
-      src={mapImage}
-      alt="VVCMC Palghar District Map"
-      style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"cover", borderRadius:12 }}
-    />
-    <div style={{ position:"absolute", bottom:8, right:10, fontSize:10, color:"#15803d", fontWeight:600, background:"#fff8", borderRadius:6, padding:"2px 8px" }}>
-      📍 Palghar District
-    </div>
-  </div> */}
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+export default function Dashboard() {
+  const navigate = useNavigate();
+  const { user } = useSelector((s) => s.auth);
 
+  const [stats, setStats]               = useState({ total:0, pending:0, resolved:0, inProgress:0 });
+  const [recent, setRecent]             = useState([]);
+  const [talukaData, setTalukaData]     = useState({});
+  const [peopleOnline, setPeopleOnline] = useState(0);
+  const [weeklyData, setWeeklyData]     = useState([4,7,5,9,12,8,15]);
+  const [loading, setLoading]           = useState(true);
+  const [activeTab, setActiveTab]       = useState("all");
 
-  {/* Replaced SVG with actual map image */}
-<div style={{ position:"relative", width:"100%", paddingBottom:"60%", background:"linear-gradient(135deg,#f0fdf4,#dcfce7)", borderRadius:12, overflow:"hidden" }}>
-  <img
-    src={mapImage}
-    alt="VVCMC Palghar District Map"
-    style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"contain", borderRadius:12 }}
-  />
-  <div style={{ position:"absolute", bottom:8, right:10, fontSize:10, color:"#15803d", fontWeight:600, background:"#fff8", borderRadius:6, padding:"2px 8px" }}>
-    📍 Palghar District
-  </div>
-</div>
+  useEffect(() => {
+    fetchDashboard();
+    const iv = setInterval(() => setPeopleOnline(Math.floor(12+Math.random()*8)), 4000);
+    setPeopleOnline(Math.floor(12+Math.random()*8));
+    return () => clearInterval(iv);
+  }, []);
 
-  {/* Legend */}
-  <div style={{ marginTop:12, display:"flex", flexWrap:"wrap", gap:8 }}>
-    {Object.entries(talukaData).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([t,c])=>(
-      <div key={t} style={{ background:"#f0fdf4", borderRadius:20, padding:"3px 10px", fontSize:11, color:"#15803d", fontWeight:600 }}>
-        {t}: {c}
-      </div>
-    ))}
-  </div>
-</div>
+  const fetchDashboard = async () => {
+    setLoading(true);
+    try {
+      const res  = await axiosInstance.get("/inwardAll");
+      const data = res.data?.data || [];
+      const total      = data.length;
+      const pending    = data.filter(d=>d.status==="Pending").length;
+      const resolved   = data.filter(d=>d.status==="Resolved").length;
+      const inProgress = data.filter(d=>d.status==="In Progress").length;
+      setStats({ total, pending, resolved, inProgress });
+      const tMap = {};
+      data.forEach(d => { if(d.taluka) tMap[d.taluka]=(tMap[d.taluka]||0)+1; });
+      setTalukaData(tMap);
+      const now=Date.now(), wk=Array(7).fill(0);
+      data.forEach(d => {
+        const diff=Math.floor((now-new Date(d.createdAt))/86400000);
+        if(diff>=0&&diff<7) wk[6-diff]++;
+      });
+      setWeeklyData(wk.map(v=>v||Math.floor(2+Math.random()*6)));
+      setRecent(data.slice(0,8));
+    } catch(e) { console.error(e); }
+    finally { setLoading(false); }
+  };
 
+  const resolutionRate = stats.total>0 ? Math.round((stats.resolved/stats.total)*100) : 0;
+  const statusColor = { "Pending":P.gold,"Resolved":P.sage,"In Progress":P.teal,"Rejected":"#d9534f" };
+  const statusBg    = { "Pending":`${P.gold}22`,"Resolved":`${P.sage}22`,"In Progress":`${P.teal}22`,"Rejected":"#fde8e8" };
+  const filtered    = activeTab==="all" ? recent : recent.filter(r=>r.status===activeTab);
 
+  const analyticCards = [
+    { label:"TOTAL APPLICATIONS", value:stats.total.toLocaleString(),  sub:"▲ 12% last week", from:P.card1From, to:P.card1To, spark:[40,55,45,70,60,85,75], dark:false },
+    { label:"PENDING",            value:stats.pending,                  sub:"▼ 5% last week",  from:P.card2From, to:P.card2To, spark:[30,50,35,60,40,70,55], dark:false },
+    { label:"RESOLVED",           value:stats.resolved,                 sub:"▲ 8% last week",  from:P.card3From, to:P.card3To, spark:[20,40,30,55,45,65,60], dark:false },
+    { label:"IN PROGRESS",        value:stats.inProgress,               sub:"— ongoing",        from:P.card4From, to:P.card4To, spark:[15,30,25,40,35,50,45], dark:true  },
+  ];
 
+  return (
+    <div style={{ minHeight:"100vh", background:P.bg, fontFamily:"'Nunito','Segoe UI',sans-serif" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
+        @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+        @keyframes pulse  { 0%,100%{opacity:1} 50%{opacity:.35} }
+        .dc { animation: fadeUp .4s ease both; }
+        .tbl-row:hover { background:${P.teal}12 !important; cursor:pointer; }
+        ::-webkit-scrollbar { width:5px; height:5px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:${P.border}; border-radius:99px; }
+        * { box-sizing:border-box; }
+      `}</style>
 
+      <div style={{ padding:"24px 28px", maxWidth:1440, margin:"0 auto" }}>
 
+        {/* ── Top accent bar ── */}
+        <div style={{ height:4, background:`linear-gradient(90deg,${P.tealDark},${P.teal},${P.gold},${P.goldDeep},${P.cream},${P.goldDeep},${P.teal})`, borderRadius:99, marginBottom:24 }}/>
 
-              {/* RIGHT COLUMN */}
-              <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+        {/* ── Page header ── */}
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:22 }}>
+          <div>
+            <h2 style={{ margin:0, fontSize:20, fontWeight:900, color:P.tealDark, letterSpacing:-0.3 }}>
+              Analytic Overview
+            </h2>
+            <p style={{ margin:"3px 0 0", fontSize:12, color:P.muted }}>
+              Good {new Date().getHours()<12?"Morning":new Date().getHours()<17?"Afternoon":"Evening"}, {user?.fullName?.split(" ")[0]||"Admin"} 👋 — Here's what's happening today.
+            </p>
+          </div>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:7, background:P.white, border:`1px solid ${P.border}`, borderRadius:10, padding:"7px 14px" }}>
+              <span style={{ width:8, height:8, borderRadius:"50%", background:P.sage, display:"inline-block", animation:"pulse 2s infinite", boxShadow:`0 0 8px ${P.sage}` }}/>
+              <span style={{ fontSize:12, fontWeight:700, color:P.tealDark }}>{peopleOnline} Online</span>
+            </div>
+            <div style={{ background:P.white, border:`1px solid ${P.border}`, borderRadius:9, padding:"7px 14px", fontSize:11, fontWeight:700, color:P.tealDark }}>
+              THIS YEAR ▾
+            </div>
+          </div>
+        </div>
 
-                {/* Resolution Rate Donut */}
-                <div className="dash-card" style={{ animationDelay:".42s", background:"#fff", borderRadius:14, padding:20, boxShadow:"0 2px 12px #0001", border:"1px solid #f0f0f0", textAlign:"center" }}>
-                  <h3 style={{ margin:"0 0 12px", fontSize:14, fontWeight:700, color:"#14532d" }}>Resolution Rate</h3>
-                  <div style={{ display:"flex", justifyContent:"center" }}>
-                    <DonutChart value={resolutionRate} color="#16a34a"/>
+        {loading ? (
+          <div style={{ textAlign:"center", padding:80, color:P.teal, fontWeight:700 }}>Loading dashboard…</div>
+        ) : (
+          <>
+            {/* ── 4 Colorful Stat Cards ── */}
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:16, marginBottom:20 }}>
+              {analyticCards.map((card, i) => (
+                <div key={i} className="dc" style={{
+                  animationDelay:`${i*0.07}s`,
+                  borderRadius:16,
+                  background:`linear-gradient(135deg,${card.from},${card.to})`,
+                  padding:"18px 20px",
+                  boxShadow:`0 8px 28px ${card.from}55`,
+                  position:"relative", overflow:"hidden",
+                  minHeight:110,
+                }}>
+                  <div style={{ position:"absolute", top:-20, right:-20, width:80, height:80, borderRadius:"50%", background:"rgba(255,255,255,0.13)" }}/>
+                  <div style={{ position:"absolute", bottom:-14, right:10, width:50, height:50, borderRadius:"50%", background:"rgba(255,255,255,0.09)" }}/>
+                  <div style={{ fontSize:9.5, fontWeight:800, color:card.dark?"#6b5020":"rgba(255,255,255,0.88)", letterSpacing:0.9, textTransform:"uppercase", marginBottom:5 }}>{card.label}</div>
+                  <div style={{ fontSize:28, fontWeight:900, color:card.dark?P.tealDark:"#fff", letterSpacing:-1, marginBottom:3 }}>{card.value}</div>
+                  <div style={{ fontSize:10, color:card.dark?"#8a6830":"rgba(255,255,255,0.72)", fontWeight:600, marginBottom:8 }}>{card.sub}</div>
+                  <Sparkline color={card.dark?"#9a7828":"#fff"} data={card.spark}/>
+                </div>
+              ))}
+            </div>
+
+            {/* ── Revenue + Status ── */}
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 290px", gap:18, marginBottom:18 }}>
+
+              {/* Revenue Chart */}
+              <div className="dc" style={{ animationDelay:".3s", background:P.white, borderRadius:16, padding:"20px 22px", boxShadow:"0 4px 20px rgba(0,0,0,0.05)", border:`1px solid ${P.border}` }}>
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
+                  <h3 style={{ margin:0, fontSize:15, fontWeight:900, color:P.tealDark }}>Revenue</h3>
+                  <div style={{ display:"flex", gap:14, alignItems:"center" }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:5 }}>
+                      <span style={{ width:10, height:3, borderRadius:99, background:P.teal, display:"inline-block" }}/>
+                      <span style={{ fontSize:10.5, color:P.muted, fontWeight:600 }}>Income</span>
+                    </div>
+                    <div style={{ display:"flex", alignItems:"center", gap:5 }}>
+                      <span style={{ width:10, height:2, background:P.gold, display:"inline-block", opacity:0.8 }}/>
+                      <span style={{ fontSize:10.5, color:P.muted, fontWeight:600 }}>Outcome</span>
+                    </div>
+                    <div style={{ background:P.bg, border:`1px solid ${P.border}`, borderRadius:7, padding:"4px 10px", fontSize:10.5, fontWeight:700, color:P.tealDark }}>THIS MONTH ▾</div>
                   </div>
-                  <p style={{ margin:"8px 0 0", fontSize:11, color:"#6b7280" }}>
-                    {resolutionRate >= 70 ? "🟢 On track — great performance!" : resolutionRate >= 40 ? "🟡 Moderate — needs attention" : "🔴 Low — action required"}
-                  </p>
+                </div>
+                <AreaChart/>
+              </div>
+
+              {/* Status Panel */}
+              <div className="dc" style={{ animationDelay:".37s", background:P.white, borderRadius:16, padding:"20px 20px", boxShadow:"0 4px 20px rgba(0,0,0,0.05)", border:`1px solid ${P.border}`, display:"flex", flexDirection:"column" }}>
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:12 }}>
+                  <h3 style={{ margin:0, fontSize:15, fontWeight:900, color:P.tealDark }}>Status</h3>
+                  <div style={{ background:P.bg, border:`1px solid ${P.border}`, borderRadius:7, padding:"4px 10px", fontSize:10.5, fontWeight:700, color:P.tealDark }}>TODAY ▾</div>
                 </div>
 
-                {/* Weekly Trend */}
-                <div className="dash-card" style={{ animationDelay:".49s", background:"#fff", borderRadius:14, padding:20, boxShadow:"0 2px 12px #0001", border:"1px solid #f0f0f0" }}>
-                  <h3 style={{ margin:"0 0 12px", fontSize:14, fontWeight:700, color:"#14532d" }}>📈 Weekly Trend</h3>
-                  <MiniBar data={weeklyData} color="#15803d"/>
-                  <div style={{ display:"flex", justifyContent:"space-between", marginTop:6 }}>
-                    {["M","T","W","T","F","S","S"].map((d,i)=>(
-                      <span key={i} style={{ fontSize:10, color:"#9ca3af", flex:1, textAlign:"center" }}>{d}</span>
-                    ))}
-                  </div>
+                <div style={{ display:"flex", justifyContent:"center", margin:"6px 0" }}>
+                  <Donut pct={resolutionRate}/>
                 </div>
 
-                {/* Category Breakdown */}
-                <div className="dash-card" style={{ animationDelay:".56s", background:"#fff", borderRadius:14, padding:20, boxShadow:"0 2px 12px #0001", border:"1px solid #f0f0f0" }}>
-                  <h3 style={{ margin:"0 0 12px", fontSize:14, fontWeight:700, color:"#14532d" }}>Priority Split</h3>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginTop:8 }}>
                   {[
-                    { label:"Normal",    color:"#15803d", pct: stats.total ? Math.round(((stats.total - stats.pending - stats.inProgress)*0.6/Math.max(stats.total,1))*100) : 60 },
-                    { label:"Urgent",    color:"#f59e0b", pct: stats.total ? Math.round((stats.pending/Math.max(stats.total,1))*55) : 25 },
-                    { label:"Emergency", color:"#ef4444", pct: stats.total ? Math.round((stats.inProgress/Math.max(stats.total,1))*40) : 15 },
-                  ].map(({ label, color, pct }) => (
-                    <div key={label} style={{ marginBottom:10 }}>
-                      <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, fontWeight:600, color:"#374151", marginBottom:3 }}>
-                        <span>{label}</span><span>{pct}%</span>
-                      </div>
-                      <div style={{ background:"#f3f4f6", borderRadius:99, height:7, overflow:"hidden" }}>
-                        <div style={{ width:`${pct}%`, height:"100%", background:color, borderRadius:99, transition:"width 1s ease" }}/>
-                      </div>
+                    { label:"BOOKED",      value:stats.total,      color:P.teal },
+                    { label:"ON PROGRESS", value:stats.inProgress, color:P.gold },
+                    { label:"CANCELLED",   value:stats.pending,    color:"#d9534f" },
+                  ].map(({ label, value, color }) => (
+                    <div key={label} style={{ textAlign:"center", padding:"10px 4px", background:P.bg, borderRadius:10, border:`1px solid ${P.border}` }}>
+                      <div style={{ fontSize:16, fontWeight:900, color }}>{value.toLocaleString()}</div>
+                      <div style={{ fontSize:8.5, fontWeight:800, color:P.muted, letterSpacing:0.4, textTransform:"uppercase", marginTop:3 }}>{label}</div>
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
 
-            {/* ── Recent Applications Table ── */}
-            <div className="dash-card" style={{ animationDelay:".63s", background:"#fff", borderRadius:14, padding:20, boxShadow:"0 2px 12px #0001", border:"1px solid #f0f0f0" }}>
-              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16, flexWrap:"wrap", gap:10 }}>
-                <div>
-                  <h3 style={{ margin:0, fontSize:15, fontWeight:700, color:"#14532d" }}>Recent Applications</h3>
-                  <p style={{ margin:0, fontSize:11, color:"#9ca3af" }}>Latest inward complaints</p>
-                </div>
-                <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-                  {["all","Pending","Resolved","In Progress"].map(tab => (
-                    <button key={tab} className={`tab-btn ${activeTab===tab?"active":""}`}
-                      onClick={() => setActiveTab(tab)}>
-                      {tab === "all" ? "All" : tab}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div style={{ overflowX:"auto" }}>
-                <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
-                  <thead>
-                    <tr style={{ background:"#f0fdf4" }}>
-                      {["Inward No","Applicant","Subject","Taluka","Department","Priority","Status","Date"].map(h => (
-                        <th key={h} style={{ padding:"10px 12px", textAlign:"left", color:"#15803d", fontWeight:700, fontSize:12, whiteSpace:"nowrap" }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.length === 0 ? (
-                      <tr><td colSpan={8} style={{ textAlign:"center", padding:32, color:"#9ca3af" }}>No applications found</td></tr>
-                    ) : filtered.map((item, i) => (
-                      <tr key={i} className="tbl-row" style={{ borderBottom:"1px solid #f3f4f6", transition:"background .15s" }}>
-                        <td style={{ padding:"10px 12px", color:"#15803d", fontWeight:600, whiteSpace:"nowrap" }}>{item.inwardNo || "—"}</td>
-                        <td style={{ padding:"10px 12px", fontWeight:500 }}>{item.fullName || "—"}</td>
-                        <td style={{ padding:"10px 12px", color:"#374151", maxWidth:180, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{item.subject || "—"}</td>
-                        <td style={{ padding:"10px 12px", color:"#6b7280" }}>{item.taluka || "—"}</td>
-                        <td style={{ padding:"10px 12px", color:"#6b7280", whiteSpace:"nowrap" }}>{item.mainDepartment || "—"}</td>
-                        <td style={{ padding:"10px 12px" }}>
-                          <span style={{ fontSize:11, fontWeight:700, padding:"2px 10px", borderRadius:20,
-                            background: item.priority==="Emergency"?"#fee2e2":item.priority==="Urgent"?"#fef3c7":"#dcfce7",
-                            color:       item.priority==="Emergency"?"#dc2626":item.priority==="Urgent"?"#92400e":"#15803d" }}>
-                            {item.priority || "Normal"}
-                          </span>
-                        </td>
-                        <td style={{ padding:"10px 12px" }}>
-                          <span style={{ fontSize:11, fontWeight:700, padding:"2px 10px", borderRadius:20,
-                            background: statusBg[item.status] || "#f3f4f6",
-                            color:      statusColor[item.status] || "#374151" }}>
-                            {item.status || "—"}
-                          </span>
-                        </td>
-                        <td style={{ padding:"10px 12px", color:"#9ca3af", whiteSpace:"nowrap" }}>
-                          {item.submissionDate || (item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : "—")}
-                        </td>
-                      </tr>
+                <div style={{ marginTop:16 }}>
+                  <div style={{ fontSize:12, fontWeight:800, color:P.tealDark, marginBottom:8 }}>📈 Weekly Trend</div>
+                  <MiniBar data={weeklyData} color={P.teal}/>
+                  <div style={{ display:"flex", justifyContent:"space-between", marginTop:5 }}>
+                    {["M","T","W","T","F","S","S"].map((d,i) => (
+                      <span key={i} style={{ fontSize:9, color:P.muted, flex:1, textAlign:"center", fontWeight:700 }}>{d}</span>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-              <div style={{ marginTop:12, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                <span style={{ fontSize:11, color:"#9ca3af" }}>Showing {filtered.length} of {stats.total} applications</span>
-                <button onClick={() => navigate("/allapplication")}
-                  style={{ background:"#f0fdf4", color:"#15803d", border:"1px solid #86efac", borderRadius:8, padding:"6px 16px", fontSize:12, fontWeight:600, cursor:"pointer" }}>
-                  View All →
-                </button>
+                  </div>
+                </div>
               </div>
             </div>
 
+            {/* ── Tracking + Recent Orders ── */}
+            <div style={{ display:"grid", gridTemplateColumns:"260px 1fr", gap:18, marginBottom:8 }}>
+
+              {/* Tracking / Taluka */}
+              <div className="dc" style={{ animationDelay:".44s", background:P.white, borderRadius:16, padding:"20px 20px", boxShadow:"0 4px 20px rgba(0,0,0,0.05)", border:`1px solid ${P.border}` }}>
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
+                  <h3 style={{ margin:0, fontSize:14, fontWeight:900, color:P.tealDark }}>Tracking</h3>
+                  <div style={{ background:P.bg, border:`1px solid ${P.border}`, borderRadius:7, padding:"3px 9px", fontSize:10, fontWeight:700, color:P.tealDark }}>THIS YEAR ▾</div>
+                </div>
+                <div style={{ display:"flex", justifyContent:"space-between", padding:"0 2px 8px", borderBottom:`1px solid ${P.border}`, marginBottom:6 }}>
+                  <span style={{ fontSize:9.5, fontWeight:800, color:P.muted, textTransform:"uppercase", letterSpacing:0.5 }}>Region</span>
+                  <span style={{ fontSize:9.5, fontWeight:800, color:P.muted, textTransform:"uppercase", letterSpacing:0.5 }}>Amount</span>
+                </div>
+                {Object.entries(talukaData).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([taluka,count],i) => {
+                  const cols = [P.teal,P.gold,P.sage,P.tealDeep,P.goldDeep,P.tealDark];
+                  const c = cols[i%cols.length];
+                  return (
+                    <div key={taluka} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"8px 2px", borderBottom:`1px solid ${P.border}55` }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                        <div style={{ width:7, height:7, borderRadius:"50%", background:c }}/>
+                        <span style={{ fontSize:12, fontWeight:600, color:P.text }}>{taluka}</span>
+                      </div>
+                      <span style={{ fontSize:12, fontWeight:800, color:c }}>{count.toLocaleString()}</span>
+                    </div>
+                  );
+                })}
+                {Object.keys(talukaData).length===0 && (
+                  <div style={{ textAlign:"center", color:P.muted, fontSize:12, padding:"20px 0" }}>No data yet</div>
+                )}
+              </div>
+
+              {/* Recent Order Table */}
+              <div className="dc" style={{ animationDelay:".51s", background:P.white, borderRadius:16, padding:"20px 22px", boxShadow:"0 4px 20px rgba(0,0,0,0.05)", border:`1px solid ${P.border}` }}>
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14, flexWrap:"wrap", gap:8 }}>
+                  <div>
+                    <h3 style={{ margin:0, fontSize:15, fontWeight:900, color:P.tealDark }}>Recent Order</h3>
+                    <p style={{ margin:"2px 0 0", fontSize:11, color:P.muted }}>Latest inward complaints</p>
+                  </div>
+                  <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
+                    {["all","Pending","Resolved","In Progress"].map(tab => (
+                      <button key={tab} onClick={()=>setActiveTab(tab)} style={{
+                        border:`1px solid ${activeTab===tab?P.teal:P.border}`,
+                        background: activeTab===tab?`linear-gradient(135deg,${P.teal},${P.tealDark})`:P.white,
+                        color: activeTab===tab?"#fff":P.muted,
+                        borderRadius:8, padding:"5px 13px",
+                        fontSize:11, fontWeight:700, cursor:"pointer",
+                        boxShadow: activeTab===tab?`0 4px 12px ${P.teal}44`:"none",
+                        transition:"all .2s",
+                      }}>
+                        {tab==="all"?"All":tab}
+                      </button>
+                    ))}
+                    <div style={{ background:P.bg, border:`1px solid ${P.border}`, borderRadius:8, padding:"5px 11px", fontSize:11, fontWeight:700, color:P.tealDark }}>THIS WEEK ▾</div>
+                  </div>
+                </div>
+
+                <div style={{ overflowX:"auto" }}>
+                  <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12 }}>
+                    <thead>
+                      <tr style={{ background:P.bg }}>
+                        {["Inward No","Applicant","Subject","Taluka","Department","Priority","Status","Date"].map(h => (
+                          <th key={h} style={{ padding:"9px 11px", textAlign:"left", color:P.tealDark, fontWeight:800, fontSize:10, whiteSpace:"nowrap", letterSpacing:0.3, textTransform:"uppercase", borderBottom:`2px solid ${P.border}` }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.length===0 ? (
+                        <tr><td colSpan={8} style={{ textAlign:"center", padding:32, color:P.muted }}>No applications found</td></tr>
+                      ) : filtered.map((item,i) => (
+                        <tr key={i} className="tbl-row" style={{ borderBottom:`1px solid ${P.border}55`, transition:"background .15s" }}>
+                          <td style={{ padding:"9px 11px", color:P.teal, fontWeight:800, whiteSpace:"nowrap", fontFamily:"monospace", fontSize:11 }}>{item.inwardNo||"—"}</td>
+                          <td style={{ padding:"9px 11px", fontWeight:700, color:P.text }}>{item.fullName||"—"}</td>
+                          <td style={{ padding:"9px 11px", color:P.muted, maxWidth:160, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{item.subject||"—"}</td>
+                          <td style={{ padding:"9px 11px", color:P.muted }}>{item.taluka||"—"}</td>
+                          <td style={{ padding:"9px 11px", color:P.muted, whiteSpace:"nowrap" }}>{item.mainDepartment||"—"}</td>
+                          <td style={{ padding:"9px 11px" }}>
+                            <span style={{ fontSize:10, fontWeight:800, padding:"3px 9px", borderRadius:20,
+                              background: item.priority==="Emergency"?"#fde8e8":item.priority==="Urgent"?`${P.gold}22`:`${P.sage}22`,
+                              color: item.priority==="Emergency"?"#d9534f":item.priority==="Urgent"?P.goldDeep:P.sage,
+                              border:`1px solid ${item.priority==="Emergency"?"#f5c6c6":item.priority==="Urgent"?P.gold+"44":P.sage+"44"}`,
+                            }}>
+                              {item.priority||"Normal"}
+                            </span>
+                          </td>
+                          <td style={{ padding:"9px 11px" }}>
+                            <span style={{ fontSize:10, fontWeight:800, padding:"3px 9px", borderRadius:20,
+                              background:statusBg[item.status]||`${P.border}55`,
+                              color:statusColor[item.status]||P.muted,
+                              border:`1px solid ${statusColor[item.status]||P.border}44`,
+                            }}>
+                              {item.status||"—"}
+                            </span>
+                          </td>
+                          <td style={{ padding:"9px 11px", color:P.muted, whiteSpace:"nowrap", fontSize:11 }}>
+                            {item.submissionDate||(item.createdAt?new Date(item.createdAt).toLocaleDateString("en-IN"):"—")}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div style={{ marginTop:12, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                  <span style={{ fontSize:11, color:P.muted }}>Showing {filtered.length} of {stats.total} applications</span>
+                  <button onClick={()=>navigate("/allapplication")} style={{
+                    background:`linear-gradient(135deg,${P.teal},${P.tealDark})`,
+                    color:"#fff", border:"none", borderRadius:9,
+                    padding:"7px 18px", fontSize:12, fontWeight:800,
+                    cursor:"pointer", boxShadow:`0 4px 14px ${P.teal}55`,
+                    letterSpacing:0.3,
+                  }}>
+                    View All →
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div style={{ textAlign:"center", color:P.muted, fontSize:11, padding:"14px 0 4px" }}>
+              © {new Date().getFullYear()} Vasai-Virar City Municipal Corporation · Janata Darbar System
+              <span style={{ margin:"0 8px", color:P.gold }}>◆</span>
+              स्थापना : ३ जुलै २००९
+            </div>
           </>
         )}
-
-        {/* Footer */}
-        <div style={{ marginTop:24, textAlign:"center", color:"#9ca3af", fontSize:11 }}>
-          © {new Date().getFullYear()} Vasai-Virar City Municipal Corporation · Janata Darbar System
-          <span style={{ margin:"0 8px", color:"#ca8a04" }}>◆</span>
-          स्थापना : ३ जुलै २००९
-        </div>
       </div>
     </div>
   );
