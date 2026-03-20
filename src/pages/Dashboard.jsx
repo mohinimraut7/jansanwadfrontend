@@ -461,6 +461,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
+import mapImage from "../assets/mapvvcmc.jfif";
+
+// mapvvcmc.jfif
 
 // ── Talukas for map overlay ──────────────────────────────────────────────────
 const TALUKAS = ["Vasai","Virar","Nalasopara","Palghar","Dahanu","Talasari","Jawhar","Mokhada","Vikramgad","Wada","Boisar","Umbergaon"];
@@ -689,7 +692,7 @@ export default function Dashboard() {
               </div>
               <div className="dash-card" style={{ animationDelay:".28s" }}>
                 {/* People Present Today */}
-                <div style={{ background:"linear-gradient(135deg,#14532d,#15803d)", borderRadius:14, padding:"18px 20px", boxShadow:"0 2px 12px #14532d22", color:"#fff", display:"flex", flexDirection:"column", gap:8 }}>
+                {/* <div style={{ background:"linear-gradient(135deg,#14532d,#15803d)", borderRadius:14, padding:"18px 20px", boxShadow:"0 2px 12px #14532d22", color:"#fff", display:"flex", flexDirection:"column", gap:8 }}>
                   <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                     <div style={{ width:36, height:36, borderRadius:10, background:"#ffffff22", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>🧑‍💼</div>
                     <span style={{ fontSize:12, color:"#86efac", fontWeight:500 }}>People Present</span>
@@ -699,7 +702,7 @@ export default function Dashboard() {
                     <span style={{ width:8, height:8, borderRadius:"50%", background:"#4ade80", display:"inline-block", boxShadow:"0 0 6px #4ade80", animation:"pulse 2s infinite" }}/>
                     <span style={{ fontSize:11, color:"#86efac" }}>Live count — updates every 4s</span>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -707,7 +710,7 @@ export default function Dashboard() {
             <div style={{ display:"grid", gridTemplateColumns:"1fr 340px", gap:20, marginBottom:24 }}>
 
               {/* MAP */}
-              <div className="dash-card" style={{ animationDelay:".35s", background:"#fff", borderRadius:14, padding:20, boxShadow:"0 2px 12px #0001", border:"1px solid #f0f0f0" }}>
+              {/* <div className="dash-card" style={{ animationDelay:".35s", background:"#fff", borderRadius:14, padding:20, boxShadow:"0 2px 12px #0001", border:"1px solid #f0f0f0" }}>
                 <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
                   <div>
                     <h3 style={{ margin:0, fontSize:15, fontWeight:700, color:"#14532d" }}>📍 Application Heatmap</h3>
@@ -718,7 +721,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <VvcmcMap talukaData={talukaData}/>
-                {/* Legend */}
+           
                 <div style={{ marginTop:12, display:"flex", flexWrap:"wrap", gap:8 }}>
                   {Object.entries(talukaData).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([t,c])=>(
                     <div key={t} style={{ background:"#f0fdf4", borderRadius:20, padding:"3px 10px", fontSize:11, color:"#15803d", fontWeight:600 }}>
@@ -726,7 +729,66 @@ export default function Dashboard() {
                     </div>
                   ))}
                 </div>
-              </div>
+              </div> */}
+
+
+              
+
+
+
+
+
+{/* MAP */}
+<div className="dash-card" style={{ animationDelay:".35s", background:"#fff", borderRadius:14, padding:20, boxShadow:"0 2px 12px #0001", border:"1px solid #f0f0f0" }}>
+  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
+    <div>
+      <h3 style={{ margin:0, fontSize:15, fontWeight:700, color:"#14532d" }}>📍 Application Heatmap</h3>
+      <p style={{ margin:0, fontSize:11, color:"#9ca3af" }}>Complaints by Taluka — Palghar District</p>
+    </div>
+    <div style={{ background:"#f0fdf4", borderRadius:8, padding:"4px 12px", fontSize:11, color:"#15803d", fontWeight:600 }}>
+      {Object.keys(talukaData).length} Talukas Active
+    </div>
+  </div>
+
+  {/* Replaced SVG with actual map image */}
+  {/* <div style={{ position:"relative", width:"100%", paddingBottom:"85%", background:"linear-gradient(135deg,#f0fdf4,#dcfce7)", borderRadius:12, overflow:"hidden" }}>
+    <img
+      src={mapImage}
+      alt="VVCMC Palghar District Map"
+      style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"cover", borderRadius:12 }}
+    />
+    <div style={{ position:"absolute", bottom:8, right:10, fontSize:10, color:"#15803d", fontWeight:600, background:"#fff8", borderRadius:6, padding:"2px 8px" }}>
+      📍 Palghar District
+    </div>
+  </div> */}
+
+
+  {/* Replaced SVG with actual map image */}
+<div style={{ position:"relative", width:"100%", paddingBottom:"60%", background:"linear-gradient(135deg,#f0fdf4,#dcfce7)", borderRadius:12, overflow:"hidden" }}>
+  <img
+    src={mapImage}
+    alt="VVCMC Palghar District Map"
+    style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"contain", borderRadius:12 }}
+  />
+  <div style={{ position:"absolute", bottom:8, right:10, fontSize:10, color:"#15803d", fontWeight:600, background:"#fff8", borderRadius:6, padding:"2px 8px" }}>
+    📍 Palghar District
+  </div>
+</div>
+
+  {/* Legend */}
+  <div style={{ marginTop:12, display:"flex", flexWrap:"wrap", gap:8 }}>
+    {Object.entries(talukaData).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([t,c])=>(
+      <div key={t} style={{ background:"#f0fdf4", borderRadius:20, padding:"3px 10px", fontSize:11, color:"#15803d", fontWeight:600 }}>
+        {t}: {c}
+      </div>
+    ))}
+  </div>
+</div>
+
+
+
+
+
 
               {/* RIGHT COLUMN */}
               <div style={{ display:"flex", flexDirection:"column", gap:16 }}>

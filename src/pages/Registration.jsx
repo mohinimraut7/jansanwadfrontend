@@ -1445,6 +1445,31 @@ export default function Registration() {
               </div>
             </div>
 
+               {/* <div className="rp-fld">
+              <label className="rp-flbl"></label>
+              <div className="rp-fwrap">
+                <span className="rp-ficon">📱</span>
+                <input className="rp-finput" type="tel" name="pincode"
+                  placeholder="Enter your pincode"
+                  maxLength={10}
+                  value={form.pincode} onChange={handleChange} />
+              </div>
+            </div> */}
+
+             {/* <div className="rp-fld">
+              <label className="rp-flbl"></label>
+              <div className="rp-fwrap">
+                <span className="rp-ficon">📱</span>
+                <input className="rp-finput" type="tel" name="address"
+                  placeholder="Enter your address"
+                  maxLength={10}
+                  value={form.address} onChange={handleChange} />
+              </div>
+            </div> */}
+
+
+            
+
             <div className="rp-fld">
               <label className="rp-flbl">Password</label>
               <div className="rp-fwrap">
