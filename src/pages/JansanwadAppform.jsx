@@ -43,7 +43,7 @@ const SectionTitle = ({ title }) => (
   </div>
 );
 
-export default function JanataDarbarComplaintForm() {
+export default function JansanwadAppform({ onClose }) {
   const generateReferenceNumber = () => {
     const today = new Date();
     return `JD/${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,"0")}/${String(today.getDate()).padStart(2,"0")}/${Math.floor(100+Math.random()*900)}`;
@@ -153,7 +153,10 @@ export default function JanataDarbarComplaintForm() {
       const data = res.data;
       if (!data.success) { alert(data.message || "Something went wrong"); return; }
       // alert("Inward Application Added Successfully");
-      alert(`✅ Application submitted successfully!\nToken Number: ${data.tokenNo}`);
+      // alert(`✅ Application submitted successfully!\nToken Number: ${data.tokenNo}`);
+      // setFormData({
+        alert(`✅ Application submitted successfully!\nToken Number: ${data.tokenNo}`);
+      if (onClose) onClose();
       setFormData({
         inwardNo: generateReferenceNumber(), submissionDate: new Date().toISOString().split("T")[0],
         fullName: "", mobile: "", email: "", wardNo: "", address: "", pincode: "",
@@ -167,17 +170,36 @@ export default function JanataDarbarComplaintForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-start justify-center p-4 md:p-6">
-      <div className="bg-white shadow-2xl rounded-xl w-full max-w-3xl">
+    // <div className="min-h-screen bg-gray-100 flex items-start justify-center p-4 md:p-6">
+    //   <div className="bg-white shadow-2xl rounded-xl w-full max-w-3xl">
+
+    //     {/* Header */}
+    //     <div className="px-8 py-5 border-b border-gray-100">
+    //       <h2 className="text-lg font-bold text-gray-800">Application Form</h2>
+    //       <p className="text-xs text-gray-400 mt-0.5">Vasai-Virar City Municipal Corporation</p>
+    //     </div>
+
+
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="bg-white shadow-2xl rounded-xl w-full max-w-3xl max-h-[95vh] flex flex-col">
 
         {/* Header */}
-        <div className="px-8 py-5 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-gray-800">Application Form</h2>
-          <p className="text-xs text-gray-400 mt-0.5">Vasai-Virar City Municipal Corporation</p>
+        <div className="px-8 py-5 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+          <div>
+            <h2 className="text-lg font-bold text-gray-800">Application Form</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Vasai-Virar City Municipal Corporation</p>
+          </div>
+          {onClose && (
+            <button onClick={onClose}
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold transition-colors text-sm">
+              ✕
+            </button>
+          )}
         </div>
 
         {/* Scrollable Form Body */}
-        <div className="px-8 py-6 overflow-y-auto" style={{ maxHeight: "calc(100vh - 180px)" }}>
+        {/* <div className="px-8 py-6 overflow-y-auto" style={{ maxHeight: "calc(100vh - 180px)" }}> */}
+        <div className="px-8 py-6 overflow-y-auto flex-1">
           <form onSubmit={handleSubmit}>
 
             {/* ── Citizen Details ── */}

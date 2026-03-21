@@ -1498,12 +1498,12 @@ export default function Sidebar() {
           {isOpen && <span>All Application Citizens</span>}
         </NavLink>
 
-        {FULL_ACCESS_ROLES.includes(user?.role) && (
-          <NavLink to="/Janatadarbarcomplaintform" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+        {/* {FULL_ACCESS_ROLES.includes(user?.role) && (
+          <NavLink to="/Jansanwadappform" className={({isActive})=>`sb-link${isActive?" active":""}`}>
             <span className="sb-icon"><FiSend size={18}/></span>
             {isOpen && <span>Application Form</span>}
           </NavLink>
-        )}
+        )} */}
 
         {FULL_ACCESS_ROLES.includes(user?.role) && (
           <NavLink to="/users" className={({isActive})=>`sb-link${isActive?" active":""}`}>

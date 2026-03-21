@@ -15,11 +15,12 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import RevenueAllocationViewSP from "./pages/RevenueAllocationViewSP";
 import RevenueAllocationDisburseAmount from "./pages/RevenueAllocationDisburseAmount";
-import JanataDarbarComplaintForm from "./pages/JanataDarbarComplaintForm";
+import JanataDarbarComplaintForm from "./pages/JansanwadAppform";
 import AllApplication from "./pages/Allapplication";
 import Users from "./pages/Users";
 import Availability from "./pages/Availability";
 import ApplicationCitizens from "./pages/ApplicationCitizens";
+import JansanwadAppform from "./pages/JansanwadAppform";
 
 
 
@@ -83,8 +84,8 @@ export default function App() {
         {/* <Route path="/revenue-allocation-sp" element={<RevenueAllocationViewSP />} /> */}
    <Route path="/revenue-allocation-disburse" element={<RevenueAllocationDisburseAmount />} />
 
-
-     <Route path="/Janatadarbarcomplaintform" element={<JanataDarbarComplaintForm />} />
+    <Route path="/Jansanwadappform" element={<JansanwadAppform/>} />
+     {/* <Route path="/Janatadarbarcomplaintform" element={<JanataDarbarComplaintForm />} /> */}
      <Route path="/users" element={<Users />} />
 
 {/*      
