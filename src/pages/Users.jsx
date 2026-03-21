@@ -533,6 +533,7 @@ function EditUserModal({ user, onClose, onSuccess }) {
     userName:       user.userName       || "",
     mobileNumber:   user.mobileNumber   || "",
     email:          user.email          || "",
+    password: user.password || "",
     departmentName: user.departmentName || "",
   });
 

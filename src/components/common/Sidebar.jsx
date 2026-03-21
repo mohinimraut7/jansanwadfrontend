@@ -1324,55 +1324,112 @@ export default function Sidebar() {
       {/* ── Header ── */}
       <div style={{ padding: isOpen ? "24px 18px 18px" : "24px 10px 18px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:10 }}>
         {isOpen ? (
-          <div style={{ display:"flex", alignItems:"center", gap:10, overflow:"hidden" }}>
-            {/* Logo */}
-            <div style={{
-              width: 46, height: 46, borderRadius: 12, flexShrink: 0,
-              background: `linear-gradient(135deg, ${GOLD}, #b8832e)`,
-              boxShadow: `0 4px 14px ${GOLD}88`,
-              overflow: "hidden",
-              border: "2px solid rgba(255,255,255,0.25)",
-              display:"flex", alignItems:"center", justifyContent:"center",
-            }}>
-              <img src={logo} alt="VVCMC" style={{ width:"100%", height:"100%", objectFit:"cover" }}
-                onError={e => { e.target.style.display="none"; e.target.parentNode.innerHTML='<span style="font-size:20px">⚖️</span>'; }}/>
-            </div>
+          // <div style={{ display:"flex", alignItems:"center", gap:10, overflow:"hidden" }}>
+          //   {/* Logo */}
+          //   <div style={{
+          //     width: 46, height: 46, borderRadius: 12, flexShrink: 0,
+          //     background: `linear-gradient(135deg, ${GOLD}, #b8832e)`,
+          //     boxShadow: `0 4px 14px ${GOLD}88`,
+          //     overflow: "hidden",
+          //     border: "2px solid rgba(255,255,255,0.25)",
+          //     display:"flex", alignItems:"center", justifyContent:"center",
+          //   }}>
+          //     <img src={logo} alt="VVCMC" style={{ width:"100%", height:"100%", objectFit:"cover" }}
+          //       onError={e => { e.target.style.display="none"; e.target.parentNode.innerHTML='<span style="font-size:20px">⚖️</span>'; }}/>
+          //   </div>
 
-            {/* Text */}
-            <div style={{ overflow:"hidden", display:"flex", flexDirection:"column", gap:0 }}>
+          //   {/* Text */}
+          //   <div style={{ overflow:"hidden", display:"flex", flexDirection:"column", gap:0 }}>
 
-              {/* वसई-विरार शहर */}
-              <div style={{
-                color: `${GOLD}dd`,
-                fontSize: 9.5, fontWeight: 800,
-                fontFamily:"'Noto Sans Devanagari','Nunito',sans-serif",
-                whiteSpace:"nowrap", letterSpacing: 0.2, lineHeight: 1.4,
-              }}>
-                वसई-विरार शहर
-              </div>
+          //     {/* वसई-विरार शहर */}
+          //     <div style={{
+          //       color: `${GOLD}dd`,
+          //       fontSize: 9.5, fontWeight: 800,
+          //       fontFamily:"'Noto Sans Devanagari','Nunito',sans-serif",
+          //       whiteSpace:"nowrap", letterSpacing: 0.2, lineHeight: 1.4,
+          //     }}>
+          //       वसई-विरार शहर
+          //     </div>
 
-              {/* महानगरपालिका */}
-              <div style={{
-                color: "rgba(255,255,255,0.92)",
-                fontSize: 11.5, fontWeight: 900,
-                fontFamily:"'Noto Sans Devanagari','Nunito',sans-serif",
-                whiteSpace:"nowrap", letterSpacing: 0.2, lineHeight: 1.3,
-              }}>
-                महानगरपालिका
-              </div>
+          //     {/* महानगरपालिका */}
+          //     <div style={{
+          //       color: "rgba(255,255,255,0.92)",
+          //       fontSize: 11.5, fontWeight: 900,
+          //       fontFamily:"'Noto Sans Devanagari','Nunito',sans-serif",
+          //       whiteSpace:"nowrap", letterSpacing: 0.2, lineHeight: 1.3,
+          //     }}>
+          //       महानगरपालिका
+          //     </div>
 
-              {/* जन संवाद */}
-              <div style={{
-                color: "#fff",
-                fontSize: 17, fontWeight: 900,
-                fontFamily:"'Noto Sans Devanagari','Nunito',sans-serif",
-                whiteSpace:"nowrap", letterSpacing: 0.3, lineHeight: 1.15,
-                textShadow: `0 2px 10px ${GOLD}55`,
-              }}>
-                जन संवाद
-              </div>
-            </div>
-          </div>
+          //     {/* जन संवाद */}
+          //     <div style={{
+          //       color: "#fff",
+          //       fontSize: 17, fontWeight: 900,
+          //       fontFamily:"'Noto Sans Devanagari','Nunito',sans-serif",
+          //       whiteSpace:"nowrap", letterSpacing: 0.3, lineHeight: 1.15,
+          //       textShadow: `0 2px 10px ${GOLD}55`,
+          //     }}>
+          //       जन संवाद
+          //     </div>
+          //   </div>
+          // </div>
+<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+
+  {/* Line 1: वसई-विरार शहर महानगरपालिका */}
+  <div style={{
+    color: `${GOLD}dd`,
+    fontSize: 15,
+    fontWeight: 800,
+    fontFamily: "'Noto Sans Devanagari','Nunito',sans-serif",
+    whiteSpace: "nowrap",
+    letterSpacing: 0.1,
+    lineHeight: 1.3,
+  }}>
+    वसई-विरार शहर महानगरपालिका
+  </div>
+   <div style={{
+      color: "#fff",
+      fontSize: 24,
+      fontWeight: 900,
+      fontFamily: "'Noto Sans Devanagari','Nunito',sans-serif",
+      whiteSpace: "nowrap",
+      letterSpacing: 0.3,
+      lineHeight: 1,
+      textShadow: `0 2px 10px ${GOLD}55`,
+      textAlign:'center',
+      // border:'1px solid red'
+    }}>
+      जन संवाद
+    </div>
+
+  {/* Line 2: Logo + जन संवाद side by side */}
+  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+
+    {/* Logo */}
+    <div style={{
+      width: 160, height: 160, borderRadius: "5%", flexShrink: 0,
+      background: `linear-gradient(135deg, ${GOLD}, #b8832e)`,
+      boxShadow: `0 4px 14px ${GOLD}88`,
+      overflow: "hidden",
+      border: "2px solid rgba(255,255,255,0.25)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+    }}>
+      <img
+        src={logo} alt="VVCMC"
+        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        onError={e => {
+          e.target.style.display = "none";
+          e.target.parentNode.innerHTML = '<span style="font-size:18px">⚖️</span>';
+        }}
+      />
+    </div>
+
+    {/* जन संवाद */}
+   
+
+  </div>
+</div>
+          
         ) : (
           <div style={{
             width:40, height:40, borderRadius:10, flexShrink:0, margin:"0 auto",
@@ -1407,13 +1464,13 @@ export default function Sidebar() {
       </div>
 
       {/* Top label like "CABANG YOG ▾" */}
-      {isOpen && (
+      {/* {isOpen && (
         <div style={{ padding:"0 18px 10px" }}>
           <div style={{ fontSize:9.5, color:"rgba(255,255,255,0.4)", fontWeight:700, letterSpacing:1.8, textTransform:"uppercase", fontFamily:"'Nunito',sans-serif" }}>
             CABANG YOG ▾
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Divider */}
       <div style={{ margin:"0 16px 10px", borderTop:"1px solid rgba(255,255,255,0.1)" }}/>
