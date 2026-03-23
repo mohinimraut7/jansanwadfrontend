@@ -105,6 +105,7 @@ export default function DashboardLayout() {
         <div style={{ position: "sticky", top: 0, height: "100vh", zIndex: 50, flexShrink: 0 }}>
           <Sidebar />
         </div>
+        
 
         {/* Right: Navbar + Content */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
