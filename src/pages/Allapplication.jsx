@@ -2970,7 +2970,18 @@ export default function AllApplication() {
   const handleTokenCheckProceed = (citizenAppointment) => {
     setShowTokenCheck(false);
     if (citizenAppointment) {
+
+
+      const normalizeWard = (ward) => {
+  if (!ward) return "";
+  // "Ward A" → "Ward-A"
+  return ward.replace(/Ward\s+/i, "Ward-");
+};
+
       // Map appointment fields → form fields for JansanwadAppform prefill
+
+
+
       setPrefillData({
         fullName:     citizenAppointment.fullName        || "",
         mobile:       citizenAppointment.mobileNumber    || "",
@@ -2978,7 +2989,8 @@ export default function AllApplication() {
         address:      citizenAppointment.address         || "",
         pincode:      citizenAppointment.pincode         || "",
         wardNo:       citizenAppointment.ward            || "",
-        ward:         citizenAppointment.ward            || "",   // ✅ ward from appointment
+        // ward:         citizenAppointment.ward            || "",   // ✅ ward from appointment
+          ward:         normalizeWard(citizenAppointment.ward), // ✅ "Ward A" → "Ward-A"
         visitorPhoto: citizenAppointment.visitorPhoto    || "",   // ✅ existing photo path
         // pass raw appointment reference fields for convenience
         _tokenId:       citizenAppointment.tokenId        || "",
@@ -3076,7 +3088,7 @@ export default function AllApplication() {
                 {applications.length}
               </span>
             </h1>
-            <p className="text-base font-medium text-gray-500 mt-1">Janata Darbar — Inward Records</p>
+            <p className="text-base font-medium text-gray-500 mt-1">जन संवाद - Applications</p>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={fetchApplications}

@@ -1184,12 +1184,19 @@ export default function JansanwadAppform({ onClose, prefillData }) {
         formPayload.append("submittedByDept",     authUser.departmentName || "");
       }
 
+     if (prefillData?._tokenId) {
+      formPayload.append("existingTokenNo", prefillData._tokenId);
+    }
+
       const res = await axiosInstance.post("/inwardAdd", formPayload, { headers: { "Content-Type": "multipart/form-data" } });
       const data = res.data;
       if (!data.success) { alert(data.message || "Something went wrong"); return; }
 
-      alert(`✅ Application submitted successfully!\nToken Number: ${data.tokenNo}`);
-      if (onClose) onClose();
+      // ✅ Show existing token if no new one was generated
+    const displayToken = prefillData?._tokenId || data.tokenNo;
+    alert(`✅ Application submitted successfully!\nToken Number: ${displayToken}`);
+    if (onClose) onClose();
+   
 
       setFormData(buildInitialForm(null));
     } catch (error) {
