@@ -563,22 +563,48 @@ function ActionModal({ appt, onClose, onRefresh, showToast }) {
   const [note, setNote]       = useState(appt.adminNote || "");
   const [status, setStatus]   = useState(appt.status || "pending");
   const [saving, setSaving]   = useState(false);
+    const [replyDocument, setReplyDocument] = useState(null); // ✅ ADD THIS
+
+  // const handleSave = async () => {
+  //   try {
+  //     setSaving(true);
+  //     await citizenAxios.patch(`/citizen/admin/update-status/${appt._id}`, {
+  //       status,
+  //       adminNote: note,
+  //     });
+  //     showToast(`✅ Status updated to "${status}" & citizen notified!`, "success");
+  //     onRefresh();
+  //     onClose();
+  //   } catch (e) {
+  //     showToast(e?.response?.data?.message || "Update failed ❌", "error");
+  //   } finally { setSaving(false); }
+  // };
 
   const handleSave = async () => {
-    try {
-      setSaving(true);
-      await citizenAxios.patch(`/citizen/admin/update-status/${appt._id}`, {
-        status,
-        adminNote: note,
-      });
-      showToast(`✅ Status updated to "${status}" & citizen notified!`, "success");
-      onRefresh();
-      onClose();
-    } catch (e) {
-      showToast(e?.response?.data?.message || "Update failed ❌", "error");
-    } finally { setSaving(false); }
-  };
+  try {
+    setSaving(true);
 
+    const formData = new FormData();
+    formData.append("status", status);
+    formData.append("adminNote", note);
+    if (replyDocument) formData.append("replyDocument", replyDocument); // ✅ only extra change
+
+    await citizenAxios.patch(`/citizen/admin/update-status/${appt._id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    showToast(`✅ Status updated to "${status}" & citizen notified!`, "success");
+    onRefresh();
+    onClose();
+  } catch (e) {
+    showToast(e?.response?.data?.message || "Update failed ❌", "error");
+  } finally {
+    setSaving(false);
+  }
+};
+  
+  
+  
   const statusCfg = sc(status);
 
   return (
@@ -674,6 +700,12 @@ function ActionModal({ appt, onClose, onRefresh, showToast }) {
             onFocus={e => e.target.style.borderColor="#16a34a"}
             onBlur={e => e.target.style.borderColor="#e2e8f0"}
           />
+
+          <input
+      type="file"
+       accept=".pdf,.jpg,.jpeg,.png,.webp"
+       onChange={(e) => setReplyDocument(e.target.files[0])}
+      />
 
           {/* Acknowledgement note */}
           <div style={{ background:"#eff6ff", border:"1px solid #bfdbfe", borderRadius:8, padding:"10px 14px", marginTop:12, fontSize:12, color:"#1e40af" }}>

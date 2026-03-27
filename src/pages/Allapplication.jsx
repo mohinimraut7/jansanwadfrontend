@@ -2614,7 +2614,7 @@ function ReplyModal({ record, onClose, onSubmit }) {
   const [newStatus, setNewStatus]     = useState(record.status || "Pending");
   const [newPriority, setNewPriority] = useState(record.priority || "Normal");
   const [submitting, setSubmitting]   = useState(false);
-
+ const [replyDoc, setReplyDoc]           = useState(null);  // ✅ file state
   if (!record) return null;
 
   const handleSubmit = async () => {
@@ -2628,9 +2628,13 @@ function ReplyModal({ record, onClose, onSubmit }) {
       replyMessage:  replyText,
       status:        newStatus,
       priority:      newPriority,
+      replyDocument: replyDoc,   // ✅ pass file
     });
     setSubmitting(false);
   };
+
+
+  
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -2640,7 +2644,7 @@ function ReplyModal({ record, onClose, onSubmit }) {
         <div className="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-indigo-600 to-blue-600 rounded-t-2xl">
           <div>
             <p className="text-xs text-indigo-200 font-medium tracking-wide uppercase">Reply to Application</p>
-            <h2 className="text-lg font-bold text-white">{record.inwardNo} — {record.fullName}</h2>
+            <h2 className="text-lg font-bold text-white">{record.tokenNo} — {record.fullName}</h2>
           </div>
           <button
             onClick={onClose}
@@ -2753,6 +2757,42 @@ function ReplyModal({ record, onClose, onSubmit }) {
             <p className="text-xs text-gray-400 mt-1 text-right">{replyText.length} characters</p>
           </div>
 
+
+
+
+  {/* ✅ Reply Document Upload */}
+          <div>
+            <label className="block text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-1.5">
+              Reply Document <span className="text-gray-400 text-xs font-normal">(Optional)</span>
+            </label>
+            <div className="border-2 border-dashed border-indigo-200 rounded-xl p-4 bg-indigo-50">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <div className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition whitespace-nowrap">
+                  📎 Choose File
+                  <input type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    style={{ display: "none" }}
+                    onChange={(e) => setReplyDoc(e.target.files[0] || null)} />
+                </div>
+                <span className="text-sm text-gray-500 truncate">
+                  {replyDoc ? replyDoc.name : "PDF, DOC, or Image"}
+                </span>
+              </label>
+              {replyDoc && (
+                <div className="mt-3 flex items-center justify-between bg-white border border-indigo-200 rounded-lg px-3 py-2">
+                  <div>
+                    <p className="text-sm font-semibold text-indigo-700">✅ {replyDoc.name}</p>
+                    <p className="text-xs text-gray-400">{(replyDoc.size / 1024).toFixed(1)} KB</p>
+                  </div>
+                  <button onClick={() => setReplyDoc(null)}
+                    className="text-red-400 hover:text-red-600 text-lg font-bold transition">✕</button>
+                </div>
+              )}
+            </div>
+          </div>
+
+
+
+
           {/* Action Buttons */}
           <div className="flex items-center justify-end gap-3 pt-2">
             <button
@@ -2793,7 +2833,7 @@ function DetailModal({ record, onClose }) {
         <div className="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-2xl">
           <div>
             <p className="text-xs text-blue-200 font-medium tracking-wide uppercase">Application Detail</p>
-            <h2 className="text-lg font-bold text-white">{record.inwardNo}</h2>
+            <h2 className="text-lg font-bold text-white">{record.tokenNo}</h2>
           </div>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 text-white font-bold transition-colors text-sm">✕</button>
         </div>
@@ -3014,50 +3054,416 @@ export default function AllApplication() {
   // ─────────────────────────────────────────────────────────────────────────
 
   // ── Reply Submit ──
-  const handleReplySubmit = async ({ applicationId, replyMessage, status, priority }) => {
-    try {
-      const authUserRaw = localStorage.getItem("authUser");
-      const authUser    = authUserRaw ? JSON.parse(authUserRaw) : null;
+  // const handleReplySubmit = async ({ applicationId, replyMessage, status, priority }) => {
+  //   try {
+  //     const authUserRaw = localStorage.getItem("authUser");
+  //     const authUser    = authUserRaw ? JSON.parse(authUserRaw) : null;
 
-      const repliedByName = authUser?.submittedByName || authUser?.name || authUser?.fullName || "";
-      const repliedByRole = authUser?.submittedByRole || authUser?.role || "";
-      const repliedById   = authUser?.submittedById   || authUser?.id  || "";
+  //     const repliedByName = authUser?.submittedByName || authUser?.name || authUser?.fullName || "";
+  //     const repliedByRole = authUser?.submittedByRole || authUser?.role || "";
+  //     const repliedById   = authUser?.submittedById   || authUser?.id  || "";
 
-      await axiosInstance.post("/replyApplication", {
-        applicationId,
-        replyMessage,
-        status,
-        priority,
-        repliedBy:     repliedById,
-        repliedByName: repliedByName,
-        repliedByRole: repliedByRole,
-      });
+  //     await axiosInstance.post("/replyApplication", {
+  //       applicationId,
+  //       replyMessage,
+  //       status,
+  //       priority,
+  //       repliedBy:     repliedById,
+  //       repliedByName: repliedByName,
+  //       repliedByRole: repliedByRole,
+  //     });
 
-      const newReply = {
-        replyMessage,
-        status,
-        priority,
-        repliedBy:     repliedById,
-        repliedByName: repliedByName,
-        repliedByRole: repliedByRole,
-        createdAt:     new Date().toISOString(),
-      };
+  //     const newReply = {
+  //       replyMessage,
+  //       status,
+  //       priority,
+  //       repliedBy:     repliedById,
+  //       repliedByName: repliedByName,
+  //       repliedByRole: repliedByRole,
+  //       createdAt:     new Date().toISOString(),
+  //     };
 
-      setApplications((prev) =>
-        prev.map((app) =>
-          app._id === applicationId
-            ? { ...app, status, priority, replies: [...(app.replies || []), newReply] }
-            : app
-        )
-      );
+  //     setApplications((prev) =>
+  //       prev.map((app) =>
+  //         app._id === applicationId
+  //           ? { ...app, status, priority, replies: [...(app.replies || []), newReply] }
+  //           : app
+  //       )
+  //     );
 
-      alert("✅ Reply यशस्वीरित्या पाठवली!");
-      setReplyTarget(null);
-    } catch (err) {
-      console.error("Reply error:", err);
-      alert("❌ Reply पाठवताना error आला. पुन्हा try करा.");
+  //     alert("✅ Reply यशस्वीरित्या पाठवली!");
+  //     setReplyTarget(null);
+  //   } catch (err) {
+  //     console.error("Reply error:", err);
+  //     alert("❌ Reply पाठवताना error आला. पुन्हा try करा.");
+  //   }
+  // };
+
+
+
+
+
+//   const handleReplySubmit = async ({ applicationId, replyMessage, status, priority, replyDocument }) => {
+//   try {
+//     const authUserRaw = localStorage.getItem("authUser");
+//     const authUser    = authUserRaw ? JSON.parse(authUserRaw) : null;
+
+//     const repliedByName = authUser?.submittedByName || authUser?.name || authUser?.fullName || "";
+//     const repliedByRole = authUser?.submittedByRole || authUser?.role || "";
+//     const repliedById   = authUser?.submittedById   || authUser?.id  || "";
+
+//     // ✅ Use FormData to support file upload
+//     const payload = new FormData();
+//     payload.append("applicationId",  applicationId);
+//     payload.append("replyMessage",   replyMessage);
+//     payload.append("status",         status);
+//     payload.append("priority",       priority);
+//     payload.append("repliedBy",      repliedById);
+//     payload.append("repliedByName",  repliedByName);
+//     payload.append("repliedByRole",  repliedByRole);
+//     if (replyDocument) {
+//       payload.append("replyDocument", replyDocument);  // ✅ attach file
+//     }
+
+//     await axiosInstance.post("/replyApplication", payload, {
+//       headers: { "Content-Type": "multipart/form-data" },
+//     });
+
+//     const newReply = {
+//       replyMessage,
+//       status,
+//       priority,
+//       repliedBy:     repliedById,
+//       repliedByName: repliedByName,
+//       repliedByRole: repliedByRole,
+//       createdAt:     new Date().toISOString(),
+//     };
+
+//     setApplications((prev) =>
+//       prev.map((app) =>
+//         app._id === applicationId
+//           ? { ...app, status, priority, replies: [...(app.replies || []), newReply] }
+//           : app
+//       )
+//     );
+
+//     alert("✅ Reply यशस्वीरित्या पाठवली!");
+//     setReplyTarget(null);
+//   } catch (err) {
+//     console.error("Reply error:", err);
+//     alert("❌ Reply पाठवताना error आला. पुन्हा try करा.");
+//   }
+// };
+
+
+// const handleReplySubmit = async ({ applicationId, replyMessage, status, priority, replyDocument }) => {
+//   try {
+//     const authUserRaw = localStorage.getItem("authUser");
+//     const authUser    = authUserRaw ? JSON.parse(authUserRaw) : null;
+
+//     const repliedByName = authUser?.submittedByName || authUser?.name || authUser?.fullName || "";
+//     const repliedByRole = authUser?.submittedByRole || authUser?.role || "";
+//     const repliedById   = authUser?.submittedById   || authUser?.id  || "";
+
+//     // ✅ Find the record to get tokenNo
+//     const record = applications.find(a => a._id === applicationId);
+//     const tokenNo = record?.tokenNo;
+
+//     if (!tokenNo) {
+//       alert("❌ Token No सापडले नाही.");
+//       return;
+//     }
+
+//     // ✅ FormData with file support
+//     const payload = new FormData();
+//     payload.append("replyMessage",   replyMessage);
+//     payload.append("status",         status);
+//     payload.append("priority",       priority);
+//     payload.append("repliedBy",      repliedById);
+//     payload.append("repliedByName",  repliedByName);
+//     payload.append("repliedByRole",  repliedByRole);
+//     if (replyDocument) {
+//       payload.append("replyDocument", replyDocument); // ✅ attach file
+//     }
+
+//     // ✅ PATCH /replyApplication/:tokenNo  (same as ApplicationCitizens pattern)
+
+ 
+
+
+//     // await axiosInstance.patch(`/replyApplication/${tokenNo}`, payload, {
+//     //   headers: { "Content-Type": "multipart/form-data" },
+//     // });
+
+
+
+//     // ✅ Also sync CitizenAppointment via updateAppointmentStatus (same as ApplicationCitizens)
+// const appointment = await axiosInstance.get(`/citizen/appointment/token/${tokenNo}`).catch(() => null);
+// if (appointment?.data?.appointment?._id) {
+//   const syncPayload = new FormData();
+//   syncPayload.append("status",    status.toLowerCase());
+//   syncPayload.append("adminNote", replyMessage);
+//   if (replyDocument) syncPayload.append("replyDocument", replyDocument);
+
+//   await axiosInstance.patch(
+//     `/citizen/admin/update-status/${appointment.data.appointment._id}`,
+//     syncPayload,
+//     { headers: { "Content-Type": "multipart/form-data" } }
+//   ).catch(() => null); // silent fail — main reply already succeeded
+// }
+
+//     const newReply = {
+//       replyMessage,
+//       status,
+//       priority,
+//       repliedBy:     repliedById,
+//       repliedByName: repliedByName,
+//       repliedByRole: repliedByRole,
+//       createdAt:     new Date().toISOString(),
+//     };
+
+//     setApplications((prev) =>
+//       prev.map((app) =>
+//         app._id === applicationId
+//           ? { ...app, status, priority, replies: [...(app.replies || []), newReply] }
+//           : app
+//       )
+//     );
+
+//     alert("✅ Reply यशस्वीरित्या पाठवली!");
+//     setReplyTarget(null);
+//   } catch (err) {
+//     console.error("Reply error:", err);
+//     alert(err?.response?.data?.message || "❌ Reply पाठवताना error आला. पुन्हा try करा.");
+//   }
+// };
+
+// const handleReplySubmit = async ({ applicationId, replyMessage, status, priority, replyDocument }) => {
+//   try {
+//     const authUserRaw = localStorage.getItem("authUser");
+//     const authUser    = authUserRaw ? JSON.parse(authUserRaw) : null;
+
+//     const repliedByName = authUser?.submittedByName || authUser?.name || authUser?.fullName || "";
+//     const repliedByRole = authUser?.submittedByRole || authUser?.role || "";
+//     const repliedById   = authUser?.submittedById   || authUser?.id  || "";
+
+//     const record  = applications.find(a => a._id === applicationId);
+//     const tokenNo = record?.tokenNo;
+
+//     if (!tokenNo) {
+//       alert("❌ Token No सापडले नाही.");
+//       return;
+//     }
+
+//     // ── Step 1: replyApplication ──────────────────────────────────────────
+//     const payload = new FormData();
+//     payload.append("replyMessage",  replyMessage);
+//     payload.append("status",        status);
+//     payload.append("priority",      priority);
+//     payload.append("repliedBy",     repliedById);
+//     payload.append("repliedByName", repliedByName);
+//     payload.append("repliedByRole", repliedByRole);
+//     if (replyDocument) payload.append("replyDocument", replyDocument);
+
+//     await axiosInstance.patch(`/citizen/admin/update-status/${record._id}`, payload, {
+//       headers: { "Content-Type": "multipart/form-data" },
+//     });
+
+//     // ── Step 2: sync CitizenAppointment (only valid statuses) ─────────────
+//     const validCitizenStatuses = ["pending", "approved", "rejected", "expired"];
+//     const citizenStatus = status.toLowerCase();
+
+//     if (validCitizenStatuses.includes(citizenStatus)) {
+//       const apptRes = await axiosInstance.get(`/citizen/appointment/token/${tokenNo}`).catch(() => null);
+//       if (apptRes?.data?.appointment?._id) {
+//         const syncPayload = new FormData();
+//         syncPayload.append("status",    citizenStatus);
+//         syncPayload.append("adminNote", replyMessage);
+//         if (replyDocument) syncPayload.append("replyDocument", replyDocument);
+
+//         await axiosInstance.patch(
+//           `/citizen/admin/update-status/${record._id}`,
+//           syncPayload,
+//           { headers: { "Content-Type": "multipart/form-data" } }
+//         ).catch(() => null); // silent fail
+//       }
+//     }
+
+//     // ── Step 3: update local state ────────────────────────────────────────
+//     const newReply = {
+//       replyMessage,
+//       status,
+//       priority,
+//       repliedBy:     repliedById,
+//       repliedByName: repliedByName,
+//       repliedByRole: repliedByRole,
+//       createdAt:     new Date().toISOString(),
+//     };
+
+//     setApplications((prev) =>
+//       prev.map((app) =>
+//         app._id === applicationId
+//           ? { ...app, status, priority, replies: [...(app.replies || []), newReply] }
+//           : app
+//       )
+//     );
+
+//     alert("✅ Reply यशस्वीरित्या पाठवली!");
+//     setReplyTarget(null);
+//   } catch (err) {
+//     console.error("Reply error:", err);
+//     alert(err?.response?.data?.message || "❌ Reply पाठवताना error आला. पुन्हा try करा.");
+//   }
+// };
+
+
+// const handleReplySubmit = async ({ applicationId, replyMessage, status, priority, replyDocument }) => {
+//   try {
+//     const authUserRaw = localStorage.getItem("authUser");
+//     const authUser    = authUserRaw ? JSON.parse(authUserRaw) : null;
+
+//     const repliedByName = authUser?.submittedByName || authUser?.name || authUser?.fullName || "";
+//     const repliedByRole = authUser?.submittedByRole || authUser?.role || "";
+//     const repliedById   = authUser?.submittedById   || authUser?.id  || "";
+
+//     const foundApp = applications.find(a => a._id === applicationId);
+//     const tokenNo  = foundApp?.tokenNo;
+
+//     if (!tokenNo) {
+//       alert("❌ Token No सापडले नाही.");
+//       return;
+//     }
+
+//     // ── Step 1: replyApplication (InwardApplication) ──────────────────────
+//     const payload = new FormData();
+//     payload.append("replyMessage",  replyMessage);
+//     payload.append("status",        status);
+//     payload.append("priority",      priority);
+//     payload.append("repliedBy",     repliedById);
+//     payload.append("repliedByName", repliedByName);
+//     payload.append("repliedByRole", repliedByRole);
+//     if (replyDocument) payload.append("replyDocument", replyDocument);
+
+//     await axiosInstance.patch(`/replyApplication/${tokenNo}`, payload, {
+//       headers: { "Content-Type": "multipart/form-data" },
+//     });
+
+//     // ── Step 2: updateAppointmentStatus (CitizenAppointment) ──────────────
+//     const validCitizenStatuses = ["pending", "approved", "rejected", "expired"];
+//     const citizenStatus = status.toLowerCase();
+
+//     if (validCitizenStatuses.includes(citizenStatus)) {
+//       const apptRes = await axiosInstance.get(`/citizen/appointment/token/${tokenNo}`).catch(() => null);
+//       if (apptRes?.data?.appointment?._id) {
+
+//         // ✅ same pattern as handleSave in ApplicationCitizens
+//         const syncPayload = new FormData();
+//         syncPayload.append("status",    citizenStatus);
+//         syncPayload.append("adminNote", replyMessage);
+//         if (replyDocument) syncPayload.append("replyDocument", replyDocument);
+
+//         await axiosInstance.patch(
+//           `/citizen/admin/update-status/${apptRes.data.appointment._id}`,
+//           syncPayload,
+//           { headers: { "Content-Type": "multipart/form-data" } }
+//         ).catch(() => null); // ✅ silent fail — main reply already succeeded
+//       }
+//     }
+
+//     // ── Step 3: update local state ────────────────────────────────────────
+//     const newReply = {
+//       replyMessage, status, priority,
+//       repliedBy:     repliedById,
+//       repliedByName: repliedByName,
+//       repliedByRole: repliedByRole,
+//       createdAt:     new Date().toISOString(),
+//     };
+
+//     setApplications((prev) =>
+//       prev.map((app) =>
+//         app._id === applicationId
+//           ? { ...app, status, priority, replies: [...(app.replies || []), newReply] }
+//           : app
+//       )
+//     );
+
+//     alert("✅ Reply यशस्वीरित्या पाठवली!");
+//     setReplyTarget(null);
+//   } catch (err) {
+//     console.error("Reply error:", err);
+//     alert(err?.response?.data?.message || "❌ Reply पाठवताना error आला. पुन्हा try करा.");
+//   }
+// };
+
+
+const handleReplySubmit = async ({ applicationId, replyMessage, status, priority, replyDocument }) => {
+  try {
+    const authUserRaw = localStorage.getItem("authUser");
+    const authUser    = authUserRaw ? JSON.parse(authUserRaw) : null;
+
+    const repliedByName = authUser?.submittedByName || authUser?.name || authUser?.fullName || "";
+    const repliedByRole = authUser?.submittedByRole || authUser?.role || "";
+    const repliedById   = authUser?.submittedById   || authUser?.id  || "";
+
+    const foundApp = applications.find(a => a._id === applicationId);
+    const tokenNo  = foundApp?.tokenNo;
+
+    if (!tokenNo) {
+      alert("❌ Token No सापडले नाही.");
+      return;
     }
-  };
+
+    // ── Get CitizenAppointment _id via tokenNo ────────────────────────────
+    const apptRes = await axiosInstance.get(`/citizen/appointment/token/${tokenNo}`).catch(() => null);
+
+    if (!apptRes?.data?.appointment?._id) {
+      alert("❌ Citizen Appointment सापडले नाही.");
+      return;
+    }
+
+    const citizenApptId = apptRes.data.appointment._id;
+
+    // ── Same API as ApplicationCitizens handleSave ────────────────────────
+    const formData = new FormData();
+    formData.append("status",        status.toLowerCase());
+    formData.append("adminNote",     replyMessage);
+    formData.append("replyMessage",  replyMessage);
+    formData.append("priority",      priority);
+    formData.append("repliedBy",     repliedById);
+    formData.append("repliedByName", repliedByName);
+    formData.append("repliedByRole", repliedByRole);
+    if (replyDocument) formData.append("replyDocument", replyDocument);
+
+    await axiosInstance.patch(
+      `/citizen/admin/update-status/${citizenApptId}`, // ✅ same API as ApplicationCitizens
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    // ── Update local state ────────────────────────────────────────────────
+    const newReply = {
+      replyMessage, status, priority,
+      repliedBy:     repliedById,
+      repliedByName: repliedByName,
+      repliedByRole: repliedByRole,
+      createdAt:     new Date().toISOString(),
+    };
+
+    setApplications((prev) =>
+      prev.map((app) =>
+        app._id === applicationId
+          ? { ...app, status, priority, replies: [...(app.replies || []), newReply] }
+          : app
+      )
+    );
+
+    alert("✅ Reply यशस्वीरित्या पाठवली!");
+    setReplyTarget(null);
+  } catch (err) {
+    console.error("Reply error:", err);
+    alert(err?.response?.data?.message || "❌ Reply पाठवताना error आला. पुन्हा try करा.");
+  }
+};
 
   const filtered = applications.filter((app) => {
     const matchSearch =
@@ -3145,7 +3551,7 @@ export default function AllApplication() {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr>
-                  {["Reply","#","Applicant","Inward No","Status","Subject","Priority","Date","Submitted By","Reply By","Document"].map((h) => (
+                  {["Reply","#","Applicant","tokenNo","Status","Subject","Priority","Date","Submitted By","Reply By","Document"].map((h) => (
                     <th key={h} className="mui-th">{h}</th>
                   ))}
                 </tr>
@@ -3192,7 +3598,7 @@ export default function AllApplication() {
                             </div>
                           </div>
                         </td>
-                        <td className="mui-td" style={{ width: 130 }}><span className="inward-chip">{app.inwardNo}</span></td>
+                        <td className="mui-td" style={{ width: 130 }}><span className="inward-chip">{app.tokenNo}</span></td>
                         <td className="mui-td" style={{ width: 110 }}><StatusBadge status={app.status} /></td>
                         <td className="mui-td" style={{ minWidth: 160, maxWidth: 200 }}>
                           <div style={{ fontSize: ".875rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 180 }}>{app.subject || "—"}</div>
