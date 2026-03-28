@@ -1191,13 +1191,990 @@
 
 // ===========================
 
-import React, { useState } from "react";
+// import React, { useState } from "react";
+// import { useDispatch } from "react-redux";
+// import { loginSuccess } from "../redux/slices/authSlice";
+// import { useNavigate } from "react-router-dom";
+// import axiosInstance from "../services/axiosInstance";
+// import bgImage from "../assets/vasaivirarmahangarpalika.jpg";
+// import logo from "../assets/vvcmclogo.jpg";
+
+// export default function Registration() {
+//   const dispatch = useDispatch();
+//   const navigate = useNavigate();
+
+//   const [form, setForm] = useState({
+//     fullName: "",
+//     userName: "",
+//     mobileNumber: "",
+//     email: "",
+//     password: "",
+//   });
+
+//   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+//   const handleRegister = async (e) => {
+//     e.preventDefault();
+//     if (!form.fullName || !form.userName || !form.mobileNumber || !form.email || !form.password) {
+//       alert("All fields required ❌"); return;
+//     }
+//     try {
+//       const res = await axiosInstance.post("/register", form);
+//       const data = res.data;
+//       if (!data.success) { alert(data.message); return; }
+//       dispatch(loginSuccess(data.user));
+//       localStorage.setItem("authUser", JSON.stringify(data.user));
+//       alert("Registration Success ✅");
+//       navigate("/dashboard");
+//     } catch (error) {
+//       alert(error?.response?.data?.message || "Server Error ❌");
+//     }
+//   };
+
+//   return (
+//     <>
+//       <style>{`
+//         @import url('https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi&family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+//         *{box-sizing:border-box;margin:0;padding:0;}
+//         .rp-root{
+//           min-height:100vh;width:100%;position:relative;
+//           display:flex;align-items:center;justify-content:flex-end;
+//           font-family:'DM Sans',sans-serif;overflow:hidden;
+//         }
+//         .rp-bg{
+//           position:absolute;inset:0;
+//           background-size:cover;background-position:center;
+//           filter:brightness(0.6) saturate(1.05);
+//           transition:transform 10s ease;
+//         }
+//         .rp-root:hover .rp-bg{transform:scale(1.025);}
+//         .rp-overlay{
+//           position:absolute;inset:0;
+//           background:linear-gradient(
+//             108deg,
+//             rgba(4,12,30,0.04) 0%,
+//             rgba(4,12,30,0.1) 30%,
+//             rgba(4,12,30,0.68) 62%,
+//             rgba(4,12,30,0.9) 100%
+//           );
+//         }
+//         .rp-hero{
+//           position:absolute;left:56px;bottom:56px;
+//           z-index:5;max-width:460px;
+//         }
+//         .rp-badge{
+//           display:inline-flex;align-items:center;gap:7px;
+//           background:rgba(255,255,255,0.11);backdrop-filter:blur(10px);
+//           border:1px solid rgba(255,255,255,0.2);border-radius:100px;
+//           padding:5px 14px;margin-bottom:16px;
+//         }
+//         .rp-bdot{
+//           width:6px;height:6px;border-radius:50%;
+//           background:#4ade80;box-shadow:0 0 7px #4ade80;
+//           animation:rblink 2s infinite;
+//         }
+//         @keyframes rblink{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.45;transform:scale(1.6);}}
+//         .rp-badge span{font-size:11px;color:rgba(255,255,255,0.88);font-weight:500;letter-spacing:0.4px;}
+//         .rp-title{
+//           font-family:'Crimson Pro',serif;font-size:50px;font-weight:700;
+//           color:#fff;line-height:1.1;text-shadow:0 2px 24px rgba(0,0,0,0.55);
+//           margin-bottom:6px;
+//         }
+//         .rp-title em{color:#fbbf24;font-style:normal;}
+//         .rp-sub{font-size:13px;color:rgba(255,255,255,0.58);margin-bottom:22px;letter-spacing:0.2px;}
+//         .rp-stats{display:flex;gap:18px;}
+//         .rp-stat{display:flex;flex-direction:column;gap:2px;}
+//         .rp-snum{font-family:'Crimson Pro',serif;font-size:24px;font-weight:700;color:#fbbf24;line-height:1;}
+//         .rp-slbl{font-size:9.5px;color:rgba(255,255,255,0.42);text-transform:uppercase;letter-spacing:0.9px;}
+//         .rp-ssep{width:1px;background:rgba(255,255,255,0.14);align-self:stretch;}
+
+//         .rp-card{
+//           position:relative;z-index:10;
+//           width:350px;margin-right:72px;
+//           background:#fff;border-radius:18px;
+//           padding:26px 28px 22px;
+//           box-shadow:0 28px 64px rgba(0,0,0,0.48),0 0 0 1px rgba(255,255,255,0.06);
+//         }
+
+//         .rp-logo-row{display:flex;align-items:center;gap:11px;margin-bottom:16px;}
+//         .rp-logo-img{width:46px;height:46px;object-fit:contain;flex-shrink:0;}
+//         .rp-logo-name{
+//           font-family:'Tiro Devanagari Marathi',serif;
+//           font-size:13.5px;font-weight:700;color:#1e3a5f;line-height:1.3;
+//           white-space:nowrap;
+//         }
+//         .rp-hr{height:1px;background:#f0f1f3;margin-bottom:16px;}
+//         .rp-ftitle{font-size:15px;font-weight:700;color:#111827;margin-bottom:14px;}
+
+//         .rp-fld{margin-bottom:10px;}
+//         .rp-flbl{
+//           display:block;font-size:10px;font-weight:600;
+//           color:#374151;letter-spacing:0.55px;text-transform:uppercase;margin-bottom:4px;
+//         }
+//         .rp-fwrap{position:relative;}
+//         .rp-ficon{
+//           position:absolute;left:10px;top:50%;transform:translateY(-50%);
+//           font-size:12px;color:#adb5bd;pointer-events:none;
+//         }
+//         .rp-finput{
+//           width:100%;padding:9px 10px 9px 32px;
+//           border:1.5px solid #e5e7eb;border-radius:8px;
+//           font-size:12.5px;color:#111827;background:#f8f9fb;
+//           outline:none;transition:all 0.18s;
+//           font-family:'DM Sans',sans-serif;
+//         }
+//         .rp-finput:focus{
+//           border-color:#3b82f6;background:#fff;box-shadow:0 0 0 3px rgba(59,130,246,0.1);
+//         }
+//         .rp-finput::placeholder{color:#c8cdd5;font-size:12px;}
+
+//         .rp-submit-btn{
+//           width:100%;margin-top:14px;padding:10px;
+//           background:linear-gradient(135deg,#15803d 0%,#22c55e 100%);
+//           color:#fff;font-size:13px;font-weight:600;letter-spacing:0.5px;
+//           border:none;border-radius:8px;cursor:pointer;
+//           transition:all 0.22s;
+//           box-shadow:0 4px 14px rgba(34,197,94,0.36);
+//           font-family:'DM Sans',sans-serif;
+//         }
+//         .rp-submit-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(34,197,94,0.46);}
+//         .rp-submit-btn:active{transform:translateY(0);}
+//         .rp-submit-btn:disabled{background:#d1d5db;box-shadow:none;cursor:not-allowed;transform:none;}
+
+//         .rp-signin{margin-top:12px;text-align:center;font-size:11.5px;color:#6b7280;}
+//         .rp-signin span{color:#1e40af;font-weight:600;cursor:pointer;margin-left:3px;}
+//         .rp-signin span:hover{text-decoration:underline;}
+
+//         .rp-cfooter{
+//           margin-top:14px;padding-top:12px;border-top:1px solid #f3f4f6;
+//           display:flex;align-items:center;justify-content:center;gap:5px;
+//         }
+//         .rp-cfdot{width:5px;height:5px;border-radius:50%;background:#4ade80;box-shadow:0 0 5px #4ade80;}
+//         .rp-cfooter span{font-size:10px;color:#b5bcc8;letter-spacing:0.25px;}
+
+//         @media(max-width:768px){
+//           .rp-hero{display:none;}
+//           .rp-card{margin-right:0;width:88%;max-width:360px;}
+//           .rp-root{justify-content:center;}
+//         }
+//       `}</style>
+
+//       <div className="rp-root">
+//         <div className="rp-bg" style={{ backgroundImage: `url(${bgImage})` }} />
+//         <div className="rp-overlay" />
+
+//         {/* Hero Left */}
+//         <div className="rp-hero">
+//           <div className="rp-badge">
+//             <div className="rp-bdot" />
+//             <span>Official Government Portal</span>
+//           </div>
+//           <h1 className="rp-title">
+//             जन संवाद<br />
+//             <em>Admin Panel</em>
+//           </h1>
+//           <p className="rp-sub">Vasai-Virar City Municipal Corporation</p>
+//           <div className="rp-stats">
+//             <div className="rp-stat">
+//               <span className="rp-snum">8</span>
+//               <span className="rp-slbl">Talukas</span>
+//             </div>
+//             <div className="rp-ssep" />
+//             <div className="rp-stat">
+//               <span className="rp-snum">2009</span>
+//               <span className="rp-slbl">Established</span>
+//             </div>
+//             <div className="rp-ssep" />
+//             <div className="rp-stat">
+//               <span className="rp-snum">24/7</span>
+//               <span className="rp-slbl">Service</span>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Card */}
+//         <div className="rp-card">
+//           {/* Logo */}
+//           <div className="rp-logo-row">
+//             <img src={logo} alt="VVCMC" className="rp-logo-img" />
+//             <div className="rp-logo-name">वसई-विरार शहर महानगरपालिका</div>
+//           </div>
+
+//           <div className="rp-hr" />
+//           <p className="rp-ftitle">Create Account</p>
+
+//           <form onSubmit={handleRegister}>
+//             <div className="rp-fld">
+//               <label className="rp-flbl">Full Name</label>
+//               <div className="rp-fwrap">
+//                 <span className="rp-ficon">👤</span>
+//                 <input className="rp-finput" type="text" name="fullName"
+//                   placeholder="Enter your full name"
+//                   value={form.fullName} onChange={handleChange} />
+//               </div>
+//             </div>
+
+//             <div className="rp-fld">
+//               <label className="rp-flbl">Username</label>
+//               <div className="rp-fwrap">
+//                 <span className="rp-ficon">🪪</span>
+//                 <input className="rp-finput" type="text" name="userName"
+//                   placeholder="Enter your username"
+//                   value={form.userName} onChange={handleChange} />
+//               </div>
+//             </div>
+
+//             <div className="rp-fld">
+//               <label className="rp-flbl">Mobile Number</label>
+//               <div className="rp-fwrap">
+//                 <span className="rp-ficon">📱</span>
+//                 <input className="rp-finput" type="tel" name="mobileNumber"
+//                   placeholder="Enter your mobile number"
+//                   maxLength={10}
+//                   value={form.mobileNumber} onChange={handleChange} />
+//               </div>
+//             </div>
+
+//             <div className="rp-fld">
+//               <label className="rp-flbl">Email</label>
+//               <div className="rp-fwrap">
+//                 <span className="rp-ficon">✉️</span>
+//                 <input className="rp-finput" type="email" name="email"
+//                   placeholder="Enter your email"
+//                   value={form.email} onChange={handleChange} />
+//               </div>
+//             </div>
+
+//                {/* <div className="rp-fld">
+//               <label className="rp-flbl"></label>
+//               <div className="rp-fwrap">
+//                 <span className="rp-ficon">📱</span>
+//                 <input className="rp-finput" type="tel" name="pincode"
+//                   placeholder="Enter your pincode"
+//                   maxLength={10}
+//                   value={form.pincode} onChange={handleChange} />
+//               </div>
+//             </div> */}
+
+//              {/* <div className="rp-fld">
+//               <label className="rp-flbl"></label>
+//               <div className="rp-fwrap">
+//                 <span className="rp-ficon">📱</span>
+//                 <input className="rp-finput" type="tel" name="address"
+//                   placeholder="Enter your address"
+//                   maxLength={10}
+//                   value={form.address} onChange={handleChange} />
+//               </div>
+//             </div> */}
+
+
+            
+
+//             <div className="rp-fld">
+//               <label className="rp-flbl">Password</label>
+//               <div className="rp-fwrap">
+//                 <span className="rp-ficon">🔒</span>
+//                 <input className="rp-finput" type="password" name="password"
+//                   placeholder="Enter your password"
+//                   value={form.password} onChange={handleChange} />
+//               </div>
+//             </div>
+
+//             <button type="submit" className="rp-submit-btn"
+//               disabled={!form.fullName || !form.userName || !form.mobileNumber || !form.email || !form.password}>
+//               CREATE ACCOUNT
+//             </button>
+//           </form>
+
+//           <p className="rp-signin">
+//             Already have an account?
+//             <span onClick={() => navigate("/login")}>Sign in</span>
+//           </p>
+
+//           <div className="rp-cfooter">
+//             <div className="rp-cfdot" />
+//             <span>Secure Government Portal · All rights reserved</span>
+//           </div>
+//         </div>
+//       </div>
+//     </>
+//   );
+// }
+
+// ==================================
+
+// import React, { useState } from "react";
+// import { useDispatch } from "react-redux";
+// import { loginSuccess } from "../redux/slices/authSlice";
+// import { useNavigate } from "react-router-dom";
+// import logo from "../assets/vvcmclogo.jpg";
+// import mayorPhoto from "../assets/ajivir5.jpeg";
+// import bgImage from "../assets/bg1.jpeg";
+// import axiosInstance from "../services/axiosInstance";
+// import Loader from "../components/common/Loader";
+// import { toast } from "react-toastify";
+
+// export default function Registration() {
+//   const dispatch = useDispatch();
+//   const navigate = useNavigate();
+
+//   const [form, setForm] = useState({
+//     fullName: "",
+//     userName: "",
+//     mobileNumber: "",
+//     email: "",
+//     password: "",
+//   });
+//   const [loading, setLoading] = useState(false);
+//   const [showPass, setShowPass] = useState(false);
+
+//   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+//   const handleRegister = async (e) => {
+//     e.preventDefault();
+//     if (!form.fullName || !form.userName || !form.mobileNumber || !form.email || !form.password) {
+//       toast.error("All fields required ❌"); return;
+//     }
+//     try {
+//       setLoading(true);
+//       const res = await axiosInstance.post("/register", form);
+//       const data = res.data;
+//       if (!data.success) { toast.error(data.message); return; }
+//       dispatch(loginSuccess(data.user));
+//       localStorage.setItem("authUser", JSON.stringify(data.user));
+//       toast.success("Registration Success ✅");
+//       navigate("/dashboard");
+//     } catch (error) {
+//       toast.error(error?.response?.data?.message || "Server Error ❌");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const isFormValid = form.fullName && form.userName && form.mobileNumber && form.email && form.password;
+
+//   return (
+//     <>
+//       {loading && <Loader />}
+
+//       <style>{`
+//         @import url('https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi&family=Playfair+Display:wght@500;700;900&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+//         :root {
+//           --teal:       #4CABC1;
+//           --teal-dark:  #49ACC3;
+//           --gold:       #CA9D28;
+//           --gold-light: #CE9A54;
+//           --cream:      #F5E7C2;
+//           --green:      #66A962;
+//           --deep:       #187480;
+//         }
+
+//         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+//         .rp-root {
+//           min-height: 100vh;
+//           width: 100%;
+//           position: relative;
+//           display: flex;
+//           align-items: center;
+//           justify-content: flex-end;
+//           padding-right: 60px;
+//           font-family: 'Outfit', sans-serif;
+//           overflow: hidden;
+//         }
+
+//         .rp-bg {
+//           position: absolute;
+//           inset: 0;
+//           background-size: cover;
+//           background-position: left center;
+//           filter: brightness(0.75) saturate(1.15);
+//           transition: transform 14s ease;
+//         }
+//         .rp-root:hover .rp-bg { transform: scale(1.02); }
+
+//         .rp-overlay {
+//           position: absolute;
+//           inset: 0;
+//           background: linear-gradient(
+//             125deg,
+//             rgba(24,116,128,0.45) 0%,
+//             rgba(73,172,195,0.38) 30%,
+//             rgba(24,116,128,0.60) 60%,
+//             rgba(12,70,80,0.82) 100%
+//           );
+//         }
+
+//         /* Multi-color top stripe */
+//         .rp-stripe {
+//           position: absolute;
+//           top: 0; left: 0; right: 0;
+//           height: 4px;
+//           background: linear-gradient(90deg,
+//             var(--gold) 0%,
+//             var(--gold-light) 22%,
+//             var(--teal) 45%,
+//             var(--teal-dark) 65%,
+//             var(--green) 85%,
+//             var(--cream) 100%
+//           );
+//           z-index: 20;
+//         }
+
+//         /* ── WRAPPER ── */
+//         .rp-wrapper {
+//           position: relative;
+//           z-index: 10;
+//           display: flex;
+//           align-items: stretch;
+//           border-radius: 28px;
+//           overflow: hidden;
+//           box-shadow:
+//             0 32px 80px rgba(0,0,0,0.52),
+//             0 0 0 1px rgba(202,157,40,0.20),
+//             inset 0 1px 0 rgba(245,231,194,0.07);
+//           animation: wrapperIn .5s cubic-bezier(.22,.9,.36,1) both;
+//         }
+//         @keyframes wrapperIn {
+//           from { opacity:0; transform:translateY(26px) scale(0.98); }
+//           to   { opacity:1; transform:translateY(0) scale(1); }
+//         }
+
+//         /* ── LEFT CARD ── */
+//         .rp-card {
+//           width: 410px;
+//           background: linear-gradient(
+//             160deg,
+//             rgba(12,68,80,0.80) 0%,
+//             rgba(24,116,128,0.62) 50%,
+//             rgba(12,68,80,0.85) 100%
+//           );
+//           backdrop-filter: blur(38px) saturate(2);
+//           -webkit-backdrop-filter: blur(38px) saturate(2);
+//           border: 1px solid rgba(76,171,193,0.20);
+//           border-right: 1px solid rgba(202,157,40,0.18);
+//           padding: 28px 32px 24px;
+//           display: flex;
+//           flex-direction: column;
+//           position: relative;
+//         }
+//         .rp-card::before {
+//           content: '';
+//           position: absolute;
+//           top: 0; left: 0; right: 0;
+//           height: 1px;
+//           background: linear-gradient(90deg, transparent, rgba(245,231,194,0.30), transparent);
+//         }
+
+//         /* ── Logo row ── */
+//         .rp-logo-row {
+//           display: flex;
+//           align-items: center;
+//           gap: 14px;
+//           margin-bottom: 18px;
+//           padding-bottom: 16px;
+//           border-bottom: 1px solid rgba(202,157,40,0.22);
+//           position: relative;
+//         }
+//         .rp-logo-row::after {
+//           content: '';
+//           position: absolute;
+//           bottom: -1px; left: 0;
+//           width: 55px; height: 2px;
+//           background: linear-gradient(90deg, var(--gold), var(--gold-light));
+//           border-radius: 2px;
+//         }
+//         .rp-logo-img {
+//           width: 54px; height: 54px;
+//           object-fit: contain;
+//           border-radius: 50%;
+//           border: 2px solid var(--gold-light);
+//           box-shadow:
+//             0 0 0 3px rgba(202,157,40,0.15),
+//             0 4px 20px rgba(0,0,0,0.32);
+//           flex-shrink: 0;
+//         }
+//         .rp-logo-texts { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+//         .rp-logo-name {
+//           font-family: 'Tiro Devanagari Marathi', serif;
+//           font-size: 15px;
+//           font-weight: 700;
+//           color: var(--gold-light);
+//           line-height: 1.3;
+//           text-shadow: 0 1px 10px rgba(0,0,0,0.4);
+//         }
+//         .rp-logo-sub {
+//           font-family: 'Tiro Devanagari Marathi', serif;
+//           font-size: 13px;
+//           font-weight: 500;
+//           color: rgba(245,231,194,0.72);
+//           letter-spacing: 0.4px;
+//         }
+
+//         /* ── FORM TITLE ── */
+//         .rp-ftitle {
+//           font-size: 21px;
+//           font-weight: 700;
+//           color: var(--cream);
+//           margin-bottom: 16px;
+//           font-family: 'Outfit', sans-serif;
+//           letter-spacing: -0.3px;
+//           text-shadow: 0 1px 12px rgba(0,0,0,0.3);
+//         }
+
+//         .rp-fld { margin-bottom: 12px; }
+
+//         .rp-flbl {
+//           display: block;
+//           font-size: 11.5px;
+//           font-weight: 700;
+//           color: rgba(245,231,194,0.72);
+//           margin-bottom: 6px;
+//           font-family: 'Outfit', sans-serif;
+//           letter-spacing: 0.8px;
+//           text-transform: uppercase;
+//         }
+
+//         .rp-fwrap { position: relative; }
+
+//         .rp-finput {
+//           width: 100%;
+//           padding: 11px 16px;
+//           border: 1px solid rgba(76,171,193,0.20);
+//           border-radius: 12px;
+//           font-size: 13.5px;
+//           color: #fff;
+//           background: rgba(12,68,80,0.58);
+//           backdrop-filter: blur(10px);
+//           -webkit-backdrop-filter: blur(10px);
+//           outline: none;
+//           transition: all 0.2s;
+//           font-family: 'Outfit', sans-serif;
+//           box-shadow: inset 0 1px 0 rgba(245,231,194,0.06), 0 2px 8px rgba(0,0,0,0.14);
+//         }
+//         .rp-finput:focus {
+//           background: rgba(24,116,128,0.62);
+//           border-color: var(--teal);
+//           box-shadow: 0 0 0 3px rgba(76,171,193,0.18), inset 0 1px 0 rgba(245,231,194,0.08);
+//         }
+//         .rp-finput::placeholder { color: rgba(245,231,194,0.28); font-size: 12.5px; }
+//         .rp-finput.has-icon { padding-left: 42px; }
+
+//         .rp-ficon {
+//           position: absolute;
+//           left: 14px; top: 50%;
+//           transform: translateY(-50%);
+//           font-size: 15px;
+//           pointer-events: none;
+//           opacity: 0.48;
+//         }
+//         .rp-pbtn {
+//           position: absolute;
+//           right: 13px; top: 50%;
+//           transform: translateY(-50%);
+//           background: none; border: none;
+//           cursor: pointer; font-size: 15px;
+//           color: rgba(245,231,194,0.42);
+//           padding: 0; display: flex; align-items: center;
+//           transition: color .2s;
+//         }
+//         .rp-pbtn:hover { color: var(--cream); }
+
+//         /* ── SUBMIT BUTTON ── */
+//         .rp-sbtn {
+//           width: 100%;
+//           padding: 13px;
+//           margin-top: 8px;
+//           background: linear-gradient(135deg, var(--green) 0%, #4e9148 100%);
+//           color: #fff;
+//           font-size: 13px; font-weight: 800;
+//           letter-spacing: 1.5px;
+//           border: none; border-radius: 12px;
+//           cursor: pointer; transition: all 0.22s;
+//           position: relative; overflow: hidden;
+//           box-shadow: 0 4px 20px rgba(102,169,98,0.42), inset 0 1px 0 rgba(245,231,194,0.10);
+//           font-family: 'Outfit', sans-serif;
+//           text-transform: uppercase;
+//         }
+//         .rp-sbtn::before {
+//           content: '';
+//           position: absolute; top: 0; left: 0; right: 0; height: 1px;
+//           background: linear-gradient(90deg, transparent, rgba(245,231,194,0.30), transparent);
+//         }
+//         .rp-sbtn::after {
+//           content: '';
+//           position: absolute; top: 0; left: -120%;
+//           width: 80%; height: 100%;
+//           background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent);
+//           transform: skewX(-20deg);
+//           transition: left 0.55s ease;
+//         }
+//         .rp-sbtn:hover::after { left: 140%; }
+//         .rp-sbtn:hover:not(:disabled) {
+//           background: linear-gradient(135deg, #3d7a39 0%, var(--green) 100%);
+//           transform: translateY(-2px);
+//           box-shadow: 0 10px 28px rgba(102,169,98,0.52);
+//         }
+//         .rp-sbtn:active:not(:disabled) { transform: translateY(0); }
+//         .rp-sbtn:disabled { opacity: 0.42; cursor: not-allowed; }
+
+//         /* ── Sign in link ── */
+//         .rp-signin {
+//           margin-top: 12px;
+//           text-align: center;
+//           font-size: 13px;
+//           color: rgba(245,231,194,0.58);
+//           font-family: 'Outfit', sans-serif;
+//         }
+//         .rp-signin a {
+//           color: var(--cream); font-weight: 700;
+//           text-decoration: none; margin-left: 5px;
+//           padding-bottom: 1px;
+//           border-bottom: 1.5px solid var(--gold-light);
+//           transition: all .2s;
+//           cursor: pointer;
+//         }
+//         .rp-signin a:hover { color: var(--gold-light); border-color: var(--gold); }
+
+//         /* ── Card footer ── */
+//         .rp-cfooter {
+//           margin-top: auto; padding-top: 14px;
+//           border-top: 1px solid rgba(202,157,40,0.14);
+//           display: flex; align-items: center;
+//           justify-content: center; gap: 7px;
+//         }
+//         .rp-cfdot {
+//           width: 6px; height: 6px;
+//           border-radius: 50%;
+//           background: var(--green);
+//           box-shadow: 0 0 8px var(--green);
+//           animation: dotPulse 2.5s infinite;
+//         }
+//         @keyframes dotPulse {
+//           0%,100% { opacity:1; transform:scale(1); }
+//           50% { opacity:0.45; transform:scale(1.7); }
+//         }
+//         .rp-cfooter span {
+//           font-size: 10.5px; color: rgba(245,231,194,0.28);
+//           letter-spacing: 0.3px;
+//         }
+
+//         /* ══════════════════════════════════════
+//            MAYOR PANEL — identical to Login
+//         ══════════════════════════════════════ */
+//         .rp-mayor-panel {
+//           width: 300px;
+//           background: linear-gradient(
+//             155deg,
+//             var(--teal-dark) 0%,
+//             var(--deep) 38%,
+//             #0b5e6b 72%,
+//             #093e4a 100%
+//           );
+//           display: flex; flex-direction: column;
+//           align-items: center; justify-content: center;
+//           padding: 40px 26px;
+//           position: relative; overflow: hidden;
+//         }
+
+//         .rp-mayor-panel::before {
+//           content: '';
+//           position: absolute; top: 0; left: 0; right: 0; height: 3px;
+//           background: linear-gradient(90deg,
+//             var(--gold), var(--gold-light), var(--cream),
+//             var(--gold-light), var(--gold)
+//           );
+//           background-size: 250%;
+//           animation: shimmerBar 3.5s linear infinite;
+//         }
+//         @keyframes shimmerBar {
+//           from { background-position: 0% center; }
+//           to   { background-position: 250% center; }
+//         }
+
+//         .rp-mayor-panel::after {
+//           content: '';
+//           position: absolute; top: 42%; left: 50%;
+//           transform: translate(-50%, -50%);
+//           width: 250px; height: 250px;
+//           border-radius: 50%;
+//           background: radial-gradient(circle, rgba(76,171,193,0.16) 0%, transparent 68%);
+//           pointer-events: none;
+//         }
+
+//         .rp-mp-icon {
+//           position: absolute; font-size: 30px;
+//           opacity: 0.14;
+//           filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+//           transition: opacity .35s;
+//         }
+//         .rp-mayor-panel:hover .rp-mp-icon { opacity: 0.24; }
+//         .rp-mp-icon.tl { top: 26px;  left: 20px; }
+//         .rp-mp-icon.tr { top: 26px;  right: 20px; }
+//         .rp-mp-icon.bl { bottom: 48px; left: 20px; }
+//         .rp-mp-icon.br { bottom: 48px; right: 20px; }
+
+//         .rp-mayor-photo-wrap {
+//           position: relative; margin-bottom: 20px; z-index: 2;
+//         }
+//         .rp-mayor-ring {
+//           width: 152px; height: 152px;
+//           border-radius: 50%; padding: 5px;
+//           background: conic-gradient(
+//             var(--gold) 0deg,
+//             var(--gold-light) 90deg,
+//             var(--cream) 180deg,
+//             var(--gold-light) 260deg,
+//             var(--gold) 360deg
+//           );
+//           box-shadow:
+//             0 8px 36px rgba(0,0,0,0.38),
+//             0 0 0 3px rgba(202,157,40,0.18);
+//         }
+//         .rp-mayor-photo {
+//           width: 100%; height: 100%;
+//           border-radius: 50%;
+//           object-fit: cover; object-position: top center;
+//           border: 3px solid rgba(255,255,255,0.92);
+//           display: block;
+//         }
+//         .rp-mayor-badge {
+//           position: absolute; bottom: 3px; right: 3px;
+//           width: 36px; height: 36px; border-radius: 50%;
+//           background: linear-gradient(135deg, #fff 0%, var(--cream) 100%);
+//           display: flex; align-items: center; justify-content: center;
+//           font-size: 17px;
+//           box-shadow: 0 3px 10px rgba(0,0,0,0.28);
+//           border: 2px solid rgba(255,255,255,0.95);
+//         }
+
+//         .rp-mayor-name {
+//           font-family: 'Tiro Devanagari Marathi', serif;
+//           font-size: 21px; font-weight: 700;
+//           color: #fff; text-align: center;
+//           margin-bottom: 6px;
+//           text-shadow: 0 2px 14px rgba(0,0,0,0.30);
+//           line-height: 1.3; z-index: 2; position: relative;
+//         }
+//         .rp-mayor-title {
+//           font-family: 'Tiro Devanagari Marathi', serif;
+//           font-size: 11.5px;
+//           color: rgba(245,231,194,0.72);
+//           text-align: center; line-height: 1.6;
+//           margin-bottom: 22px; z-index: 2; position: relative;
+//         }
+
+//         .rp-mayor-bar-wrap {
+//           width: 110px; height: 5px;
+//           background: rgba(255,255,255,0.14);
+//           border-radius: 999px; overflow: hidden;
+//           z-index: 2; position: relative;
+//         }
+//         .rp-mayor-bar {
+//           width: 55%; height: 100%;
+//           background: linear-gradient(90deg, var(--green), #7dd87a);
+//           border-radius: 999px;
+//           box-shadow: 0 0 10px rgba(102,169,98,0.65);
+//           animation: barGlow 2.5s ease-in-out infinite;
+//         }
+//         @keyframes barGlow {
+//           0%,100% { opacity:1; }
+//           50% { opacity:0.60; }
+//         }
+
+//         @keyframes fadeUp {
+//           from { opacity:0; transform:translateY(10px); }
+//           to   { opacity:1; transform:translateY(0); }
+//         }
+//         .fade-up { animation: fadeUp .28s ease both; }
+
+//         /* ── Responsive ── */
+//         @media (max-width: 768px) {
+//           .rp-mayor-panel { display: none; }
+//           .rp-card {
+//             border-right: 1px solid rgba(76,171,193,0.20);
+//             border-radius: 24px; width: 92%; max-width: 410px;
+//           }
+//           .rp-wrapper { border-radius: 24px; }
+//           .rp-root { justify-content: center; padding-right: 0; }
+//         }
+//       `}</style>
+
+//       <div className="rp-root">
+//         <div className="rp-bg" style={{ backgroundImage: `url(${bgImage})` }} />
+//         <div className="rp-overlay" />
+//         <div className="rp-stripe" />
+
+//         <div className="rp-wrapper">
+
+//           {/* ── LEFT: REGISTRATION CARD ── */}
+//           <div className="rp-card">
+
+//             {/* Logo */}
+//             <div className="rp-logo-row">
+//               <img src={logo} alt="VVCMC" className="rp-logo-img" />
+//               <div className="rp-logo-texts">
+//                 <div className="rp-logo-name">वसई-विरार शहर महानगरपालिका</div>
+//                 <div className="rp-logo-sub">जन संवाद</div>
+//               </div>
+//             </div>
+
+//             <div className="fade-up">
+//               <p className="rp-ftitle">Create Account</p>
+
+//               <form onSubmit={handleRegister}>
+
+//                 <div className="rp-fld">
+//                   <label className="rp-flbl">Full Name</label>
+//                   <div className="rp-fwrap">
+//                     <span className="rp-ficon">👤</span>
+//                     <input
+//                       className="rp-finput has-icon"
+//                       type="text"
+//                       name="fullName"
+//                       placeholder="Enter your full name"
+//                       value={form.fullName}
+//                       onChange={handleChange}
+//                       autoComplete="name"
+//                     />
+//                   </div>
+//                 </div>
+
+//                 <div className="rp-fld">
+//                   <label className="rp-flbl">Username</label>
+//                   <div className="rp-fwrap">
+//                     <span className="rp-ficon">🪪</span>
+//                     <input
+//                       className="rp-finput has-icon"
+//                       type="text"
+//                       name="userName"
+//                       placeholder="Enter your username"
+//                       value={form.userName}
+//                       onChange={handleChange}
+//                       autoComplete="username"
+//                     />
+//                   </div>
+//                 </div>
+
+//                 <div className="rp-fld">
+//                   <label className="rp-flbl">Mobile Number</label>
+//                   <div className="rp-fwrap">
+//                     <span className="rp-ficon">📱</span>
+//                     <input
+//                       className="rp-finput has-icon"
+//                       type="tel"
+//                       name="mobileNumber"
+//                       placeholder="Enter your mobile number"
+//                       maxLength={10}
+//                       value={form.mobileNumber}
+//                       onChange={handleChange}
+//                     />
+//                   </div>
+//                 </div>
+
+//                 <div className="rp-fld">
+//                   <label className="rp-flbl">Email</label>
+//                   <div className="rp-fwrap">
+//                     <span className="rp-ficon">✉️</span>
+//                     <input
+//                       className="rp-finput has-icon"
+//                       type="email"
+//                       name="email"
+//                       placeholder="Enter your email"
+//                       value={form.email}
+//                       onChange={handleChange}
+//                       autoComplete="email"
+//                     />
+//                   </div>
+//                 </div>
+
+//                 <div className="rp-fld">
+//                   <label className="rp-flbl">Password</label>
+//                   <div className="rp-fwrap">
+//                     <span className="rp-ficon">🔒</span>
+//                     <input
+//                       className="rp-finput has-icon"
+//                       type={showPass ? "text" : "password"}
+//                       name="password"
+//                       placeholder="Enter your password"
+//                       value={form.password}
+//                       onChange={handleChange}
+//                       autoComplete="new-password"
+//                       style={{ paddingRight: 42 }}
+//                     />
+//                     <button
+//                       type="button"
+//                       className="rp-pbtn"
+//                       onClick={() => setShowPass(!showPass)}
+//                       tabIndex={-1}
+//                     >
+//                       {showPass ? "🙈" : "👁️"}
+//                     </button>
+//                   </div>
+//                 </div>
+
+//                 <button
+//                   type="submit"
+//                   className="rp-sbtn"
+//                   disabled={!isFormValid || loading}
+//                 >
+//                   {loading ? "⏳ Creating..." : "CREATE ACCOUNT →"}
+//                 </button>
+//               </form>
+
+//               <p className="rp-signin">
+//                 Already have an account?
+//                 <a onClick={() => navigate("/login")}>Sign in</a>
+//               </p>
+//             </div>
+
+//             {/* Footer */}
+//             <div className="rp-cfooter">
+//               <div className="rp-cfdot" />
+//               <span>Secure Government Portal · All rights reserved</span>
+//             </div>
+//           </div>
+
+//           {/* ── RIGHT: MAYOR PANEL ── */}
+//           <div className="rp-mayor-panel">
+//             <span className="rp-mp-icon tl">🏛️</span>
+//             <span className="rp-mp-icon tr">🏥</span>
+//             <span className="rp-mp-icon bl">🏗️</span>
+//             <span className="rp-mp-icon br">🏢</span>
+
+//             <div className="rp-mayor-photo-wrap">
+//               <div className="rp-mayor-ring">
+//                 <img src={mayorPhoto} alt="Mayor" className="rp-mayor-photo" />
+//               </div>
+//               <div className="rp-mayor-badge">🪑</div>
+//             </div>
+
+//             <p className="rp-mayor-name">मा. श्री.अजीव पाटील</p>
+//             <p className="rp-mayor-title">मा. महापौर, वसई विरार शहर महानगरपालिका</p>
+
+//             <div className="rp-mayor-bar-wrap">
+//               <div className="rp-mayor-bar" />
+//             </div>
+//           </div>
+
+//         </div>
+//       </div>
+//     </>
+//   );
+// }
+
+// ==================================
+import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../services/axiosInstance";
-import bgImage from "../assets/vasaivirarmahangarpalika.jpg";
 import logo from "../assets/vvcmclogo.jpg";
+import mayorPhoto from "../assets/ajivir5.jpeg";
+import bgImage from "../assets/bg1.jpeg";
+import axiosInstance from "../services/axiosInstance";
+import Loader from "../components/common/Loader";
+import { toast } from "react-toastify";
 
 export default function Registration() {
   const dispatch = useDispatch();
@@ -1210,291 +2187,545 @@ export default function Registration() {
     email: "",
     password: "",
   });
+  const [loading, setLoading]   = useState(false);
+  const [showPass, setShowPass] = useState(false);
+  const [animated, setAnimated] = useState(false);
+
+  // Trigger entrance animation after first paint
+  useEffect(() => {
+    const t = setTimeout(() => setAnimated(true), 60);
+    return () => clearTimeout(t);
+  }, []);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleRegister = async (e) => {
     e.preventDefault();
     if (!form.fullName || !form.userName || !form.mobileNumber || !form.email || !form.password) {
-      alert("All fields required ❌"); return;
+      toast.error("All fields required ❌"); return;
     }
     try {
-      const res = await axiosInstance.post("/register", form);
+      setLoading(true);
+      const res  = await axiosInstance.post("/register", form);
       const data = res.data;
-      if (!data.success) { alert(data.message); return; }
+      if (!data.success) { toast.error(data.message); return; }
       dispatch(loginSuccess(data.user));
       localStorage.setItem("authUser", JSON.stringify(data.user));
-      alert("Registration Success ✅");
+      toast.success("Registration Success ✅");
       navigate("/dashboard");
     } catch (error) {
-      alert(error?.response?.data?.message || "Server Error ❌");
+      toast.error(error?.response?.data?.message || "Server Error ❌");
+    } finally {
+      setLoading(false);
     }
   };
 
+  const isFormValid = form.fullName && form.userName && form.mobileNumber && form.email && form.password;
+
   return (
     <>
+      {loading && <Loader />}
+
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi&family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
-        *{box-sizing:border-box;margin:0;padding:0;}
-        .rp-root{
-          min-height:100vh;width:100%;position:relative;
-          display:flex;align-items:center;justify-content:flex-end;
-          font-family:'DM Sans',sans-serif;overflow:hidden;
+        @import url('https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi&family=Playfair+Display:wght@500;700;900&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+        :root {
+          --teal:       #4CABC1;
+          --teal-dark:  #49ACC3;
+          --gold:       #CA9D28;
+          --gold-light: #CE9A54;
+          --cream:      #F5E7C2;
+          --green:      #66A962;
+          --deep:       #187480;
         }
-        .rp-bg{
-          position:absolute;inset:0;
-          background-size:cover;background-position:center;
-          filter:brightness(0.6) saturate(1.05);
-          transition:transform 10s ease;
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* ── ROOT — always centered ── */
+        .rp-root {
+          min-height: 100vh;
+          width: 100%;
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'Outfit', sans-serif;
+          overflow: hidden;
         }
-        .rp-root:hover .rp-bg{transform:scale(1.025);}
-        .rp-overlay{
-          position:absolute;inset:0;
-          background:linear-gradient(
-            108deg,
-            rgba(4,12,30,0.04) 0%,
-            rgba(4,12,30,0.1) 30%,
-            rgba(4,12,30,0.68) 62%,
-            rgba(4,12,30,0.9) 100%
+
+        .rp-bg {
+          position: absolute;
+          inset: 0;
+          background-size: cover;
+          background-position: left center;
+          filter: brightness(0.75) saturate(1.15);
+          transition: transform 14s ease;
+        }
+        .rp-root:hover .rp-bg { transform: scale(1.02); }
+
+        .rp-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            125deg,
+            rgba(24,116,128,0.45) 0%,
+            rgba(73,172,195,0.38) 30%,
+            rgba(24,116,128,0.60) 60%,
+            rgba(12,70,80,0.82) 100%
           );
         }
-        .rp-hero{
-          position:absolute;left:56px;bottom:56px;
-          z-index:5;max-width:460px;
-        }
-        .rp-badge{
-          display:inline-flex;align-items:center;gap:7px;
-          background:rgba(255,255,255,0.11);backdrop-filter:blur(10px);
-          border:1px solid rgba(255,255,255,0.2);border-radius:100px;
-          padding:5px 14px;margin-bottom:16px;
-        }
-        .rp-bdot{
-          width:6px;height:6px;border-radius:50%;
-          background:#4ade80;box-shadow:0 0 7px #4ade80;
-          animation:rblink 2s infinite;
-        }
-        @keyframes rblink{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.45;transform:scale(1.6);}}
-        .rp-badge span{font-size:11px;color:rgba(255,255,255,0.88);font-weight:500;letter-spacing:0.4px;}
-        .rp-title{
-          font-family:'Crimson Pro',serif;font-size:50px;font-weight:700;
-          color:#fff;line-height:1.1;text-shadow:0 2px 24px rgba(0,0,0,0.55);
-          margin-bottom:6px;
-        }
-        .rp-title em{color:#fbbf24;font-style:normal;}
-        .rp-sub{font-size:13px;color:rgba(255,255,255,0.58);margin-bottom:22px;letter-spacing:0.2px;}
-        .rp-stats{display:flex;gap:18px;}
-        .rp-stat{display:flex;flex-direction:column;gap:2px;}
-        .rp-snum{font-family:'Crimson Pro',serif;font-size:24px;font-weight:700;color:#fbbf24;line-height:1;}
-        .rp-slbl{font-size:9.5px;color:rgba(255,255,255,0.42);text-transform:uppercase;letter-spacing:0.9px;}
-        .rp-ssep{width:1px;background:rgba(255,255,255,0.14);align-self:stretch;}
 
-        .rp-card{
-          position:relative;z-index:10;
-          width:350px;margin-right:72px;
-          background:#fff;border-radius:18px;
-          padding:26px 28px 22px;
-          box-shadow:0 28px 64px rgba(0,0,0,0.48),0 0 0 1px rgba(255,255,255,0.06);
+        .rp-stripe {
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 4px;
+          background: linear-gradient(90deg,
+            var(--gold) 0%, var(--gold-light) 22%,
+            var(--teal) 45%, var(--teal-dark) 65%,
+            var(--green) 85%, var(--cream) 100%
+          );
+          z-index: 20;
         }
 
-        .rp-logo-row{display:flex;align-items:center;gap:11px;margin-bottom:16px;}
-        .rp-logo-img{width:46px;height:46px;object-fit:contain;flex-shrink:0;}
-        .rp-logo-name{
-          font-family:'Tiro Devanagari Marathi',serif;
-          font-size:13.5px;font-weight:700;color:#1e3a5f;line-height:1.3;
-          white-space:nowrap;
+        /* ── WRAPPER ── */
+        .rp-wrapper {
+          position: relative;
+          z-index: 10;
+          display: flex;
+          align-items: stretch;
+          border-radius: 28px;
+          overflow: hidden;
+          box-shadow:
+            0 32px 80px rgba(0,0,0,0.52),
+            0 0 0 1px rgba(202,157,40,0.20),
+            inset 0 1px 0 rgba(245,231,194,0.07);
+          /* JS-driven: transition from off-right to center */
+          transition: transform 0.85s cubic-bezier(0.22, 0.9, 0.36, 1),
+                      opacity   0.60s ease;
         }
-        .rp-hr{height:1px;background:#f0f1f3;margin-bottom:16px;}
-        .rp-ftitle{font-size:15px;font-weight:700;color:#111827;margin-bottom:14px;}
 
-        .rp-fld{margin-bottom:10px;}
-        .rp-flbl{
-          display:block;font-size:10px;font-weight:600;
-          color:#374151;letter-spacing:0.55px;text-transform:uppercase;margin-bottom:4px;
+        /* ── LEFT CARD ── */
+        .rp-card {
+          width: 410px;
+          background: linear-gradient(
+            160deg,
+            rgba(12,68,80,0.80) 0%,
+            rgba(24,116,128,0.62) 50%,
+            rgba(12,68,80,0.85) 100%
+          );
+          backdrop-filter: blur(38px) saturate(2);
+          -webkit-backdrop-filter: blur(38px) saturate(2);
+          border: 1px solid rgba(76,171,193,0.20);
+          border-right: 1px solid rgba(202,157,40,0.18);
+          padding: 28px 32px 24px;
+          display: flex;
+          flex-direction: column;
+          position: relative;
         }
-        .rp-fwrap{position:relative;}
-        .rp-ficon{
-          position:absolute;left:10px;top:50%;transform:translateY(-50%);
-          font-size:12px;color:#adb5bd;pointer-events:none;
+        .rp-card::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0; height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(245,231,194,0.30), transparent);
         }
-        .rp-finput{
-          width:100%;padding:9px 10px 9px 32px;
-          border:1.5px solid #e5e7eb;border-radius:8px;
-          font-size:12.5px;color:#111827;background:#f8f9fb;
-          outline:none;transition:all 0.18s;
-          font-family:'DM Sans',sans-serif;
-        }
-        .rp-finput:focus{
-          border-color:#3b82f6;background:#fff;box-shadow:0 0 0 3px rgba(59,130,246,0.1);
-        }
-        .rp-finput::placeholder{color:#c8cdd5;font-size:12px;}
 
-        .rp-submit-btn{
-          width:100%;margin-top:14px;padding:10px;
-          background:linear-gradient(135deg,#15803d 0%,#22c55e 100%);
-          color:#fff;font-size:13px;font-weight:600;letter-spacing:0.5px;
-          border:none;border-radius:8px;cursor:pointer;
-          transition:all 0.22s;
-          box-shadow:0 4px 14px rgba(34,197,94,0.36);
-          font-family:'DM Sans',sans-serif;
+        /* ── Logo row ── */
+        .rp-logo-row {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          margin-bottom: 18px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid rgba(202,157,40,0.22);
+          position: relative;
         }
-        .rp-submit-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(34,197,94,0.46);}
-        .rp-submit-btn:active{transform:translateY(0);}
-        .rp-submit-btn:disabled{background:#d1d5db;box-shadow:none;cursor:not-allowed;transform:none;}
-
-        .rp-signin{margin-top:12px;text-align:center;font-size:11.5px;color:#6b7280;}
-        .rp-signin span{color:#1e40af;font-weight:600;cursor:pointer;margin-left:3px;}
-        .rp-signin span:hover{text-decoration:underline;}
-
-        .rp-cfooter{
-          margin-top:14px;padding-top:12px;border-top:1px solid #f3f4f6;
-          display:flex;align-items:center;justify-content:center;gap:5px;
+        .rp-logo-row::after {
+          content: '';
+          position: absolute;
+          bottom: -1px; left: 0;
+          width: 55px; height: 2px;
+          background: linear-gradient(90deg, var(--gold), var(--gold-light));
+          border-radius: 2px;
         }
-        .rp-cfdot{width:5px;height:5px;border-radius:50%;background:#4ade80;box-shadow:0 0 5px #4ade80;}
-        .rp-cfooter span{font-size:10px;color:#b5bcc8;letter-spacing:0.25px;}
+        .rp-logo-img {
+          width: 54px; height: 54px;
+          object-fit: contain;
+          border-radius: 50%;
+          border: 2px solid var(--gold-light);
+          box-shadow: 0 0 0 3px rgba(202,157,40,0.15), 0 4px 20px rgba(0,0,0,0.32);
+          flex-shrink: 0;
+        }
+        .rp-logo-texts { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+        .rp-logo-name {
+          font-family: 'Tiro Devanagari Marathi', serif;
+          font-size: 15px; font-weight: 700;
+          color: var(--gold-light); line-height: 1.3;
+          text-shadow: 0 1px 10px rgba(0,0,0,0.4);
+        }
+        .rp-logo-sub {
+          font-family: 'Tiro Devanagari Marathi', serif;
+          font-size: 13px; font-weight: 500;
+          color: rgba(245,231,194,0.72); letter-spacing: 0.4px;
+        }
 
-        @media(max-width:768px){
-          .rp-hero{display:none;}
-          .rp-card{margin-right:0;width:88%;max-width:360px;}
-          .rp-root{justify-content:center;}
+        .rp-ftitle {
+          font-size: 21px; font-weight: 700;
+          color: var(--cream); margin-bottom: 16px;
+          font-family: 'Outfit', sans-serif; letter-spacing: -0.3px;
+          text-shadow: 0 1px 12px rgba(0,0,0,0.3);
+        }
+
+        .rp-fld { margin-bottom: 12px; }
+
+        .rp-flbl {
+          display: block; font-size: 11.5px; font-weight: 700;
+          color: rgba(245,231,194,0.72); margin-bottom: 6px;
+          font-family: 'Outfit', sans-serif; letter-spacing: 0.8px;
+          text-transform: uppercase;
+        }
+
+        .rp-fwrap { position: relative; }
+
+        .rp-finput {
+          width: 100%; padding: 11px 16px;
+          border: 1px solid rgba(76,171,193,0.20);
+          border-radius: 12px; font-size: 13.5px; color: #fff;
+          background: rgba(12,68,80,0.58);
+          backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+          outline: none; transition: all 0.2s; font-family: 'Outfit', sans-serif;
+          box-shadow: inset 0 1px 0 rgba(245,231,194,0.06), 0 2px 8px rgba(0,0,0,0.14);
+        }
+        .rp-finput:focus {
+          background: rgba(24,116,128,0.62); border-color: var(--teal);
+          box-shadow: 0 0 0 3px rgba(76,171,193,0.18), inset 0 1px 0 rgba(245,231,194,0.08);
+        }
+        .rp-finput::placeholder { color: rgba(245,231,194,0.28); font-size: 12.5px; }
+        .rp-finput.has-icon { padding-left: 42px; }
+
+        .rp-ficon {
+          position: absolute; left: 14px; top: 50%;
+          transform: translateY(-50%); font-size: 15px;
+          pointer-events: none; opacity: 0.48;
+        }
+        .rp-pbtn {
+          position: absolute; right: 13px; top: 50%;
+          transform: translateY(-50%);
+          background: none; border: none; cursor: pointer; font-size: 15px;
+          color: rgba(245,231,194,0.42); padding: 0;
+          display: flex; align-items: center; transition: color .2s;
+        }
+        .rp-pbtn:hover { color: var(--cream); }
+
+        .rp-sbtn {
+          width: 100%; padding: 13px; margin-top: 8px;
+          background: linear-gradient(135deg, var(--green) 0%, #4e9148 100%);
+          color: #fff; font-size: 13px; font-weight: 800; letter-spacing: 1.5px;
+          border: none; border-radius: 12px; cursor: pointer; transition: all 0.22s;
+          position: relative; overflow: hidden;
+          box-shadow: 0 4px 20px rgba(102,169,98,0.42), inset 0 1px 0 rgba(245,231,194,0.10);
+          font-family: 'Outfit', sans-serif; text-transform: uppercase;
+        }
+        .rp-sbtn::before {
+          content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(245,231,194,0.30), transparent);
+        }
+        .rp-sbtn::after {
+          content: ''; position: absolute; top: 0; left: -120%;
+          width: 80%; height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent);
+          transform: skewX(-20deg); transition: left 0.55s ease;
+        }
+        .rp-sbtn:hover::after { left: 140%; }
+        .rp-sbtn:hover:not(:disabled) {
+          background: linear-gradient(135deg, #3d7a39 0%, var(--green) 100%);
+          transform: translateY(-2px); box-shadow: 0 10px 28px rgba(102,169,98,0.52);
+        }
+        .rp-sbtn:active:not(:disabled) { transform: translateY(0); }
+        .rp-sbtn:disabled { opacity: 0.42; cursor: not-allowed; }
+
+        .rp-signin {
+          margin-top: 12px; text-align: center; font-size: 13px;
+          color: rgba(245,231,194,0.58); font-family: 'Outfit', sans-serif;
+        }
+        .rp-signin a {
+          color: var(--cream); font-weight: 700;
+          text-decoration: none; margin-left: 5px; padding-bottom: 1px;
+          border-bottom: 1.5px solid var(--gold-light); transition: all .2s; cursor: pointer;
+        }
+        .rp-signin a:hover { color: var(--gold-light); border-color: var(--gold); }
+
+        .rp-cfooter {
+          margin-top: auto; padding-top: 14px;
+          border-top: 1px solid rgba(202,157,40,0.14);
+          display: flex; align-items: center; justify-content: center; gap: 7px;
+        }
+        .rp-cfdot {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: var(--green); box-shadow: 0 0 8px var(--green);
+          animation: dotPulse 2.5s infinite;
+        }
+        @keyframes dotPulse {
+          0%,100% { opacity:1; transform:scale(1); }
+          50% { opacity:0.45; transform:scale(1.7); }
+        }
+        .rp-cfooter span { font-size: 10.5px; color: rgba(245,231,194,0.28); letter-spacing: 0.3px; }
+
+        /* ══════════════ MAYOR PANEL ══════════════ */
+        .rp-mayor-panel {
+          width: 300px;
+          background: linear-gradient(155deg, var(--teal-dark) 0%, var(--deep) 38%, #0b5e6b 72%, #093e4a 100%);
+          display: flex; flex-direction: column;
+          align-items: center; justify-content: center;
+          padding: 40px 26px;
+          position: relative; overflow: hidden;
+          /* JS-driven slide from top-right */
+          transition: transform 0.80s cubic-bezier(0.22, 0.9, 0.36, 1) 0.10s,
+                      opacity   0.65s ease 0.10s;
+        }
+
+        .rp-mayor-panel::before {
+          content: '';
+          position: absolute; top: 0; left: 0; right: 0; height: 3px;
+          background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--cream), var(--gold-light), var(--gold));
+          background-size: 250%;
+          animation: shimmerBar 3.5s linear infinite;
+        }
+        @keyframes shimmerBar {
+          from { background-position: 0% center; }
+          to   { background-position: 250% center; }
+        }
+
+        .rp-mayor-panel::after {
+          content: '';
+          position: absolute; top: 42%; left: 50%;
+          transform: translate(-50%, -50%);
+          width: 250px; height: 250px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(76,171,193,0.16) 0%, transparent 68%);
+          pointer-events: none;
+        }
+
+        .rp-mp-icon {
+          position: absolute; font-size: 30px; opacity: 0.14;
+          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); transition: opacity .35s;
+        }
+        .rp-mayor-panel:hover .rp-mp-icon { opacity: 0.24; }
+        .rp-mp-icon.tl { top: 26px;  left: 20px; }
+        .rp-mp-icon.tr { top: 26px;  right: 20px; }
+        .rp-mp-icon.bl { bottom: 48px; left: 20px; }
+        .rp-mp-icon.br { bottom: 48px; right: 20px; }
+
+        .rp-mayor-photo-wrap { position: relative; margin-bottom: 20px; z-index: 2; }
+        .rp-mayor-ring {
+          width: 152px; height: 152px; border-radius: 50%; padding: 5px;
+          background: conic-gradient(var(--gold) 0deg, var(--gold-light) 90deg, var(--cream) 180deg, var(--gold-light) 260deg, var(--gold) 360deg);
+          box-shadow: 0 8px 36px rgba(0,0,0,0.38), 0 0 0 3px rgba(202,157,40,0.18);
+        }
+        .rp-mayor-photo {
+          width: 100%; height: 100%; border-radius: 50%;
+          object-fit: cover; object-position: top center;
+          border: 3px solid rgba(255,255,255,0.92); display: block;
+        }
+        .rp-mayor-badge {
+          position: absolute; bottom: 3px; right: 3px;
+          width: 36px; height: 36px; border-radius: 50%;
+          background: linear-gradient(135deg, #fff 0%, var(--cream) 100%);
+          display: flex; align-items: center; justify-content: center; font-size: 17px;
+          box-shadow: 0 3px 10px rgba(0,0,0,0.28); border: 2px solid rgba(255,255,255,0.95);
+        }
+
+        .rp-mayor-name {
+          font-family: 'Tiro Devanagari Marathi', serif;
+          font-size: 21px; font-weight: 700; color: #fff; text-align: center;
+          margin-bottom: 6px; text-shadow: 0 2px 14px rgba(0,0,0,0.30);
+          line-height: 1.3; z-index: 2; position: relative;
+        }
+        .rp-mayor-title {
+          font-family: 'Tiro Devanagari Marathi', serif;
+          font-size: 11.5px; color: rgba(245,231,194,0.72);
+          text-align: center; line-height: 1.6;
+          margin-bottom: 22px; z-index: 2; position: relative;
+        }
+
+        .rp-mayor-bar-wrap {
+          width: 110px; height: 5px; background: rgba(255,255,255,0.14);
+          border-radius: 999px; overflow: hidden; z-index: 2; position: relative;
+        }
+        .rp-mayor-bar {
+          width: 55%; height: 100%;
+          background: linear-gradient(90deg, var(--green), #7dd87a);
+          border-radius: 999px; box-shadow: 0 0 10px rgba(102,169,98,0.65);
+          animation: barGlow 2.5s ease-in-out infinite;
+        }
+        @keyframes barGlow { 0%,100% { opacity:1; } 50% { opacity:0.60; } }
+
+        @keyframes fadeUp {
+          from { opacity:0; transform:translateY(10px); }
+          to   { opacity:1; transform:translateY(0); }
+        }
+        .fade-up { animation: fadeUp .28s ease both; }
+
+        @media (max-width: 768px) {
+          .rp-mayor-panel { display: none; }
+          .rp-card { border-right: 1px solid rgba(76,171,193,0.20); border-radius: 24px; width: 92%; max-width: 410px; }
+          .rp-wrapper { border-radius: 24px; }
         }
       `}</style>
 
       <div className="rp-root">
         <div className="rp-bg" style={{ backgroundImage: `url(${bgImage})` }} />
         <div className="rp-overlay" />
+        <div className="rp-stripe" />
 
-        {/* Hero Left */}
-        <div className="rp-hero">
-          <div className="rp-badge">
-            <div className="rp-bdot" />
-            <span>Official Government Portal</span>
+        {/* Wrapper: starts 160px right + invisible → slides to center */}
+        <div
+          className="rp-wrapper"
+          style={{
+            opacity:   animated ? 1 : 0,
+            transform: animated ? 'translateX(0)' : 'translateX(160px)',
+          }}
+        >
+          {/* ── LEFT: REGISTRATION CARD ── */}
+          <div className="rp-card">
+
+            <div className="rp-logo-row">
+              <img src={logo} alt="VVCMC" className="rp-logo-img" />
+              <div className="rp-logo-texts">
+                <div className="rp-logo-name">वसई-विरार शहर महानगरपालिका</div>
+                <div className="rp-logo-sub">जन संवाद</div>
+              </div>
+            </div>
+
+            <div className="fade-up">
+              <p className="rp-ftitle">Create Account</p>
+
+              <form onSubmit={handleRegister}>
+
+                <div className="rp-fld">
+                  <label className="rp-flbl">Full Name</label>
+                  <div className="rp-fwrap">
+                    <span className="rp-ficon">👤</span>
+                    <input
+                      className="rp-finput has-icon"
+                      type="text" name="fullName"
+                      placeholder="Enter your full name"
+                      value={form.fullName} onChange={handleChange}
+                      autoComplete="name"
+                    />
+                  </div>
+                </div>
+
+                <div className="rp-fld">
+                  <label className="rp-flbl">Username</label>
+                  <div className="rp-fwrap">
+                    <span className="rp-ficon">🪪</span>
+                    <input
+                      className="rp-finput has-icon"
+                      type="text" name="userName"
+                      placeholder="Enter your username"
+                      value={form.userName} onChange={handleChange}
+                      autoComplete="username"
+                    />
+                  </div>
+                </div>
+
+                <div className="rp-fld">
+                  <label className="rp-flbl">Mobile Number</label>
+                  <div className="rp-fwrap">
+                    <span className="rp-ficon">📱</span>
+                    <input
+                      className="rp-finput has-icon"
+                      type="tel" name="mobileNumber"
+                      placeholder="Enter your mobile number"
+                      maxLength={10}
+                      value={form.mobileNumber} onChange={handleChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="rp-fld">
+                  <label className="rp-flbl">Email</label>
+                  <div className="rp-fwrap">
+                    <span className="rp-ficon">✉️</span>
+                    <input
+                      className="rp-finput has-icon"
+                      type="email" name="email"
+                      placeholder="Enter your email"
+                      value={form.email} onChange={handleChange}
+                      autoComplete="email"
+                    />
+                  </div>
+                </div>
+
+                <div className="rp-fld">
+                  <label className="rp-flbl">Password</label>
+                  <div className="rp-fwrap">
+                    <span className="rp-ficon">🔒</span>
+                    <input
+                      className="rp-finput has-icon"
+                      type={showPass ? "text" : "password"}
+                      name="password"
+                      placeholder="Enter your password"
+                      value={form.password} onChange={handleChange}
+                      autoComplete="new-password"
+                      style={{ paddingRight: 42 }}
+                    />
+                    <button
+                      type="button" className="rp-pbtn"
+                      onClick={() => setShowPass(!showPass)} tabIndex={-1}
+                    >
+                      {showPass ? "🙈" : "👁️"}
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="submit" className="rp-sbtn"
+                  disabled={!isFormValid || loading}
+                >
+                  {loading ? "⏳ Creating..." : "CREATE ACCOUNT →"}
+                </button>
+              </form>
+
+              <p className="rp-signin">
+                Already have an account?
+                <a onClick={() => navigate("/login")}>Sign in</a>
+              </p>
+            </div>
+
+            <div className="rp-cfooter">
+              <div className="rp-cfdot" />
+              <span>Secure Government Portal · All rights reserved</span>
+            </div>
           </div>
-          <h1 className="rp-title">
-            जन संवाद<br />
-            <em>Admin Panel</em>
-          </h1>
-          <p className="rp-sub">Vasai-Virar City Municipal Corporation</p>
-          <div className="rp-stats">
-            <div className="rp-stat">
-              <span className="rp-snum">8</span>
-              <span className="rp-slbl">Talukas</span>
+
+          {/* ── RIGHT: MAYOR PANEL — slides from top-right ── */}
+          <div
+            className="rp-mayor-panel"
+            style={{
+              opacity:   animated ? 1 : 0,
+              transform: animated ? 'translate(0, 0)' : 'translate(80px, -60px)',
+            }}
+          >
+            <span className="rp-mp-icon tl">🏛️</span>
+            <span className="rp-mp-icon tr">🏥</span>
+            <span className="rp-mp-icon bl">🏗️</span>
+            <span className="rp-mp-icon br">🏢</span>
+
+            <div className="rp-mayor-photo-wrap">
+              <div className="rp-mayor-ring">
+                <img src={mayorPhoto} alt="Mayor" className="rp-mayor-photo" />
+              </div>
+              <div className="rp-mayor-badge">🪑</div>
             </div>
-            <div className="rp-ssep" />
-            <div className="rp-stat">
-              <span className="rp-snum">2009</span>
-              <span className="rp-slbl">Established</span>
-            </div>
-            <div className="rp-ssep" />
-            <div className="rp-stat">
-              <span className="rp-snum">24/7</span>
-              <span className="rp-slbl">Service</span>
+
+            <p className="rp-mayor-name">मा. श्री.अजीव पाटील</p>
+            <p className="rp-mayor-title">मा. महापौर, वसई विरार शहर महानगरपालिका</p>
+
+            <div className="rp-mayor-bar-wrap">
+              <div className="rp-mayor-bar" />
             </div>
           </div>
-        </div>
 
-        {/* Card */}
-        <div className="rp-card">
-          {/* Logo */}
-          <div className="rp-logo-row">
-            <img src={logo} alt="VVCMC" className="rp-logo-img" />
-            <div className="rp-logo-name">वसई-विरार शहर महानगरपालिका</div>
-          </div>
-
-          <div className="rp-hr" />
-          <p className="rp-ftitle">Create Account</p>
-
-          <form onSubmit={handleRegister}>
-            <div className="rp-fld">
-              <label className="rp-flbl">Full Name</label>
-              <div className="rp-fwrap">
-                <span className="rp-ficon">👤</span>
-                <input className="rp-finput" type="text" name="fullName"
-                  placeholder="Enter your full name"
-                  value={form.fullName} onChange={handleChange} />
-              </div>
-            </div>
-
-            <div className="rp-fld">
-              <label className="rp-flbl">Username</label>
-              <div className="rp-fwrap">
-                <span className="rp-ficon">🪪</span>
-                <input className="rp-finput" type="text" name="userName"
-                  placeholder="Enter your username"
-                  value={form.userName} onChange={handleChange} />
-              </div>
-            </div>
-
-            <div className="rp-fld">
-              <label className="rp-flbl">Mobile Number</label>
-              <div className="rp-fwrap">
-                <span className="rp-ficon">📱</span>
-                <input className="rp-finput" type="tel" name="mobileNumber"
-                  placeholder="Enter your mobile number"
-                  maxLength={10}
-                  value={form.mobileNumber} onChange={handleChange} />
-              </div>
-            </div>
-
-            <div className="rp-fld">
-              <label className="rp-flbl">Email</label>
-              <div className="rp-fwrap">
-                <span className="rp-ficon">✉️</span>
-                <input className="rp-finput" type="email" name="email"
-                  placeholder="Enter your email"
-                  value={form.email} onChange={handleChange} />
-              </div>
-            </div>
-
-               {/* <div className="rp-fld">
-              <label className="rp-flbl"></label>
-              <div className="rp-fwrap">
-                <span className="rp-ficon">📱</span>
-                <input className="rp-finput" type="tel" name="pincode"
-                  placeholder="Enter your pincode"
-                  maxLength={10}
-                  value={form.pincode} onChange={handleChange} />
-              </div>
-            </div> */}
-
-             {/* <div className="rp-fld">
-              <label className="rp-flbl"></label>
-              <div className="rp-fwrap">
-                <span className="rp-ficon">📱</span>
-                <input className="rp-finput" type="tel" name="address"
-                  placeholder="Enter your address"
-                  maxLength={10}
-                  value={form.address} onChange={handleChange} />
-              </div>
-            </div> */}
-
-
-            
-
-            <div className="rp-fld">
-              <label className="rp-flbl">Password</label>
-              <div className="rp-fwrap">
-                <span className="rp-ficon">🔒</span>
-                <input className="rp-finput" type="password" name="password"
-                  placeholder="Enter your password"
-                  value={form.password} onChange={handleChange} />
-              </div>
-            </div>
-
-            <button type="submit" className="rp-submit-btn"
-              disabled={!form.fullName || !form.userName || !form.mobileNumber || !form.email || !form.password}>
-              CREATE ACCOUNT
-            </button>
-          </form>
-
-          <p className="rp-signin">
-            Already have an account?
-            <span onClick={() => navigate("/login")}>Sign in</span>
-          </p>
-
-          <div className="rp-cfooter">
-            <div className="rp-cfdot" />
-            <span>Secure Government Portal · All rights reserved</span>
-          </div>
         </div>
       </div>
     </>
