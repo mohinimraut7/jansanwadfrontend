@@ -1222,7 +1222,7 @@ function ActionModal({ appt, onClose, onRefresh, showToast }) {
               Update Status
             </label>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {["pending","approved","rejected","in progress","resolved"].map(s => {
+              {["pending","approved","rejected"].map(s => {
                 const cfg = sc(s);
                 const active = status === s;
                 return (
