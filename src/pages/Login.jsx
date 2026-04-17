@@ -3967,12 +3967,18 @@ export default function Login() {
     if (!/^[0-9]{10}$/.test(mobile)) { toast.error("10 अंकी valid mobile number टाका!"); return; }
     setOtpLoading(true);
     const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const corporation="VVCMC";
+    const platformShort="VVMCDM"
+    const usr="citizen"
+    const platform="Divyang Kalyan Management System"
+    const apkey="67e12059b220a"
+    const fullName="Citizen"
     setGeneratedOtp(newOtp);
     setTimeLeft(60);
     setCanResend(false);
     setOtp(["", "", "", "", "", ""]);
-    const smsText = `Dear Citizen ${newOtp} is OTP for VVCMC Divyang Kalyan Management System login for citizen registration.VVCMC`;
-    const smsApiUrl = `https://1.rapidsms.co.in/api/push.json?apikey=67e12059b220a&route=&sender=VVMCDM&mobileno=${mobile}&text=${encodeURIComponent(smsText)}`;
+    const smsText = `Dear ${fullName} ${newOtp} is OTP for ${corporation} ${platform} login for ${usr} registration.${corporation}`;
+    const smsApiUrl = `https://1.rapidsms.co.in/api/push.json?apikey=${apkey}&route=&sender=${platformShort}&mobileno=${mobile}&text=${encodeURIComponent(smsText)}`;
     try {
       await fetch(smsApiUrl, { method: "GET", mode: "no-cors" });
       toast.success(`OTP पाठवला ******${mobile.slice(-3)} वर`);
