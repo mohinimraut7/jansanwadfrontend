@@ -1111,6 +1111,25 @@ function ActionModal({ appt, onClose, onRefresh, showToast }) {
   const [saving, setSaving]         = useState(false);
   const [replyDocument, setReplyDocument] = useState(null);
 
+  // const handleSave = async () => {
+  //   try {
+  //     setSaving(true);
+  //     const formData = new FormData();
+  //     formData.append("status", status);
+  //     formData.append("adminNote", note);
+  //     if (replyDocument) formData.append("replyDocument", replyDocument);
+  //     await citizenAxios.patch(`/citizen/admin/update-status/${appt._id}`, formData, {
+  //       headers: { "Content-Type": "multipart/form-data" },
+  //     });
+  //     showToast(`Status updated to "${status}" & citizen notified!`, "success");
+  //     onRefresh();
+  //     onClose();
+  //   } catch (e) {
+  //     showToast(e?.response?.data?.message || "Update failed", "error");
+  //   } finally { setSaving(false); }
+  // };
+
+  
   const handleSave = async () => {
     try {
       setSaving(true);
@@ -1118,9 +1137,23 @@ function ActionModal({ appt, onClose, onRefresh, showToast }) {
       formData.append("status", status);
       formData.append("adminNote", note);
       if (replyDocument) formData.append("replyDocument", replyDocument);
+      
       await citizenAxios.patch(`/citizen/admin/update-status/${appt._id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+
+      // ── WhatsApp Notification to Citizen ──────────────────────────
+      const mobile = appt.mobileNumber?.replace(/\D/g, "").slice(-10);
+      if (mobile) {
+        const officerName="Repected Mayor Ajiv Patil Sir"
+        const smsText = `Dear ${appt.fullName}, Your appointment with ${officerName} at Vasai Virar City Municipal Corporation has been successfully booked. Date: ${formatShort(appt.preferredDate)}, Time Slot: ${appt.microSlot || appt.slotTime}, Token No: ${appt.tokenId}. - VVCMC Jan Samvaad`;
+        
+        const waApiUrl = `https://1.rapidsms.co.in/api/push.json?apikey=67e12059b220a&route=&sender=VVMCDM&mobileno=${mobile}&text=${encodeURIComponent(smsText)}`;
+        
+        fetch(waApiUrl, { method: "GET", mode: "no-cors" }).catch(() => {});
+      }
+      // ─────────────────────────────────────────────────────────────
+
       showToast(`Status updated to "${status}" & citizen notified!`, "success");
       onRefresh();
       onClose();
@@ -1128,7 +1161,9 @@ function ActionModal({ appt, onClose, onRefresh, showToast }) {
       showToast(e?.response?.data?.message || "Update failed", "error");
     } finally { setSaving(false); }
   };
-
+  
+  
+  
   const statusCfg = sc(status);
 
   return (
