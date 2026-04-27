@@ -1144,13 +1144,58 @@ function ActionModal({ appt, onClose, onRefresh, showToast }) {
 
       // ── WhatsApp Notification to Citizen ──────────────────────────
       const mobile = appt.mobileNumber?.replace(/\D/g, "").slice(-10);
+      const platform="Jan Samvaad";
+      const corporation="VVCMC";
+      const sender="VVCMCJS";
+      const fnamecorporation="Vasai Virar City Municipal Corporation"
+
+//       const statusMessage = {
+//   pending: `Pending — Awaiting Mayor's Approval`,
+//   approved: `Approved by Respected Mayor Ajiv Patil Sir`,
+//   rejected: `Rejected by Admin`,
+//   cancelled: `Cancelled`
+// }[appt.status] || appt.status;
+
+
+
+const statusMessage = {
+  pending:   `Pending — Awaiting Mayor's Approval`,
+  approved:  `Approved by Respected Mayor Ajiv Patil Sir`,
+  rejected:  `Rejected by Respected Mayor Ajiv Patil Sir`,
+  cancelled: `Cancelled`
+}[status] || status; // ✅ 'appt.status' नाही — 'status' वापरा (नवीन updated status)
+
+
+
+
+
+    
       if (mobile) {
         const officerName="Repected Mayor Ajiv Patil Sir"
-        const smsText = `Dear ${appt.fullName}, Your appointment with ${officerName} at Vasai Virar City Municipal Corporation has been successfully booked. Date: ${formatShort(appt.preferredDate)}, Time Slot: ${appt.microSlot || appt.slotTime}, Token No: ${appt.tokenId}. - VVCMC Jan Samvaad`;
+          console.log("mobile>>>>",mobile,platform,corporation,officerName,sender,appt.preferredDate,formatShort(appt.preferredDate),appt.microSlot,appt.slotTime,appt.tokenId)
+        // const whatsupText = `Dear ${appt.fullName}, Your appointment with ${officerName} at ${fnamecorporation} has been successfully booked. Date: ${formatShort(appt.preferredDate)}, Time Slot: ${appt.microSlot || appt.slotTime}, Token No: ${appt.tokenId}. - ${corporation} ${platform}`;
         
-        const waApiUrl = `https://1.rapidsms.co.in/api/push.json?apikey=67e12059b220a&route=&sender=VVMCDM&mobileno=${mobile}&text=${encodeURIComponent(smsText)}`;
+        // const waApiUrl = `https://1.rapidsms.co.in/api/push.json?apikey=67e12059b220a&route=&sender=${sender}&mobileno=${mobile}&text=${encodeURIComponent(whatsupText)}`;
+
+
+//   const whatsupText = `Dear ${appt.fullName}, Your appointment with Repected Mayor Ajiv Patil Sir at Vasai Virar City Municipal Corporation has been successfully booked.
+// Appointment is ${statusMessage}.${formatShort(appt.preferredDate)}, Time Slot: ${appt.microSlot || appt.slotTime}, Token No: ${appt.tokenId}. - VVCMC Jan Samvaad`;
         
-        fetch(waApiUrl, { method: "GET", mode: "no-cors" }).catch(() => {});
+// const waApiUrl = `https://1.rapidsms.co.in/api/push.json?apikey=67e12059b220a&route=&sender=VVCMCJS&mobileno=${mobile}&text=${encodeURIComponent(whatsupText)}`;
+        
+//         fetch(waApiUrl, { method: "GET", mode: "no-cors" }).catch(() => {});
+
+
+
+
+// const whatsupText = `Dear ${appt.fullName}, Your appointment with Respected Mayor Ajiv Patil Sir at Vasai Virar City Municipal Corporation has been updated. Appointment Status: ${statusMessage}. Date: ${formatShort(appt.preferredDate)}, Time Slot: ${appt.microSlot || appt.slotTime}, Token No: ${appt.tokenId}. Please carry this Token No on your visit day. VVCMC Jan Samvaad`;
+
+// const waApiUrl = `https://1.rapidsms.co.in/api/push.json?apikey=67e12059b220a&route=&sender=VVCMCJS&mobileno=${mobile}&text=${encodeURIComponent(whatsupText)}`;
+
+const smsText =`Dear ${appt.fullName}, Your appointment with Respected Mayor Ajiv Patil Sir at Vasai Virar City Municipal Corporation has been updated. Appointment Status: ${statusMessage} Date: ${formatShort(appt.preferredDate)} Time Slot: {appt.microSlot || appt.slotTime} Token No: ${appt.tokenId} Please carry this Token No on your visit day. SAAVI INFINET` 
+const waApiUrl = `https://smsfortius.work/V2/apikey.php?apikey=dWaYXxSkYneCVvUL&senderid=SAAVIT&templateid=1607100000000379326&number=${mobile}&message=${encodeURIComponent(smsText)}`;
+
+fetch(waApiUrl, { method: "GET", mode: "no-cors" }).catch(() => {});
       }
       // ─────────────────────────────────────────────────────────────
 

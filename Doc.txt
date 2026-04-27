@@ -21,3 +21,5 @@ npm i lucide-react
 
 
 npm install react-toastify
+======================
+db jansanwaad=>mohinimraut7@gmail.com =>mongodb atlast

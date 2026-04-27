@@ -1042,12 +1042,17 @@ export default function JansanwadAppform({ onClose, prefillData }) {
   }, []);
 
   const [departments, setDepartments] = useState([]);
+const [departmentUsers, setDepartmentUsers] = useState([]);
 
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
         const res = await axiosInstance.get("/getUsers");
+        console.log("res>>>>>>>>",res.data)
         if (res.data.success) {
+           // ← नवीन: सगळे users store करा (mobile number साठी)
+           const users = res.data.users;
+        setDepartmentUsers(users);
           const uniqueDepts = [...new Set(
             res.data.users.map((u) => u.departmentName).filter(Boolean)
           )];
@@ -1149,7 +1154,158 @@ export default function JansanwadAppform({ onClose, prefillData }) {
     setShowCamera2(false);
   };
 
+
+//   const sendWhatsAppToTaggedDepts = (taggedDepts, tokenNo) => {
+//   // तुमचा portal URL — OTP login page
+//   // const portalLink = `https://yourdomain.com/login`; // ← तुमचा URL टाका
+//   // const portalLink = `${axiosInstance.defaults.baseURL?.replace("/api", "")}/login`;
+//   const portalLink = `${import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173"}/login`;
+
+//   taggedDepts.forEach((deptName) => {
+//     // त्या department चे सगळे users शोधा
+//     const deptUsersList = departmentUsers.filter(
+//       (u) => u.departmentName === deptName && u.mobileNumber
+//     );
+
+//     deptUsersList.forEach((user) => {
+//       const mobile = user.mobileNumber.replace(/\D/g, ""); // फक्त numbers
+
+//       const message = 
+// `नमस्कार ${user.fullName || ""},
+
+// नवीन तक्रार नोंदवली गेली आहे.
+// 🔖 Token: ${tokenNo}
+// 🏢 Department: ${deptName}
+
+// कृपया खालील link वर click करून login करा:
+// 👉 ${portalLink}?mobile=${mobile}
+
+// (OTP तुमच्या ${mobile} नंबरवर येईल)`;
+
+//       const encoded = encodeURIComponent(message);
+//       const waUrl = `https://wa.me/91${mobile}?text=${encoded}`;
+//       window.open(waUrl, "_blank");
+//     });
+//   });
+// };
+
+
+// const sendWhatsAppToTaggedDepts = (taggedDepts, tokenNo) => {
+//   const portalLink = `${import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173"}/login`;
+//   const apkey = "67e12059b220a";        // same key jo OTP साठी वापरतो
+//   const platformShort = "VVMCDM";      // same sender
+
+//   taggedDepts.forEach((deptName) => {
+//     const deptUsersList = departmentUsers.filter(
+//       (u) => u.departmentName === deptName && u.mobileNumber
+//     );
+
+//     deptUsersList.forEach((user) => {
+//       const mobile = user.mobileNumber.replace(/\D/g, "");
+//       const loginLink = `${portalLink}?mobile=${mobile}`;
+
+//       const smsText = `Hello ${user.fullName || ""},\nNew complaint assigned.\nToken: ${tokenNo}\nDept: ${deptName}\nLogin: ${loginLink}\nVVCMC`;
+
+//       const smsApiUrl = `https://1.rapidsms.co.in/api/push.json?apikey=${apkey}&route=&sender=${platformShort}&mobileno=${mobile}&text=${encodeURIComponent(smsText)}`;
+
+//       // Automatically sends — no click needed
+//       fetch(smsApiUrl, { method: "GET", mode: "no-cors" })
+//         .then(() => console.log(`SMS sent to ${mobile}`))
+//         .catch((err) => console.error("SMS error:", err));
+//     });
+//   });
+// };
+
   // ── submit ────────────────────────────────────────────────────────────────
+  
+  
+//   const sendWhatsAppToTaggedDepts = (taggedDepts, tokenNo) => {
+//   const portalLink = `${import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173"}/login`;
+//   const apkey = "67e12059b220a";      // same key
+//   const platformShort = "VVCMCJS";    // same sender
+
+//   taggedDepts.forEach((deptName) => {
+//     const deptUsersList = departmentUsers.filter(
+//       (u) => u.departmentName === deptName && u.mobileNumber
+//     );
+
+//     deptUsersList.forEach((user) => {
+//       const mobile = user.mobileNumber.replace(/\D/g, "");
+//       // const loginLink = `${portalLink}?mobile=${mobile}`;
+//       const displayMobile = `******${mobile.slice(-4)}`;
+//             const loginLink = `${portalLink}`;
+
+
+//       const waText = `Hello ${user.fullName || ""},\nNew complaint assigned.\nToken: ${tokenNo}\nDept: ${deptName}\n\nकृपया खालील link वर OTP Login करा:\n${loginLink}\n\n OTP तुमच्या ${displayMobile} नंबरवर येईल.\n\n(Register करू नका - OTP Login वापरा)\nVVCMC`;
+
+//       // ✅ WhatsApp साठी फक्त route=w (WhatsApp route)
+//       const waApiUrl = `https://1.rapidsms.co.in/api/push.json?apikey=${apkey}&route=w&sender=VVCMCJS&mobileno=91${mobile}&text=${encodeURIComponent(waText)}`;
+
+//       fetch(waApiUrl, { method: "GET", mode: "no-cors" })
+//         .then(() => console.log(`WhatsApp sent to ${mobile}`))
+//         .catch((err) => console.error("WhatsApp error:", err));
+//     });
+//   });
+// };
+
+
+
+
+const sendWhatsAppToTaggedDepts = (taggedDepts, tokenNo) => {
+  // Portal login URL — fetched from environment variable or fallback to localhost
+  const portalLink = `${import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173"}/login`;
+  
+  // RapidSMS API credentials
+  const apkey = "67e12059b220a";
+  const platformShort = "VVCMCJS";
+
+  // Loop through all selected departments
+  taggedDepts.forEach((deptName) => {
+    
+    // Find all users belonging to this department who have a mobile number
+    const deptUsersList = departmentUsers.filter(
+      (u) => u.departmentName === deptName && u.mobileNumber
+    );
+
+    // If no users found for this department, skip
+    if (deptUsersList.length === 0) {
+      console.warn(`No users found for department: ${deptName}`);
+      return;
+    }
+
+    // Send WhatsApp message to each user in the department
+    deptUsersList.forEach((user) => {
+      
+      // Remove all non-numeric characters from mobile number
+      const mobile = user.mobileNumber.replace(/\D/g, "");
+
+      // Skip if mobile number is invalid (less than 10 digits)
+      if (mobile.length < 10) {
+        console.warn(`Invalid mobile number for user: ${user.fullName}`);
+        return;
+      }
+
+      // Mask mobile number for display — show only last 4 digits
+      const displayMobile = `******${mobile.slice(-4)}`;
+
+      // Portal login link (same for all users)
+      const loginLink = `${portalLink}`;
+
+      // WhatsApp message body — informs officer about new complaint
+      const waText = `Hello ${user.userName || ""},\nA new complaint has been assigned to you.\nToken No: ${tokenNo}\nDepartment: ${deptName}\n\nPlease login to the portal using OTP Login:\n${loginLink}\n\nYour OTP will be sent to your registered mobile number ${displayMobile}.\n\nNote: Do not Register. Use OTP Login only.\n\nVVCMC Jan Samvaad`;
+
+      // Build RapidSMS WhatsApp API URL with encoded message
+      const waApiUrl = `https://1.rapidsms.co.in/api/push.json?apikey=${apkey}&route=w&sender=VVCMCJS&mobileno=91${mobile}&text=${encodeURIComponent(waText)}`;
+
+      // Send WhatsApp message via RapidSMS API (no-cors mode)
+      fetch(waApiUrl, { method: "GET", mode: "no-cors" })
+        .then(() => console.log(`✅ WhatsApp sent to ${user.fullName} (${displayMobile})`))
+        .catch((err) => console.error(`❌ WhatsApp error for ${user.fullName} (${displayMobile}):`, err));
+    });
+  });
+};
+  
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -1192,11 +1348,16 @@ export default function JansanwadAppform({ onClose, prefillData }) {
       const data = res.data;
       if (!data.success) { alert(data.message || "Something went wrong"); return; }
 
+
+
+
       // ✅ Show existing token if no new one was generated
     const displayToken = prefillData?._tokenId || data.tokenNo;
     alert(`✅ Application submitted successfully!\nToken Number: ${displayToken}`);
     if (onClose) onClose();
-   
+   if (formData.tagTo.length > 0) {
+  sendWhatsAppToTaggedDepts(formData.tagTo, displayToken);
+}
 
       setFormData(buildInitialForm(null));
     } catch (error) {

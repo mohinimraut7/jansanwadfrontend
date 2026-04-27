@@ -3904,20 +3904,40 @@ export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [tab, setTab] = useState("password");
+  // const [tab, setTab] = useState("password");
 
   const [form, setForm]         = useState({ userName: "", password: "" });
   const [loading, setLoading]   = useState(false);
   const [showPass, setShowPass] = useState(false);
 
   const [otpStep, setOtpStep]           = useState("mobile");
-  const [mobileNo, setMobileNo]         = useState("");
+  // const [mobileNo, setMobileNo]         = useState("");
+
+
+// Read mobile from WhatsApp link if present
+const mobileFromUrl = new URLSearchParams(window.location.search).get("mobile") || "";
+
+const [tab, setTab] = useState(mobileFromUrl ? "otp" : "password");  // ← changed
+
+const [mobileNo, setMobileNo] = useState(mobileFromUrl);  // ← changed
+
+
   const [otp, setOtp]                   = useState(["", "", "", "", "", ""]);
   const [generatedOtp, setGeneratedOtp] = useState("");
   const [timeLeft, setTimeLeft]         = useState(0);
   const [canResend, setCanResend]       = useState(false);
   const [otpLoading, setOtpLoading]     = useState(false);
   const otpRefs = useRef([]);
+
+  // ── Auto-send OTP if mobile came from WhatsApp link ──
+useEffect(() => {
+  if (mobileFromUrl && mobileFromUrl.length === 10) {
+    setTimeout(() => {
+      sendOtp();
+    }, 800);
+  }
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
   useEffect(() => {
     if (timeLeft <= 0) { setCanResend(true); return; }
@@ -4051,7 +4071,8 @@ export default function Login() {
     setTab(t);
     setOtpStep("mobile");
     setOtp(["", "", "", "", "", ""]);
-    setMobileNo("");
+    // setMobileNo("");
+     setMobileNo(t === "otp" ? mobileFromUrl : "");
     setTimeLeft(0);
   };
 
