@@ -931,6 +931,8 @@ import {
   departmentsData,
 } from "../data/officeData";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+
 
 const talukas = ["Palghar","Vasai","Dahanu","Talasari","Jawhar","Mokhada","Vikramgad","Wada"];
 
@@ -1251,56 +1253,96 @@ const [departmentUsers, setDepartmentUsers] = useState([]);
 
 
 
-const sendWhatsAppToTaggedDepts = (taggedDepts, tokenNo) => {
-  // Portal login URL — fetched from environment variable or fallback to localhost
-  const portalLink = `${import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173"}/login`;
+// const sendWhatsAppToTaggedDepts = (taggedDepts, tokenNo) => {
+//   // Portal login URL — fetched from environment variable or fallback to localhost
+//   const portalLink = `${import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173"}/login`;
   
-  // RapidSMS API credentials
-  const apkey = "67e12059b220a";
-  const platformShort = "VVCMCJS";
+//   // RapidSMS API credentials
+//   const apkey = "67e12059b220a";
+//   const platformShort = "VVCMCJS";
 
-  // Loop through all selected departments
-  taggedDepts.forEach((deptName) => {
+//   // Loop through all selected departments
+//   taggedDepts.forEach((deptName) => {
     
-    // Find all users belonging to this department who have a mobile number
+//     // Find all users belonging to this department who have a mobile number
+//     const deptUsersList = departmentUsers.filter(
+//       (u) => u.departmentName === deptName && u.mobileNumber
+//     );
+
+//     // If no users found for this department, skip
+//     if (deptUsersList.length === 0) {
+//       console.warn(`No users found for department: ${deptName}`);
+//       return;
+//     }
+
+//     // Send WhatsApp message to each user in the department
+//     deptUsersList.forEach((user) => {
+      
+//       // Remove all non-numeric characters from mobile number
+//       const mobile = user.mobileNumber.replace(/\D/g, "");
+
+//       // Skip if mobile number is invalid (less than 10 digits)
+//       if (mobile.length < 10) {
+//         console.warn(`Invalid mobile number for user: ${user.fullName}`);
+//         return;
+//       }
+
+//       // Mask mobile number for display — show only last 4 digits
+//       const displayMobile = `******${mobile.slice(-4)}`;
+
+//       // Portal login link (same for all users)
+//       const loginLink = `${portalLink}`;
+
+//       // WhatsApp message body — informs officer about new complaint
+//       const waText = `Hello ${user.userName || ""},\nA new complaint has been assigned to you.\nToken No: ${tokenNo}\nDepartment: ${deptName}\n\nPlease login to the portal using OTP Login:\n${loginLink}\n\nYour OTP will be sent to your registered mobile number ${displayMobile}.\n\nNote: Do not Register. Use OTP Login only.\n\nVVCMC Jan Samvaad`;
+
+//       // Build RapidSMS WhatsApp API URL with encoded message
+//       const waApiUrl = `https://1.rapidsms.co.in/api/push.json?apikey=${apkey}&route=w&sender=VVCMCJS&mobileno=91${mobile}&text=${encodeURIComponent(waText)}`;
+
+//       // Send WhatsApp message via RapidSMS API (no-cors mode)
+//       fetch(waApiUrl, { method: "GET", mode: "no-cors" })
+//         .then(() => console.log(`✅ WhatsApp sent to ${user.fullName} (${displayMobile})`))
+//         .catch((err) => console.error(`❌ WhatsApp error for ${user.fullName} (${displayMobile}):`, err));
+//     });
+//   });
+// };
+
+const sendSmsToTaggedDepts = (taggedDepts, tokenNo) => {
+  const portalLink = `${import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173"}/login`;
+
+  // SMS API credentials
+  const apiKey    = "dWaYXxSkYneCVvUL";
+  const senderId  = "SAAVIT";
+  const templateId = "1607100000000379323";
+const newOtp="121212"
+  taggedDepts.forEach((deptName) => {
     const deptUsersList = departmentUsers.filter(
       (u) => u.departmentName === deptName && u.mobileNumber
     );
 
-    // If no users found for this department, skip
     if (deptUsersList.length === 0) {
       console.warn(`No users found for department: ${deptName}`);
       return;
     }
 
-    // Send WhatsApp message to each user in the department
     deptUsersList.forEach((user) => {
-      
-      // Remove all non-numeric characters from mobile number
       const mobile = user.mobileNumber.replace(/\D/g, "");
+      const usern=user.userName;
 
-      // Skip if mobile number is invalid (less than 10 digits)
       if (mobile.length < 10) {
-        console.warn(`Invalid mobile number for user: ${user.fullName}`);
+        console.warn(`Invalid mobile: ${user.fullName}`);
         return;
       }
 
-      // Mask mobile number for display — show only last 4 digits
       const displayMobile = `******${mobile.slice(-4)}`;
 
-      // Portal login link (same for all users)
-      const loginLink = `${portalLink}`;
+      const message = `Hello ${usern}, A new complaint has been assigned to you. Token No: ${tokenNo} Department: ${deptName} Please login to the portal using OTP Login: ${newOtp} Your OTP will be sent to your registered mobile number ${displayMobile}. Note: Do not Register. Use OTP Login only. SAAVI INFINET`;
 
-      // WhatsApp message body — informs officer about new complaint
-      const waText = `Hello ${user.userName || ""},\nA new complaint has been assigned to you.\nToken No: ${tokenNo}\nDepartment: ${deptName}\n\nPlease login to the portal using OTP Login:\n${loginLink}\n\nYour OTP will be sent to your registered mobile number ${displayMobile}.\n\nNote: Do not Register. Use OTP Login only.\n\nVVCMC Jan Samvaad`;
+      const smsUrl = `https://smsfortius.work/V2/apikey.php?apikey=dWaYXxSkYneCVvUL&senderid=SAAVIT&templateid=1607100000000379323&number=${mobile}&message=${encodeURIComponent(message)}`;
 
-      // Build RapidSMS WhatsApp API URL with encoded message
-      const waApiUrl = `https://1.rapidsms.co.in/api/push.json?apikey=${apkey}&route=w&sender=VVCMCJS&mobileno=91${mobile}&text=${encodeURIComponent(waText)}`;
-
-      // Send WhatsApp message via RapidSMS API (no-cors mode)
-      fetch(waApiUrl, { method: "GET", mode: "no-cors" })
-        .then(() => console.log(`✅ WhatsApp sent to ${user.fullName} (${displayMobile})`))
-        .catch((err) => console.error(`❌ WhatsApp error for ${user.fullName} (${displayMobile}):`, err));
+      fetch(smsUrl, { method: "GET", mode: "no-cors" })
+        .then(() => console.log(`✅ SMS sent to ${user.fullName} (${displayMobile})`))
+        .catch((err) => console.error(`❌ SMS error for ${user.fullName}:`, err));
     });
   });
 };
@@ -1310,10 +1352,10 @@ const sendWhatsAppToTaggedDepts = (taggedDepts, tokenNo) => {
     e.preventDefault();
     try {
       if (!formData.fullName || !formData.mobile || !formData.subject) {
-        alert("Required fields missing: Full Name, Mobile, and Subject are required"); return;
+        toast.error("Required fields missing: Full Name, Mobile, and Subject are required"); return;
       }
       if (!formData.documents) {
-        alert("Document file is required. Please upload a file before submitting."); return;
+        toast.error("Document file is required. Please upload a file before submitting."); return;
       }
 
       const authUserRaw = localStorage.getItem("authUser");
@@ -1346,17 +1388,21 @@ const sendWhatsAppToTaggedDepts = (taggedDepts, tokenNo) => {
 
       const res = await axiosInstance.post("/inwardAdd", formPayload, { headers: { "Content-Type": "multipart/form-data" } });
       const data = res.data;
-      if (!data.success) { alert(data.message || "Something went wrong"); return; }
+      if (!data.success) { toast.error(data.message || "Something went wrong"); return; }
 
 
 
 
       // ✅ Show existing token if no new one was generated
     const displayToken = prefillData?._tokenId || data.tokenNo;
-    alert(`✅ Application submitted successfully!\nToken Number: ${displayToken}`);
+    toast.success(`✅ Application submitted successfully!\nToken Number: ${displayToken}`);
     if (onClose) onClose();
-   if (formData.tagTo.length > 0) {
-  sendWhatsAppToTaggedDepts(formData.tagTo, displayToken);
+//    if (formData.tagTo.length > 0) {
+//   sendWhatsAppToTaggedDepts(formData.tagTo, displayToken);
+// }
+
+if (formData.tagTo.length > 0) {
+  sendSmsToTaggedDepts(formData.tagTo, displayToken);
 }
 
       setFormData(buildInitialForm(null));
@@ -1452,12 +1498,24 @@ const sendWhatsAppToTaggedDepts = (taggedDepts, tokenNo) => {
             {formData.existingPhotoUrl && !formData.photoPreview && (
               <div className="mb-4 p-4 border-2 border-green-300 rounded-lg bg-green-50 text-center">
                 <p className="text-xs font-semibold text-green-700 uppercase tracking-widest mb-2">✅ Token वरून Photo मिळाला</p>
-                <img
+                {/* <img
                   src={`${axiosInstance.defaults.baseURL?.replace("/api", "") || ""}/${formData.existingPhotoUrl.replace(/\\/g, "/")}`}
                   alt="existing visitor"
                   className="w-24 h-24 rounded-full object-cover border-4 border-green-400 mx-auto mb-2 shadow-md"
                   onError={(e) => { e.target.style.display = "none"; }}
-                />
+                /> */}
+
+<img
+  src={
+    formData.existingPhotoUrl.startsWith("http")
+      ? formData.existingPhotoUrl
+      : `${axiosInstance.defaults.baseURL?.replace("/api", "") || ""}/${formData.existingPhotoUrl.replace(/\\/g, "/")}`
+  }
+  alt="existing visitor"
+  className="w-24 h-24 rounded-full object-cover border-4 border-green-400 mx-auto mb-2 shadow-md"
+  onError={(e) => { e.target.style.display = "none"; }}
+/>
+
                 <p className="text-green-700 text-sm font-semibold">Citizen चा photo</p>
                 <p className="text-gray-400 text-xs mt-1">बदलायचा असेल तरच खाली Upload/Camera वापरा</p>
               </div>

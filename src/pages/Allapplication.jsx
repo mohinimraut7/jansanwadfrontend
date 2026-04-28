@@ -3729,6 +3729,7 @@ import JansanwadAppform from "./JansanwadAppform";
 import axiosInstance from "../services/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
+
 // ── Style constants (Availability.jsx palette) ────────────────────────────────
 const C = {
   bg:         "#f0f4f0",
