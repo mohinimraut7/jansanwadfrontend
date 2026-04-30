@@ -1422,13 +1422,15 @@ const sendWhatsAppToTaggedDepts = (taggedDepts, tokenNo) => {
 
 
 const sendSmsToTaggedDepts = (taggedDepts, tokenNo) => {
-  const portalLink = `${import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173"}/login`;
+  // const portalLink = `${import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173"}/login`;
+  const portalLink = `${"https://jansamvad.saavi.co.in" || "https://jansamvad.saavi.co.in"}`;
 
   // SMS API credentials
   const apiKey    = "dWaYXxSkYneCVvUL";
   const senderId  = "SAAVIT";
   const templateId = "1607100000000379323";
-const newOtp="121212"
+// const newOtp="121212"
+
   taggedDepts.forEach((deptName) => {
     const deptUsersList = departmentUsers.filter(
       (u) => u.departmentName === deptName && u.mobileNumber
@@ -1450,7 +1452,7 @@ const newOtp="121212"
 
       const displayMobile = `******${mobile.slice(-4)}`;
 
-      const message = `Hello ${usern}, A new complaint has been assigned to you. Token No: ${tokenNo} Department: ${deptName} Please login to the portal using OTP Login: ${newOtp} Your OTP will be sent to your registered mobile number ${displayMobile}. Note: Do not Register. Use OTP Login only. SAAVI INFINET`;
+      const message = `Hello ${usern}, A new complaint has been assigned to you. Token No: ${tokenNo} Department: ${deptName} Please login to the portal using OTP Login: ${portalLink} Your OTP will be sent to your registered mobile number ${displayMobile}. Note: Do not Register. Use OTP Login only. SAAVI INFINET`;
 
       const smsUrl = `https://smsfortius.work/V2/apikey.php?apikey=dWaYXxSkYneCVvUL&senderid=SAAVIT&templateid=1607100000000379323&number=${mobile}&message=${encodeURIComponent(message)}`;
 
