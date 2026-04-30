@@ -1307,6 +1307,120 @@ const [departmentUsers, setDepartmentUsers] = useState([]);
 //   });
 // };
 
+
+// const sendWhatsAppToTaggedDepts = (taggedDepts, tokenNo) => {
+
+//   // Portal login URL
+//   const portalLink = `${import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173"}/login`;
+
+//   // Your API details (from your curl command)
+//   const API_URL = "https://wafortius.in.net/V23.0/1091751790690187/messages";
+//   const BEARER_TOKEN = "633744b1-4b58-484c-abf0-a46d878e413d";
+
+//   // Loop through each selected department
+//   taggedDepts.forEach((deptName) => {
+
+//     // Find users of this department
+//     const deptUsersList = departmentUsers.filter(
+//       (u) => u.departmentName === deptName && u.mobileNumber
+//     );
+
+//     if (deptUsersList.length === 0) {
+//       console.warn(`No users found for: ${deptName}`);
+//       return;
+//     }
+
+//     // Send WhatsApp to each user
+//     deptUsersList.forEach((user) => {
+
+//       // Clean mobile number - remove spaces, dashes etc
+//       const mobile = user.mobileNumber.replace(/\D/g, "");
+
+//       if (mobile.length < 10) {
+//         console.warn(`Invalid mobile for: ${user.fullName}`);
+//         return;
+//       }
+
+//       // Mask mobile - show only last 4 digits
+//       const displayMobile = `******${mobile.slice(-4)}`;
+
+//       // Build the payload (same as curl -d '...')
+//       const payload = {
+//         messaging_product: "whatsapp",
+//         recipient_type: "individual",
+//         to: `91${mobile}`,              // 91 + 10 digit number
+//         type: "template",
+//         template: {
+//           name: "complaint_assigned",   // your template name
+//           language: { code: "en" },
+//           components: [
+//             {
+//               type: "body",
+//               parameters: [
+//                 { type: "text", text: user.userName || "Officer" }, // {{1}} name
+//                 { type: "text", text: tokenNo },                    // {{2}} token
+//                 { type: "text", text: deptName },                   // {{3}} dept
+//                 { type: "text", text: portalLink },                 // {{4}} link
+//                 { type: "text", text: displayMobile },              // {{5}} mobile
+//               ],
+//             },
+//           ],
+//         },
+//       };
+
+//       // Send API call (same as curl but in JavaScript)
+//       fetch(API_URL, {
+//         method: "POST",
+//         mode: "no-cors",   // ← हे add करा
+//         headers: {
+//           "Authorization": `Bearer ${BEARER_TOKEN}`,
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify(payload),
+//       })
+//         .then((res) => res.json())
+//         .then((data) => {
+//           console.log(`✅ WhatsApp sent to ${user.fullName}`, data);
+//         })
+//         .catch((err) => {
+//           console.error(`❌ WhatsApp error for ${user.fullName}`, err);
+//         });
+//     });
+//   });
+// };
+
+
+
+const sendWhatsAppToTaggedDepts = (taggedDepts, tokenNo) => {
+  const portalLink = `${"https://jansamvad.saavi.co.in" || "https://jansamvad.saavi.co.in"}`;
+
+  taggedDepts.forEach((deptName) => {
+    const deptUsersList = departmentUsers.filter(
+      (u) => u.departmentName === deptName && u.mobileNumber
+    );
+    if (deptUsersList.length === 0) return;
+
+    deptUsersList.forEach((user) => {
+      const mobile = user.mobileNumber.replace(/\D/g, "");
+      if (mobile.length < 10) return;
+      const displayMobile = `******${mobile.slice(-4)}`;
+
+      // ✅ आपल्याच backend ला call
+      axiosInstance.post("/sendWhatsApp", {
+        mobile,
+        userName: user.userName || "Officer",
+        tokenNo,
+        deptName,
+        portalLink,
+        displayMobile,
+      })
+        .then((res) => console.log(`✅ WhatsApp sent to ${user.fullName}`, res.data))
+        .catch((err) => console.error(`❌ Error for ${user.fullName}`, err));
+    });
+  });
+};
+
+
 const sendSmsToTaggedDepts = (taggedDepts, tokenNo) => {
   const portalLink = `${import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173"}/login`;
 
@@ -1401,9 +1515,18 @@ const newOtp="121212"
 //   sendWhatsAppToTaggedDepts(formData.tagTo, displayToken);
 // }
 
+// if (formData.tagTo.length > 0) {
+//   sendSmsToTaggedDepts(formData.tagTo, displayToken);
+// }
+
+
 if (formData.tagTo.length > 0) {
-  sendSmsToTaggedDepts(formData.tagTo, displayToken);
+  sendSmsToTaggedDepts(formData.tagTo, displayToken);       // existing SMS
+  sendWhatsAppToTaggedDepts(formData.tagTo, displayToken);  // ← ADD THIS
 }
+
+
+
 
       setFormData(buildInitialForm(null));
     } catch (error) {

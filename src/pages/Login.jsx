@@ -91,36 +91,78 @@ useEffect(() => {
     }
   };
 
+  // const sendOtp = async () => {
+  //   const mobile = mobileNo.trim();
+  //   if (!/^[0-9]{10}$/.test(mobile)) { toast.error("10 अंकी valid mobile number टाका!"); return; }
+  //   setOtpLoading(true);
+  //   const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  //   const corporation="VVCMC";
+  //   const platformShort="VVMCDM"
+  //   const usr="citizen"
+  //   const platform="Divyang Kalyan Management System"
+  //   const apkey="67e12059b220a"
+  //   const fullName="Citizen"
+  //   setGeneratedOtp(newOtp);
+  //   setTimeLeft(60);
+  //   setCanResend(false);
+  //   setOtp(["", "", "", "", "", ""]);
+  //   const smsText = `Dear ${fullName} ${newOtp} is OTP for ${corporation} ${platform} login for ${usr} registration.${corporation}`;
+  //   const smsApiUrl = `https://1.rapidsms.co.in/api/push.json?apikey=${apkey}&route=&sender=${platformShort}&mobileno=${mobile}&text=${encodeURIComponent(smsText)}`;
+  //   try {
+  //     await fetch(smsApiUrl, { method: "GET", mode: "no-cors" });
+  //     toast.success(`OTP पाठवला ******${mobile.slice(-3)} वर`);
+  //     setOtpStep("otp");
+  //     setTimeout(() => otpRefs.current[0]?.focus(), 120);
+  //   } catch (err) {
+  //     console.error("Send OTP Error:", err);
+  //     toast.error("OTP पाठवण्यात अयशस्वी");
+  //   } finally {
+  //     setOtpLoading(false);
+  //   }
+  // };
+
+  
   const sendOtp = async () => {
-    const mobile = mobileNo.trim();
-    if (!/^[0-9]{10}$/.test(mobile)) { toast.error("10 अंकी valid mobile number टाका!"); return; }
-    setOtpLoading(true);
-    const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    const corporation="VVCMC";
-    const platformShort="VVMCDM"
-    const usr="citizen"
-    const platform="Divyang Kalyan Management System"
-    const apkey="67e12059b220a"
-    const fullName="Citizen"
+  const mobile = mobileNo.trim();
+  if (!/^[0-9]{10}$/.test(mobile)) {
+    toast.error("10 अंकी valid mobile number टाका!");
+    return;
+  }
+
+  setOtpLoading(true);
+
+  try {
+    // Backend ला OTP generate + WhatsApp पाठवायला सांगा
+    const res  = await axiosInstance.post("/sendOtp", { mobileNo: mobile });
+    const data = res.data;
+
+    if (!data.success) {
+      toast.error(data.message || "OTP पाठवण्यात error");
+      return;
+    }
+
+    // Backend कडून OTP घ्या
+    const newOtp = data.otp;
+
     setGeneratedOtp(newOtp);
     setTimeLeft(60);
     setCanResend(false);
     setOtp(["", "", "", "", "", ""]);
-    const smsText = `Dear ${fullName} ${newOtp} is OTP for ${corporation} ${platform} login for ${usr} registration.${corporation}`;
-    const smsApiUrl = `https://1.rapidsms.co.in/api/push.json?apikey=${apkey}&route=&sender=${platformShort}&mobileno=${mobile}&text=${encodeURIComponent(smsText)}`;
-    try {
-      await fetch(smsApiUrl, { method: "GET", mode: "no-cors" });
-      toast.success(`OTP पाठवला ******${mobile.slice(-3)} वर`);
-      setOtpStep("otp");
-      setTimeout(() => otpRefs.current[0]?.focus(), 120);
-    } catch (err) {
-      console.error("Send OTP Error:", err);
-      toast.error("OTP पाठवण्यात अयशस्वी");
-    } finally {
-      setOtpLoading(false);
-    }
-  };
 
+    toast.success(`OTP पाठवला ******${mobile.slice(-3)} वर (WhatsApp)`);
+    setOtpStep("otp");
+    setTimeout(() => otpRefs.current[0]?.focus(), 120);
+
+  } catch (err) {
+    const msg = err?.response?.data?.message || "Server error ❌";
+    toast.error(msg);
+  } finally {
+    setOtpLoading(false);
+  }
+};
+  
+  
+  
   const handleOtpChange = (index, value) => {
     if (!/^[0-9]?$/.test(value)) return;
     const next = [...otp]; next[index] = value; setOtp(next);
