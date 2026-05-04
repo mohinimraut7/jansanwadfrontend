@@ -21,6 +21,7 @@ import Users from "./pages/Users";
 import Availability from "./pages/Availability";
 import ApplicationCitizens from "./pages/ApplicationCitizens";
 import JansanwadAppform from "./pages/JansanwadAppform";
+import ProceedingsMeeting from "./pages/ProceedingsMeeting";
 
 
 
@@ -70,6 +71,11 @@ export default function App() {
     
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />
+
+                <Route path="/proceedingsmeeting" element={<ProceedingsMeeting />} />
+
+
+        
           <Route path="/allapplication" element={<AllApplication />} />
 
           <Route path="/allapplicationcitizens" element={<ApplicationCitizens/>} />

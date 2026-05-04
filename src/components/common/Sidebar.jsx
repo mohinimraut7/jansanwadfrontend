@@ -2305,7 +2305,7 @@ export default function Sidebar() {
   const { user } = useSelector((s) => s.auth);
   const { mode, setMode } = useSidebar();
 
-  const FULL_ACCESS_ROLES = ["Super Admin", "Guardian Minister"];
+  const FULL_ACCESS_ROLES = ["Super Admin", "Guardian Minister","Mayor","Admin"];
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   useEffect(() => {
@@ -2327,8 +2327,11 @@ export default function Sidebar() {
   const isCollapsed = mode === "collapsed";
   const isHidden    = mode === "hidden";
 
+
+
   // HIDDEN — render only the › floating button
   if (isHidden) {
+
     return (
       <button
         onClick={handleOpenArrow}
@@ -2354,6 +2357,9 @@ export default function Sidebar() {
     );
   }
 
+
+  console.log("nddd",user.role)
+
   return (
     <>
       {/* Backdrop overlay on mobile when open */}
@@ -2362,8 +2368,6 @@ export default function Sidebar() {
           onClick={handleClose}
           style={{
             position: "fixed", inset: 0, zIndex: 90,
-            background: "rgba(0,0,0,0.45)",
-            backdropFilter: "blur(2px)",
           }}
         />
       )}
@@ -2515,19 +2519,36 @@ export default function Sidebar() {
               <NavLink to="/dashboard" className={({isActive})=>`sb-link${isActive?" active":""}`}>
                 <span className="sb-icon"><FiLayout size={18}/></span><span>Dashboard</span>
               </NavLink>
+
+           
+              
+                {FULL_ACCESS_ROLES.includes(user?.role) && (
+                <NavLink to="/proceedingsmeeting" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+                <span className="sb-icon"><FiCalendar size={18}/></span><span>Proceedings Meeting</span>
+              </NavLink>
+               )}
+               {FULL_ACCESS_ROLES.includes(user?.role) && (
               <NavLink to="/availability" className={({isActive})=>`sb-link${isActive?" active":""}`}>
                 <span className="sb-icon"><FiCalendar size={18}/></span><span>Availability</span>
               </NavLink>
-              <NavLink to="/allapplication" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+                  )}
+             
+            <NavLink to="/allapplication" className={({isActive})=>`sb-link${isActive?" active":""}`}>
                 <span className="sb-icon"><FiFileText size={18}/></span><span>All Application</span>
               </NavLink>
+
+                 {FULL_ACCESS_ROLES.includes(user?.role) && (
               <NavLink to="/allapplicationcitizens" className={({isActive})=>`sb-link${isActive?" active":""}`}>
                 <span className="sb-icon"><FiFileText size={18}/></span><span>All Application Citizens</span>
               </NavLink>
+                 )}
               {FULL_ACCESS_ROLES.includes(user?.role) && (
+                
                 <NavLink to="/users" className={({isActive})=>`sb-link${isActive?" active":""}`}>
                   <span className="sb-icon"><FiUsers size={18}/></span><span>Users</span>
                 </NavLink>
+
+                
               )}
             </>
           ) : (
