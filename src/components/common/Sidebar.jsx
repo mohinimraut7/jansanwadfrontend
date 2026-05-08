@@ -2889,11 +2889,16 @@ export default function Sidebar() {
                 <span className="sb-icon"><FiLayout size={18}/></span><span>Dashboard</span>
               </NavLink>
 
-              {FULL_ACCESS_ROLES.includes(user?.role) && (
-                <NavLink to="/proceedingsmeeting" className={({isActive})=>`sb-link${isActive?" active":""}`}>
-                  <span className="sb-icon"><FiCalendar size={18}/></span><span>Proceedings Meeting</span>
+              {/* {FULL_ACCESS_ROLES.includes(user?.role) && ( */}
+                <NavLink to="/meetings" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+                  <span className="sb-icon"><FiCalendar size={18}/></span><span>Meetings</span>
                 </NavLink>
-              )}
+              {/* )} */}
+               {/* {FULL_ACCESS_ROLES.includes(user?.role) && (
+                <NavLink to="/meetingsubjects" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+                  <span className="sb-icon"><FiCalendar size={18}/></span><span>Meetings Subjects</span>
+                </NavLink>
+              )} */}
               {FULL_ACCESS_ROLES.includes(user?.role) && (
                 <NavLink to="/availability" className={({isActive})=>`sb-link${isActive?" active":""}`}>
                   <span className="sb-icon"><FiCalendar size={18}/></span><span>Availability</span>
