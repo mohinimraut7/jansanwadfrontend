@@ -515,7 +515,11 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
           ) : (
             <table className="pm-table" style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
-                <tr>{["#", "Meeting No", "Type", "Date", "Time", "Actions"].map(h => <th key={h}>{h}</th>)}</tr>
+                {/* <tr>{["#", "Meeting No", "Type", "Date", "Time", "Actions"].map(h => <th key={h}>{h}</th>)}</tr> */}
+                <tr>
+                 {["#", "Meeting No", "Type", "Date", "Time"].map(h => <th key={h}>{h}</th>)}
+                 {isFullAccess && <th>Actions</th>}
+                </tr>
               </thead>
               <tbody>
                 {loading ? <tr><td colSpan={6} style={{ textAlign: "center", padding: 24, color: "#8a9a90" }}>Loading...</td></tr>
@@ -531,12 +535,14 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
                     <td>{m.meetingType}</td>
                     <td>{m.meetingDate ? new Date(m.meetingDate).toLocaleDateString("en-IN") : "-"}</td>
                     <td><span className="time-badge">{formatTime(m.meetingTime)}</span></td>
+                    {isFullAccess && 
                     <td>
                       <div style={{ display: "flex", gap: 6 }}>
                         <button className="pm-btn-edit" onClick={() => openEditModal(m)}>✏️ Edit</button>
                         <button className="pm-btn-delete" onClick={() => setDeleteConfirm(m._id)}>🗑️ Delete</button>
                       </div>
                     </td>
+                     }
                   </tr>
                 ))}
               </tbody>
