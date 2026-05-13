@@ -482,7 +482,7 @@ const handleSaveSubject = async () => {
         )}
 
         {/* Header */}
-        <button className="sms-back-btn" onClick={() => navigate("/proceedingsmeeting")}>
+        <button className="sms-back-btn" onClick={() => navigate("/meetings")}>
           ← Back to Meetings
         </button>
         <h1 className="sms-title">Meeting Subjects</h1>
