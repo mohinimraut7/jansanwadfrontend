@@ -69,6 +69,11 @@ export default function SpecificMeetingSubjects() {
   // Delete confirm
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
+  // States nanter he add kara:
+const authUser     = getAuthUser();
+const userRole     = authUser?.role || "";
+const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
+
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 640);
     window.addEventListener("resize", onResize);
@@ -495,7 +500,7 @@ const handleSaveSubject = async () => {
             value={subjectSearch}
             onChange={e => setSubjectSearch(e.target.value)}
           />
-          {selectedMeetingId && (
+          {selectedMeetingId && isFullAccess && (
             <button className="sms-btn-primary" onClick={openAddModal} style={{ display: "flex", alignItems: "center", gap: 6 }}>
               + Add Subject
             </button>
@@ -584,9 +589,15 @@ const handleSaveSubject = async () => {
             ) : (
               <table className="sms-table" style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
-                  <tr>
+                  {/* <tr>
                     {["#", "Subject ID", "Subject Name", "Subject Type", "Decision", "Departments", "Actions"].map(h => <th key={h}>{h}</th>)}
-                  </tr>
+                  </tr> */}
+                <tr>
+                 {["#", "Subject ID", "Subject Name", "Subject Type", "Decision", "Departments"].map(h => <th key={h}>{h}</th>)}
+                 {isFullAccess && <th>Actions</th>}
+                </tr>
+
+
                 </thead>
                 <tbody>
                   {filteredSubjects.map((sub, i) => {
@@ -604,12 +615,14 @@ const handleSaveSubject = async () => {
                             : <span style={{ color: "#ccc" }}>—</span>
                           }
                         </td>
+                        {isFullAccess && 
                         <td>
                           <div style={{ display: "flex", gap: 6 }}>
                             <button className="sms-btn-edit" onClick={() => openEditModal(sub, realIdx)}>✏️ Edit</button>
                             <button className="sms-btn-delete" onClick={() => setDeleteConfirm(realIdx)}>🗑️ Delete</button>
                           </div>
                         </td>
+                  }
                       </tr>
                     );
                   })}
