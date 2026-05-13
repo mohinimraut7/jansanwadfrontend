@@ -181,6 +181,13 @@ export default function Meetings() {
   const [manualRecordingFile, setManualRecordingFile] = useState(null);
   const aiExtractedDecisionRef            = useRef("");
 
+  // States nanter he add kara:
+const authUser     = getAuthUser();
+const userRole     = authUser?.role || "";
+const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
+
+
+
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 640);
     window.addEventListener("resize", onResize);
@@ -473,8 +480,8 @@ export default function Meetings() {
 
         <div style={{ marginBottom: 16 }}>
           <h1 className="pm-title">Meeting Proceedings</h1>
-          <p className="pm-subtitle">Sabha Kamkaj manage करा</p>
-          <button className="pm-btn-primary" onClick={openCreateModal}>+ Create Meeting</button>
+         {isFullAccess && <p className="pm-subtitle">Sabha Kamkaj manage करा</p>}
+          {isFullAccess && <button className="pm-btn-primary" onClick={openCreateModal}>+ Create Meeting</button>}
         </div>
 
         <div style={{ background: "#fff", borderRadius: 12, padding: isMobile ? 12 : 20, overflowX: "auto" }}>
