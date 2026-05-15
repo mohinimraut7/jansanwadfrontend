@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
 
+
+
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 const FULL_ACCESS_ROLES = ["Super Admin", "Guardian Minister", "Mayor", "Admin"];
 
@@ -130,10 +132,20 @@ function MeetingRecorder({ onDecisionExtracted, onTranscriptUpdate, onRecordingR
         </div>
         <div style={{ flex: 1 }}>
           <label className="mr-toggle">
-            <input type="checkbox" checked={recordingEnabled} onChange={e => setRecordingEnabled(e.target.checked)} disabled={sessionActive} style={{ display: "none" }} />
-            <div className={`mr-toggle-track ${recordingEnabled ? "on" : ""}`}><div className="mr-toggle-thumb" /></div>
+            <input
+              type="checkbox"
+              checked={recordingEnabled}
+              onChange={e => setRecordingEnabled(e.target.checked)}
+              disabled={sessionActive}
+              style={{ display: "none" }}
+            />
+            <div className={`mr-toggle-track ${recordingEnabled ? "on" : ""}`}>
+              <div className="mr-toggle-thumb" />
+            </div>
             <span style={{ fontSize: 13, fontWeight: 600, color: "#3a6b50" }}>
-              {recordingEnabled ? <><span className="mr-rec-dot" />Audio Recording ON</> : "Audio Recording (optional)"}
+              {recordingEnabled
+                ? <><span className="mr-rec-dot" />Audio Recording ON</>
+                : "Audio Recording (optional)"}
             </span>
           </label>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -144,14 +156,22 @@ function MeetingRecorder({ onDecisionExtracted, onTranscriptUpdate, onRecordingR
           </div>
         </div>
       </div>
+
       {micError && (
-        <div style={{ background: micError === "notfound" ? "#fff8e1" : "#fdecea", border: `1.5px solid ${micError === "notfound" ? "#ffe082" : "#f5c6c2"}`, borderRadius: 10, padding: "12px 14px", marginBottom: 12, fontSize: 13, fontWeight: 500, color: "#3a2a2a" }}>
-          {micError === "denied" && <div style={{ fontWeight: 800, color: "#c0392b" }}>🚫 Microphone Permission Denied</div>}
+        <div style={{
+          background: micError === "notfound" ? "#fff8e1" : "#fdecea",
+          border: `1.5px solid ${micError === "notfound" ? "#ffe082" : "#f5c6c2"}`,
+          borderRadius: 10, padding: "12px 14px", marginBottom: 12,
+          fontSize: 13, fontWeight: 500, color: "#3a2a2a"
+        }}>
+          {micError === "denied"   && <div style={{ fontWeight: 800, color: "#c0392b" }}>🚫 Microphone Permission Denied</div>}
           {micError === "notfound" && <div style={{ fontWeight: 800, color: "#b07a00" }}>🎤 Microphone Not Found</div>}
-          {micError === "other" && <div style={{ fontWeight: 800, color: "#c0392b" }}>❌ Microphone Could Not Start — Refresh page</div>}
+          {micError === "other"    && <div style={{ fontWeight: 800, color: "#c0392b" }}>❌ Microphone Could Not Start — Refresh page</div>}
         </div>
       )}
+
       <div style={{ fontSize: 12, fontWeight: 600, color: "#7a9a88", minHeight: 16, marginBottom: 10 }}>{status}</div>
+
       {recordingReady && recordingURL && (
         <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <span style={{ fontSize: 13, fontWeight: 700, color: "#1a4a2e" }}>🔴 Recording ready:</span>
@@ -167,26 +187,29 @@ function MeetingRecorder({ onDecisionExtracted, onTranscriptUpdate, onRecordingR
 export default function Meetings() {
   const navigate = useNavigate();
 
-  const [meetings, setMeetings]           = useState([]);
-  const [search, setSearch]               = useState("");
-  const [showModal, setShowModal]         = useState(false);
-  const [toast, setToast]                 = useState(null);
-  const [loading, setLoading]             = useState(false);
-  const [editId, setEditId]               = useState(null);
+  const [meetings, setMeetings]         = useState([]);
+  const [search, setSearch]             = useState("");
+  const [showModal, setShowModal]       = useState(false);
+  const [toast, setToast]               = useState(null);
+  const [loading, setLoading]           = useState(false);
+  const [editId, setEditId]             = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [isMobile, setIsMobile]           = useState(window.innerWidth < 640);
-  const [showRecorder, setShowRecorder]   = useState(false);
-  const meetingRecordingRef               = useRef(null);
+  const [isMobile, setIsMobile]         = useState(window.innerWidth < 640);
+  const [showRecorder, setShowRecorder] = useState(false);
+  const meetingRecordingRef             = useRef(null);
   const [meetingRecording, setMeetingRecording]       = useState(null);
   const [manualRecordingFile, setManualRecordingFile] = useState(null);
-  const aiExtractedDecisionRef            = useRef("");
+  const aiExtractedDecisionRef          = useRef("");
 
-  // States nanter he add kara:
-const authUser     = getAuthUser();
-const userRole     = authUser?.role || "";
-const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
+  const [agendaFiles, setAgendaFiles]                 = useState([]);
+  const [existingAgendaFiles, setExistingAgendaFiles] = useState([]);
 
+  // ✅ Viewer Modal state
+  const [viewerModal, setViewerModal] = useState(null); // { url, name, type }
 
+  const authUser     = getAuthUser();
+  const userRole     = authUser?.role || "";
+  const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 640);
@@ -194,20 +217,14 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // const generateMeetingId = (list) => {
-  //   const year = new Date().getFullYear();
-  //   const seq  = String((list?.length ?? 0) + 1).padStart(4, "0");
-  //   return `MTG-${year}-${seq}`;
-  // };
-
   const generateMeetingId = (list) => {
-  const now   = new Date();
-  const year  = now.getFullYear();
-  const month = now.toLocaleString("en-US", { month: "short" }).toUpperCase();
-  const day   = String(now.getDate()).padStart(2, "0");
-  const seq   = String((list?.length ?? 0) + 1).padStart(4, "0");
-  return `MTG-${year}-${month}-${day}-${seq}`;
-};
+    const now   = new Date();
+    const year  = now.getFullYear();
+    const month = now.toLocaleString("en-US", { month: "short" }).toUpperCase();
+    const day   = String(now.getDate()).padStart(2, "0");
+    const seq   = String((list?.length ?? 0) + 1).padStart(4, "0");
+    return `MTG-${year}-${month}-${day}-${seq}`;
+  };
 
   const emptyForm = {
     meetingNumber: "", meetingType: "", meetingDate: "",
@@ -234,54 +251,37 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
     return `${hour}:${minute} ${ampm}`;
   };
 
-  // const fetchMeetings = async (searchVal = "") => {
-  //   try {
-  //     setLoading(true);
-  //     const url = searchVal ? `${BASE_URL}/getMeetings?search=${searchVal}` : `${BASE_URL}/getMeetings`;
-  //     const res  = await fetch(url);
-  //     const data = await res.json();
-  //     if (data.success) setMeetings(data.data);
-  //     else showToast(data.message || "Failed to fetch", "error");
-  //   } catch { showToast("Server error.", "error"); }
-  //   finally { setLoading(false); }
-  // };
-
-  
   const fetchMeetings = async (searchVal = "") => {
-  try {
-    setLoading(true);
-    const url = searchVal
-      ? `${BASE_URL}/getMeetings?search=${searchVal}`
-      : `${BASE_URL}/getMeetings`;
-    const res  = await fetch(url);
-    const data = await res.json();
-
-    if (data.success) {
-      const authUser     = getAuthUser();
-      const userRole     = authUser?.role           || "";
-      const userDept     = authUser?.departmentName || "";
-      const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
-
-      if (isFullAccess) {
-        setMeetings(data.data);
+    try {
+      setLoading(true);
+      const url = searchVal
+        ? `${BASE_URL}/getMeetings?search=${searchVal}`
+        : `${BASE_URL}/getMeetings`;
+      const res  = await fetch(url);
+      const data = await res.json();
+      if (data.success) {
+        const authUser     = getAuthUser();
+        const userRole     = authUser?.role           || "";
+        const userDept     = authUser?.departmentName || "";
+        const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
+        if (isFullAccess) {
+          setMeetings(data.data);
+        } else {
+          const filtered = (data.data || []).filter(meeting =>
+            Array.isArray(meeting.subjects) &&
+            meeting.subjects.some(sub =>
+              Array.isArray(sub.tagTo) && sub.tagTo.includes(userDept)
+            )
+          );
+          setMeetings(filtered);
+        }
       } else {
-        const filtered = (data.data || []).filter(meeting =>
-          Array.isArray(meeting.subjects) &&
-          meeting.subjects.some(sub =>
-            Array.isArray(sub.tagTo) && sub.tagTo.includes(userDept)
-          )
-        );
-        setMeetings(filtered);
+        showToast(data.message || "Failed to fetch", "error");
       }
-    } else {
-      showToast(data.message || "Failed to fetch", "error");
-    }
-  } catch { showToast("Server error.", "error"); }
-  finally { setLoading(false); }
-};
-  
-  
-  
+    } catch { showToast("Server error.", "error"); }
+    finally { setLoading(false); }
+  };
+
   useEffect(() => { fetchMeetings(); }, []);
   useEffect(() => {
     const t = setTimeout(() => fetchMeetings(search), 400);
@@ -297,6 +297,8 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
     setMeetingRecording(null);
     setManualRecordingFile(null);
     aiExtractedDecisionRef.current = "";
+    setAgendaFiles([]);
+    setExistingAgendaFiles([]);
     setShowModal(true);
     try {
       const res  = await fetch(`${BASE_URL}/getNextMeetingId`);
@@ -313,15 +315,21 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
       meetingNumber: m.meetingNumber,
       meetingType:   m.meetingType,
       meetingDate:   m.meetingDate ? m.meetingDate.slice(0, 10) : "",
-      meetingHour:   m.meetingTime ? (() => { const h = parseInt(m.meetingTime.split(":")[0], 10); return String(h % 12 || 12).padStart(2, "0"); })() : "",
+      meetingHour:   m.meetingTime
+        ? (() => { const h = parseInt(m.meetingTime.split(":")[0], 10); return String(h % 12 || 12).padStart(2, "0"); })()
+        : "",
       meetingMinute: m.meetingTime ? m.meetingTime.split(":")[1] : "",
-      meetingAmpm:   m.meetingTime ? (parseInt(m.meetingTime.split(":")[0], 10) >= 12 ? "PM" : "AM") : "AM",
+      meetingAmpm:   m.meetingTime
+        ? (parseInt(m.meetingTime.split(":")[0], 10) >= 12 ? "PM" : "AM")
+        : "AM",
     });
     setShowRecorder(false);
     aiExtractedDecisionRef.current = m.aiExtractedDecision || "";
     meetingRecordingRef.current = m.meetingRecording || null;
     setMeetingRecording(m.meetingRecording || null);
     setManualRecordingFile(null);
+    setAgendaFiles([]);
+    setExistingAgendaFiles(m.agendaFiles || []);
     setShowModal(true);
   };
 
@@ -341,6 +349,7 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
       fd.append("meetingType",   formData.meetingType);
       if (formData.meetingDate) fd.append("meetingDate", formData.meetingDate);
       if (buildTimeString())    fd.append("meetingTime", buildTimeString());
+      agendaFiles.forEach(f => fd.append("agendaFiles", f));
       const res  = await fetch(`${BASE_URL}/createMeeting`, { method: "POST", body: fd });
       const data = await res.json();
       if (data.success) { setShowModal(false); showToast("Meeting created!"); fetchMeetings(search); }
@@ -359,6 +368,8 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
       if (buildTimeString())    fd.append("meetingTime", buildTimeString());
       const aiText = aiExtractedDecisionRef.current?.trim();
       if (aiText) fd.append("aiExtractedDecision", aiText);
+      fd.append("existingAgendaFiles", JSON.stringify(existingAgendaFiles));
+      agendaFiles.forEach(f => fd.append("agendaFiles", f));
       if (manualRecordingFile) fd.append("meetingRecording", manualRecordingFile);
       const recordingVal = meetingRecordingRef.current;
       if (recordingVal && recordingVal.startsWith("blob:")) {
@@ -379,7 +390,10 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
   };
 
   const handleSubmit = () => {
-    if (!formData.meetingNumber || !formData.meetingType) { showToast("Please fill required fields", "error"); return; }
+    if (!formData.meetingNumber || !formData.meetingType) {
+      showToast("Please fill required fields", "error");
+      return;
+    }
     editId ? handleUpdate() : handleCreate();
   };
 
@@ -396,9 +410,78 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
 
   const handleMeetingClick = (m) => {
     navigate(`/proceedingsmeeting/${m._id}`, {
-      state: { meetingNumber: m.meetingNumber, meetingType: m.meetingType, meetingDate: m.meetingDate, meetingTime: m.meetingTime }
+      state: {
+        meetingNumber: m.meetingNumber,
+        meetingType:   m.meetingType,
+        meetingDate:   m.meetingDate,
+        meetingTime:   m.meetingTime,
+      },
     });
   };
+
+  // ✅ Cloudinary URL fixer — PDF/DOC/DOCX/XLS/XLSX → raw upload
+  const getCloudinaryUrl = (url) => {
+    if (!url) return url;
+    if (url.match(/\.(pdf|doc|docx|xls|xlsx)$/i)) {
+      return url
+        .replace("/image/upload/", "/raw/upload/")
+        .replace("/upload/fl_attachment/", "/upload/");
+    }
+    return url;
+  };
+
+  // ✅ File type helper — XLS/XLSX added
+  const getFileInfo = (url) => {
+    const isPdf = url.match(/\.pdf$/i);
+    const isDoc = url.match(/\.(doc|docx)$/i);
+    const isXl  = url.match(/\.(xls|xlsx)$/i);
+    const isImg = url.match(/\.(png|jpg|jpeg|gif|webp)$/i);
+    return {
+      type:  isPdf ? "pdf" : isDoc ? "doc" : isXl ? "xl" : isImg ? "img" : "other",
+      icon:  isPdf ? "📄" : isDoc ? "📝" : isXl ? "📊" : isImg ? "🖼️" : "📁",
+      label: isPdf ? "PDF" : isDoc ? "DOC" : isXl ? "Excel" : isImg ? "Image" : "File",
+    };
+  };
+
+  // ✅ Open viewer modal
+  // const openViewer = (url) => {
+  //   const cleanUrl = getCloudinaryUrl(url);
+  //   const { type } = getFileInfo(url);
+  //   const fname = url.split("/").pop()?.split("?")[0] || "Document";
+  //   setViewerModal({ url: cleanUrl, name: fname, type });
+  // };
+
+
+// ✅ Signed URL घेऊन viewer उघडा
+const openViewer = async (url) => {
+  const { type } = getFileInfo(url);
+  const fname = url.split("/").pop()?.split("?")[0] || "Document";
+
+  // Images ला signed URL नको — direct access होतो
+  if (type === "img") {
+    setViewerModal({ url, name: fname, type });
+    return;
+  }
+
+  try {
+    const res  = await fetch(`${BASE_URL}/getSignedFileUrl`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ fileUrl: url }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      setViewerModal({ url: data.url, name: fname, type });
+    } else {
+      // Fallback — original URL वापरा
+      setViewerModal({ url, name: fname, type });
+    }
+  } catch {
+    setViewerModal({ url, name: fname, type });
+  }
+};
+
+
 
   return (
     <>
@@ -406,13 +489,7 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
         @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&display=swap');
         .pm-wrap * { font-family: 'Nunito Sans', sans-serif; box-sizing: border-box; }
         .pm-table tbody tr:hover { background: #f4faf6; }
-        .meeting-no-link {
-          display: inline-block; background: #e6f4ec; color: #1a6640;
-          font-weight: 700; font-size: 12.5px; padding: 3px 10px;
-          border-radius: 6px; letter-spacing: 0.3px; cursor: pointer;
-          text-decoration: underline; text-underline-offset: 2px;
-          transition: background 0.15s, color 0.15s;
-        }
+        .meeting-no-link { display: inline-block; background: #e6f4ec; color: #1a6640; font-weight: 700; font-size: 12.5px; padding: 3px 10px; border-radius: 6px; letter-spacing: 0.3px; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; transition: background 0.15s, color 0.15s; }
         .meeting-no-link:hover { background: #1a7a4a; color: #fff; }
         .time-badge { display: inline-block; background: #e6f4ec; color: #1a6640; font-size: 12.5px; font-weight: 700; padding: 3px 10px; border-radius: 6px; }
         .pm-table th { font-size: 13px; font-weight: 700; color: #3a6b50; padding: 11px 14px; text-align: left; background: #f0f7f2; border-bottom: 2px solid #d6ede0; white-space: nowrap; }
@@ -445,7 +522,8 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
         .pm-delete-title { font-size: 17px; font-weight: 700; color: #1a4a2e; margin-bottom: 6px; }
         .pm-delete-sub { font-size: 13.5px; color: #8a9a90; margin-bottom: 20px; font-weight: 500; }
         .pm-click-hint { font-size: 11px; color: #8aaa95; font-weight: 500; margin-left: 6px; font-style: italic; }
-        /* Recorder */
+        .pm-file-btn { display: inline-flex; align-items: center; justify-content: center; background: #e8f4fd; color: #1a6aaa; border: 1px solid #b8d8f0; border-radius: 6px; padding: 5px 9px; font-size: 14px; cursor: pointer; transition: background 0.15s; }
+        .pm-file-btn:hover { background: #cce5f8; }
         .mr-wrap * { font-family: 'Nunito Sans', sans-serif; box-sizing: border-box; }
         .mr-vad-ring { width: 56px; height: 56px; border-radius: 50%; border: 3px solid #d6ede0; display: flex; align-items: center; justify-content: center; font-size: 22px; background: #f7fbf8; flex-shrink: 0; transition: border-color 0.25s, background 0.25s; }
         .mr-vad-ring.speaking { border-color: #1a7a4a; background: #e6f4ec; animation: mrRingPulse 1s ease-in-out infinite; }
@@ -468,101 +546,230 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
         .pm-recorder-toggle.active { background: #e6f4ec; border-color: #1a7a4a; color: #1a4a2e; }
         .pm-recorder-section { border: 1.5px solid #d6ede0; border-radius: 10px; padding: 14px; background: #f7fbf8; margin-top: 8px; }
         .pm-recording-locked { border: 1.5px dashed #e0c99a; border-radius: 8px; padding: 12px 14px; background: #fffbf2; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: #9a7a30; }
+
+/* ── Viewer Modal ── */
+.vm-overlay{position:fixed;inset:0;
+background:rgba(220,235,225,0.40);
+
+display:flex;justify-content:center;align-items:center;z-index:3000;padding:12px;}
+.vm-box{background:#fff;border-radius:12px;display:flex;flex-direction:column;overflow:hidden;
+box-shadow:0 8px 32px rgba(26,122,74,0.13),0 2px 8px rgba(0,0,0,0.08);border:1.5px solid #d6ede0;}
+.vm-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1.5px solid #eef7f2;background:#fff;flex-shrink:0;flex-wrap:wrap;gap:10px;}
+.vm-title{display:flex;align-items:center;gap:12px;min-width:0;color:red}
+.vm-icon-bg{width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+.vm-icon-bg.pdf{background:#fff2f2;border:1px solid #ffd5d5;}
+.vm-icon-bg.doc{background:#eef4ff;border:1px solid #c8d9f8;}
+.vm-icon-bg.xl{background:#edfff5;border:1px solid #b8e8cc;}
+.vm-icon-bg.img{background:#fff8ee;border:1px solid #ffdca8;}
+.vm-icon-bg.other{background:#f0f7f2;border:1px solid #c8e0cc;}
+.vm-name{font-size:14px;font-weight:700;color:#1a2e22;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.vm-sub{font-size:11.5px;color:#8aaa95;margin-top:2px;font-weight:600;display:flex;align-items:center;gap:5px;}
+.vm-sub-dot{width:5px;height:5px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.vm-sub-dot.pdf{background:#e05555;}
+.vm-sub-dot.doc{background:#4a7adc;}
+.vm-sub-dot.xl{background:#1a7a4a;}
+.vm-sub-dot.img{background:#e8a030;}
+.vm-sub-dot.other{background:#9ab5a0;}
+.vm-actions{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.vm-dl-btn{font-family:'Nunito Sans',sans-serif;font-size:13px;font-weight:700;background:#1a7a4a;color:#fff;border:none;border-radius:8px;padding:8px 16px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;cursor:pointer;transition:background 0.15s;}
+.vm-dl-btn:hover{background:#155e39;}
+.vm-close-btn{font-family:'Nunito Sans',sans-serif;background:#f0f7f2;color:#3a6b50;border:1.5px solid #c8e0cc;border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background 0.15s,color 0.15s,border-color 0.15s;}
+.vm-close-btn:hover{background:#fdecea;color:#c0392b;border-color:#f5c6c2;}
+.vm-body{flex:1;overflow:hidden;background:#fff;position:relative;}
+.vm-iframe{width:100%;height:100%;border:none;display:block;}
+.vm-img-wrap{width:100%;height:100%;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:24px;}
+.vm-img-wrap img{max-width:100%;height:auto;border-radius:8px;}
+.vm-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;}
+.vm-empty-icon{font-size:48px;}
+.vm-empty-title{font-size:14px;font-weight:700;color:#1a4a2e;margin:0;}
+.vm-empty-sub{font-size:12px;color:#9ab5a0;margin:0;font-weight:500;}
+
+
+     
       `}</style>
 
       <div className="pm-wrap" style={{ background: "#f0f4f0", minHeight: "100vh", padding: isMobile ? 12 : 24 }}>
 
+        {/* ── Toast ── */}
         {toast && (
-          <div style={{ position: "fixed", top: 16, right: 16, left: isMobile ? 16 : "auto", background: toast.type === "success" ? "#1a7a4a" : "#c0392b", color: "#fff", padding: "10px 18px", borderRadius: 8, fontWeight: 700, fontSize: 13.5, zIndex: 9999, fontFamily: "'Nunito Sans', sans-serif" }}>
+          <div style={{
+            position: "fixed", top: 16, right: 16,
+            left: isMobile ? 16 : "auto",
+            background: toast.type === "success" ? "#1a7a4a" : "#c0392b",
+            color: "#fff", padding: "10px 18px", borderRadius: 8,
+            fontWeight: 700, fontSize: 13.5, zIndex: 9999,
+            fontFamily: "'Nunito Sans', sans-serif",
+          }}>
             {toast.msg}
           </div>
         )}
 
+        {/* ── Page Header ── */}
         <div style={{ marginBottom: 16 }}>
           <h1 className="pm-title">Meeting Proceedings</h1>
-         {isFullAccess && <p className="pm-subtitle">Sabha Kamkaj manage करा</p>}
-          {isFullAccess && <button className="pm-btn-primary" onClick={openCreateModal}>+ Create Meeting</button>}
+          {isFullAccess && <p className="pm-subtitle">Sabha Kamkaj manage करा</p>}
+          {isFullAccess && (
+            <button className="pm-btn-primary" onClick={openCreateModal}>+ Create Meeting</button>
+          )}
         </div>
 
+        {/* ── Table / Cards ── */}
         <div style={{ background: "#fff", borderRadius: 12, padding: isMobile ? 12 : 20, overflowX: "auto" }}>
-          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", gap: 10, marginBottom: 15 }}>
+          <div style={{
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",
+            justifyContent: "space-between",
+            alignItems: isMobile ? "flex-start" : "center",
+            gap: 10, marginBottom: 15,
+          }}>
             <h3 className="pm-section-title">Records ({meetings.length})</h3>
-            <input className="pm-search" placeholder="Search meeting no..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: isMobile ? "100%" : "auto" }} />
+            <input
+              className="pm-search"
+              placeholder="Search meeting no..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ width: isMobile ? "100%" : "auto" }}
+            />
           </div>
 
+          {/* Mobile Cards */}
           {isMobile ? (
             <div>
-              {loading ? <div style={{ textAlign: "center", padding: 20, color: "#8a9a90" }}>Loading...</div>
-               : meetings.length === 0 ? <div style={{ textAlign: "center", padding: 20, color: "#8a9a90" }}>No records found</div>
-               : meetings.map((m, i) => (
-                <div className="pm-card" key={m._id} onClick={() => handleMeetingClick(m)}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                    <span style={{ fontWeight: 800, color: "#1a4a2e", fontSize: 14 }}>
-                      #{i + 1} — <span style={{ background: "#e6f4ec", color: "#1a6640", fontWeight: 700, fontSize: 12.5, padding: "3px 10px", borderRadius: 6 }}>{m.meetingNumber}</span>
-                      <span className="pm-click-hint">tap → subjects</span>
-                    </span>
-                    <div style={{ display: "flex", gap: 6 }} onClick={e => e.stopPropagation()}>
-                      <button className="pm-btn-edit" onClick={() => openEditModal(m)}>✏️</button>
-                      <button className="pm-btn-delete" onClick={() => setDeleteConfirm(m._id)}>🗑️</button>
+              {loading
+                ? <div style={{ textAlign: "center", padding: 20, color: "#8a9a90" }}>Loading...</div>
+                : meetings.length === 0
+                ? <div style={{ textAlign: "center", padding: 20, color: "#8a9a90" }}>No records found</div>
+                : meetings.map((m, i) => (
+                  <div className="pm-card" key={m._id} onClick={() => handleMeetingClick(m)}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                      <span style={{ fontWeight: 800, color: "#1a4a2e", fontSize: 14 }}>
+                        #{i + 1} —{" "}
+                        <span style={{ background: "#e6f4ec", color: "#1a6640", fontWeight: 700, fontSize: 12.5, padding: "3px 10px", borderRadius: 6 }}>
+                          {m.meetingNumber}
+                        </span>
+                        <span className="pm-click-hint">tap → subjects</span>
+                      </span>
+                      <div style={{ display: "flex", gap: 6 }} onClick={e => e.stopPropagation()}>
+                        {/* Agenda file icons — mobile */}
+                        {Array.isArray(m.agendaFiles) && m.agendaFiles.length > 0 && (
+                          <div style={{ display: "flex", gap: 4 }}>
+                            {m.agendaFiles.map((url, idx) => {
+                              const { icon } = getFileInfo(url);
+                              return (
+                                <button
+                                  key={idx}
+                                  className="pm-file-btn"
+                                  title={`View File ${idx + 1}`}
+                                  onClick={() => openViewer(url)}
+                                >
+                                  {icon}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                        {isFullAccess && (
+                          <>
+                            <button className="pm-btn-edit"   onClick={() => openEditModal(m)}>✏️</button>
+                            <button className="pm-btn-delete" onClick={() => setDeleteConfirm(m._id)}>🗑️</button>
+                          </>
+                        )}
+                      </div>
                     </div>
+                    <div className="pm-card-row"><span className="pm-card-label">Type</span><span>{m.meetingType || "-"}</span></div>
+                    <div className="pm-card-row"><span className="pm-card-label">Date</span><span>{m.meetingDate ? new Date(m.meetingDate).toLocaleDateString("en-IN") : "-"}</span></div>
+                    <div className="pm-card-row"><span className="pm-card-label">Time</span><span className="time-badge">{formatTime(m.meetingTime)}</span></div>
                   </div>
-                  <div className="pm-card-row"><span className="pm-card-label">Type</span><span>{m.meetingType || "-"}</span></div>
-                  <div className="pm-card-row"><span className="pm-card-label">Date</span><span>{m.meetingDate ? new Date(m.meetingDate).toLocaleDateString("en-IN") : "-"}</span></div>
-                  <div className="pm-card-row"><span className="pm-card-label">Time</span><span className="time-badge">{formatTime(m.meetingTime)}</span></div>
-                </div>
-              ))}
+                ))
+              }
             </div>
           ) : (
+            // Desktop Table
             <table className="pm-table" style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
-                {/* <tr>{["#", "Meeting No", "Type", "Date", "Time", "Actions"].map(h => <th key={h}>{h}</th>)}</tr> */}
                 <tr>
-                 {["#", "Meeting No", "Type", "Date", "Time"].map(h => <th key={h}>{h}</th>)}
-                 {isFullAccess && <th>Actions</th>}
+                  {["#", "Meeting No", "Type", "Date", "Time"].map(h => <th key={h}>{h}</th>)}
+                  {isFullAccess && <th>Actions</th>}
                 </tr>
               </thead>
               <tbody>
-                {loading ? <tr><td colSpan={6} style={{ textAlign: "center", padding: 24, color: "#8a9a90" }}>Loading...</td></tr>
-                 : meetings.length === 0 ? <tr><td colSpan={6} style={{ textAlign: "center", padding: 24, color: "#8a9a90" }}>No records found</td></tr>
-                 : meetings.map((m, i) => (
-                  <tr key={m._id}>
-                    <td>{i + 1}</td>
-                    <td>
-                      <span className="meeting-no-link" onClick={() => handleMeetingClick(m)} title="Click to view/add subjects">
-                        {m.meetingNumber}
-                      </span>
-                    </td>
-                    <td>{m.meetingType}</td>
-                    <td>{m.meetingDate ? new Date(m.meetingDate).toLocaleDateString("en-IN") : "-"}</td>
-                    <td><span className="time-badge">{formatTime(m.meetingTime)}</span></td>
-                    {isFullAccess && 
-                    <td>
-                      <div style={{ display: "flex", gap: 6 }}>
-                        <button className="pm-btn-edit" onClick={() => openEditModal(m)}>✏️ Edit</button>
-                        <button className="pm-btn-delete" onClick={() => setDeleteConfirm(m._id)}>🗑️ Delete</button>
-                      </div>
-                    </td>
-                     }
-                  </tr>
-                ))}
+                {loading
+                  ? <tr><td colSpan={6} style={{ textAlign: "center", padding: 24, color: "#8a9a90" }}>Loading...</td></tr>
+                  : meetings.length === 0
+                  ? <tr><td colSpan={6} style={{ textAlign: "center", padding: 24, color: "#8a9a90" }}>No records found</td></tr>
+                  : meetings.map((m, i) => (
+                    <tr key={m._id}>
+                      <td>{i + 1}</td>
+                      <td>
+                        <span
+                          className="meeting-no-link"
+                          onClick={() => handleMeetingClick(m)}
+                          title="Click to view/add subjects"
+                        >
+                          {m.meetingNumber}
+                        </span>
+                      </td>
+                      <td>{m.meetingType}</td>
+                      <td>{m.meetingDate ? new Date(m.meetingDate).toLocaleDateString("en-IN") : "-"}</td>
+                      <td><span className="time-badge">{formatTime(m.meetingTime)}</span></td>
+
+                      {isFullAccess && (
+                        <td>
+                          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                            {/* ✅ Agenda File Icons — click → viewer modal */}
+                            {Array.isArray(m.agendaFiles) && m.agendaFiles.length > 0 && (
+                              <div style={{ display: "flex", gap: 4 }}>
+                                {m.agendaFiles.map((url, idx) => {
+                                  const { icon } = getFileInfo(url);
+                                  return (
+                                    <button
+                                      key={idx}
+                                      className="pm-file-btn"
+                                      title={`View File ${idx + 1}`}
+                                      onClick={() => openViewer(url)}
+                                    >
+                                      {icon}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                            <button className="pm-btn-edit"   onClick={() => openEditModal(m)}>✏️ Edit</button>
+                            <button className="pm-btn-delete" onClick={() => setDeleteConfirm(m._id)}>🗑️ Delete</button>
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  ))
+                }
               </tbody>
             </table>
           )}
         </div>
 
-        {/* ── Modal ── */}
+        {/* ── Create / Edit Modal ── */}
         {showModal && (
           <div style={modalOverlay}>
-            <div style={{ background: "#fff", borderRadius: 12, padding: isMobile ? 16 : 25, width: isMobile ? "95%" : "60%", maxWidth: 680, maxHeight: "90vh", overflowY: "auto" }}>
+            <div style={{
+              background: "#fff", borderRadius: 12,
+              padding: isMobile ? 16 : 25,
+              width: isMobile ? "95%" : "60%", maxWidth: 680,
+              maxHeight: "90vh", overflowY: "auto",
+            }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
                 <h3 className="pm-modal-title">{editId ? "Edit Meeting" : "Create Meeting"}</h3>
-                <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: "#8a9a90" }}>✕</button>
+                <button
+                  onClick={() => setShowModal(false)}
+                  style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: "#8a9a90" }}
+                >✕</button>
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 14 }}>
 
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                  <label className="pm-label">Meeting Number <span className="pm-auto-badge">Auto Generated</span></label>
+                  <label className="pm-label">
+                    Meeting Number <span className="pm-auto-badge">Auto Generated</span>
+                  </label>
                   <input className="pm-input-readonly" value={formData.meetingNumber} readOnly />
                 </div>
 
@@ -585,11 +792,15 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
                   <div style={{ display: "flex", gap: 6 }}>
                     <select className="pm-input" name="meetingHour" value={formData.meetingHour} onChange={handleChange} style={{ flex: 1, padding: "10px 4px" }}>
                       <option value="">HH</option>
-                      {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")).map(h => <option key={h} value={h}>{h}</option>)}
+                      {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")).map(h => (
+                        <option key={h} value={h}>{h}</option>
+                      ))}
                     </select>
                     <select className="pm-input" name="meetingMinute" value={formData.meetingMinute} onChange={handleChange} style={{ flex: 1, padding: "10px 4px" }}>
                       <option value="">MM</option>
-                      {["00","05","10","15","20","25","30","35","40","45","50","55"].map(m => <option key={m} value={m}>{m}</option>)}
+                      {["00","05","10","15","20","25","30","35","40","45","50","55"].map(m => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
                     </select>
                     <select className="pm-input" name="meetingAmpm" value={formData.meetingAmpm} onChange={handleChange} style={{ flex: 1, padding: "10px 4px" }}>
                       <option value="AM">AM</option>
@@ -598,19 +809,106 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
                   </div>
                 </div>
 
+                {/* ✅ Agenda Files — XLS/XLSX accept added */}
+                <div style={{ display: "flex", flexDirection: "column", gridColumn: isMobile ? "1" : "span 2" }}>
+                  <label className="pm-label">
+                    Agenda 
+                    <span style={{ fontSize: 11, color: "#8a9a90", fontWeight: 500, marginLeft: 6 }}>
+                      (PDF, Word, Excel, PNG, JPG — max 12, optional)
+                    </span>
+                  </label>
+                  <div style={{ border: "1.5px dashed #c8e0cc", borderRadius: 8, padding: "10px 14px", background: "#f7fbf8" }}>
+
+                    {/* Existing files */}
+                    {existingAgendaFiles.length > 0 && (
+                      <div style={{ marginBottom: 8 }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "#5a7a6a", marginBottom: 4 }}>Existing Files:</div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                          {existingAgendaFiles.map((url, idx) => (
+                            <div key={idx} style={{ display: "flex", alignItems: "center", gap: 4, background: "#e6f4ec", borderRadius: 6, padding: "3px 8px" }}>
+                              <button
+                                onClick={() => openViewer(url)}
+                                style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, color: "#1a6640", padding: 0, display: "flex", alignItems: "center", gap: 4 }}
+                              >
+                                {getFileInfo(url).icon} File {idx + 1}
+                              </button>
+                              <button
+                                onClick={() => setExistingAgendaFiles(prev => prev.filter((_, i) => i !== idx))}
+                                style={{ background: "#fdecea", color: "#c0392b", border: "none", borderRadius: 4, padding: "1px 5px", cursor: "pointer", fontSize: 11, fontWeight: 700 }}
+                              >✕</button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Choose Files */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                      <label style={{
+                        fontFamily: "'Nunito Sans', sans-serif", fontSize: 13, fontWeight: 700,
+                        background: "#e6f4ec", color: "#1a6640", border: "1.5px solid #c8e0cc",
+                        borderRadius: 7, padding: "6px 14px", cursor: "pointer",
+                      }}>
+                        📁 Choose Files
+                        <input
+                          type="file"
+                          multiple
+                          accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,image/png,image/jpeg"
+                          style={{ display: "none" }}
+                          onChange={e => {
+                            const selected = Array.from(e.target.files);
+                            const total = existingAgendaFiles.length + agendaFiles.length + selected.length;
+                            if (total > 12) { showToast("Maximum 12 files allowed!", "error"); return; }
+                            setAgendaFiles(prev => [...prev, ...selected]);
+                            e.target.value = "";
+                          }}
+                        />
+                      </label>
+                      <span style={{ fontSize: 12, color: "#8a9a90" }}>
+                        {existingAgendaFiles.length + agendaFiles.length}/12 files
+                      </span>
+                    </div>
+
+                    {/* Newly selected files */}
+                    {agendaFiles.length > 0 && (
+                      <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {agendaFiles.map((f, idx) => (
+                          <div key={idx} style={{ display: "flex", alignItems: "center", gap: 4, background: "#fff8e1", border: "1px solid #ffe082", borderRadius: 6, padding: "3px 8px" }}>
+                            <span style={{ fontSize: 12, fontWeight: 600, color: "#7a5a00" }}>📄 {f.name}</span>
+                            <button
+                              onClick={() => setAgendaFiles(prev => prev.filter((_, i) => i !== idx))}
+                              style={{ background: "#fdecea", color: "#c0392b", border: "none", borderRadius: 4, padding: "1px 5px", cursor: "pointer", fontSize: 11, fontWeight: 700 }}
+                            >✕</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 {/* Edit-only: Record + Upload */}
                 {editId && (
                   meetingTimeReached ? (
                     <>
                       <div style={{ gridColumn: isMobile ? "1" : "span 2" }}>
-                        <button className={`pm-recorder-toggle ${showRecorder ? "active" : ""}`} onClick={() => setShowRecorder(v => !v)} type="button">
+                        <button
+                          className={`pm-recorder-toggle ${showRecorder ? "active" : ""}`}
+                          onClick={() => setShowRecorder(v => !v)}
+                          type="button"
+                        >
                           🎙️ {showRecorder ? "Hide Recorder" : "Record Meeting"}
                         </button>
                         {showRecorder && (
                           <div className="pm-recorder-section">
                             <MeetingRecorder
-                              onRecordingReady={(url) => { meetingRecordingRef.current = url; setMeetingRecording(url); showToast("Recording saved! 🔴"); }}
-                              onDecisionExtracted={(text) => { aiExtractedDecisionRef.current = text?.trim() || ""; }}
+                              onRecordingReady={(url) => {
+                                meetingRecordingRef.current = url;
+                                setMeetingRecording(url);
+                                showToast("Recording saved! 🔴");
+                              }}
+                              onDecisionExtracted={(text) => {
+                                aiExtractedDecisionRef.current = text?.trim() || "";
+                              }}
                               onTranscriptUpdate={() => {}}
                             />
                           </div>
@@ -620,12 +918,27 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
                       <div style={{ display: "flex", flexDirection: "column", gridColumn: isMobile ? "1" : "span 2" }}>
                         <label className="pm-label">Upload Meeting Recording (optional)</label>
                         <div style={{ border: "1.5px dashed #c8e0cc", borderRadius: 8, padding: "10px 14px", background: "#f7fbf8", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-                          <label style={{ fontFamily: "'Nunito Sans', sans-serif", fontSize: 13, fontWeight: 700, background: "#e6f4ec", color: "#1a6640", border: "1.5px solid #c8e0cc", borderRadius: 7, padding: "6px 14px", cursor: "pointer" }}>
+                          <label style={{
+                            fontFamily: "'Nunito Sans', sans-serif", fontSize: 13, fontWeight: 700,
+                            background: "#e6f4ec", color: "#1a6640", border: "1.5px solid #c8e0cc",
+                            borderRadius: 7, padding: "6px 14px", cursor: "pointer",
+                          }}>
                             📁 Choose File
-                            <input type="file" accept="audio/*,video/webm" style={{ display: "none" }} onChange={e => { const f = e.target.files[0]; if (f) setManualRecordingFile(f); }} />
+                            <input
+                              type="file"
+                              accept="audio/*,video/webm"
+                              style={{ display: "none" }}
+                              onChange={e => { const f = e.target.files[0]; if (f) setManualRecordingFile(f); }}
+                            />
                           </label>
                           {manualRecordingFile
-                            ? <span style={{ fontSize: 12.5, fontWeight: 600, color: "#1a4a2e" }}>🎵 {manualRecordingFile.name} <button onClick={() => setManualRecordingFile(null)} style={{ background: "#fdecea", color: "#c0392b", border: "none", borderRadius: 5, padding: "2px 6px", cursor: "pointer", fontSize: 11, fontWeight: 700, marginLeft: 6 }}>✕</button></span>
+                            ? <span style={{ fontSize: 12.5, fontWeight: 600, color: "#1a4a2e" }}>
+                                🎵 {manualRecordingFile.name}{" "}
+                                <button
+                                  onClick={() => setManualRecordingFile(null)}
+                                  style={{ background: "#fdecea", color: "#c0392b", border: "none", borderRadius: 5, padding: "2px 6px", cursor: "pointer", fontSize: 11, fontWeight: 700, marginLeft: 6 }}
+                                >✕</button>
+                              </span>
                             : meetingRecording
                               ? <span style={{ fontSize: 12.5, fontWeight: 600, color: "#1a4a2e" }}>🔴 Auto-recording saved</span>
                               : <span style={{ fontSize: 12.5, color: "#9ab5a0" }}>No file chosen</span>
@@ -646,7 +959,6 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
                     </div>
                   )
                 )}
-
               </div>
 
               {!editId && (
@@ -665,7 +977,7 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
           </div>
         )}
 
-        {/* Delete Confirm */}
+        {/* ── Delete Confirm ── */}
         {deleteConfirm && (
           <div style={modalOverlay}>
             <div style={{ background: "#fff", padding: 28, borderRadius: 12, maxWidth: 380, width: isMobile ? "90%" : "100%", textAlign: "center" }}>
@@ -673,9 +985,141 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
               <p className="pm-delete-sub">He record permanently delete होईल. Sure aahes ka?</p>
               <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
                 <button className="pm-btn-cancel" onClick={() => setDeleteConfirm(null)}>Cancel</button>
-                <button className="pm-btn-primary" style={{ background: "#c0392b" }} onClick={() => handleDelete(deleteConfirm)} disabled={loading}>
+                <button
+                  className="pm-btn-primary"
+                  style={{ background: "#c0392b" }}
+                  onClick={() => handleDelete(deleteConfirm)}
+                  disabled={loading}
+                >
                   {loading ? "Deleting..." : "Yes, Delete"}
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── ✅ File Viewer Modal ── */}
+        {viewerModal && (
+          <div className="vm-overlay" onClick={() => setViewerModal(null)}>
+            <div
+              className="vm-box"
+              style={{
+                width:  isMobile ? "99%" : "86%",
+                maxWidth: 1020,
+                height: isMobile ? "97vh" : "90vh",
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+             
+
+             
+<div className="vm-header">
+  <div className="vm-title">
+    <div className="vm-icon-wrap">
+      {viewerModal.type === "pdf"  ? "📄"
+       : viewerModal.type === "doc" ? "📝"
+       : viewerModal.type === "xl"  ? "📊"
+       : viewerModal.type === "img" ? "🖼️" : "📁"}
+    </div>
+    <div>
+      <div className="vm-name" style={{ maxWidth: isMobile ? 160 : 440 }}>
+        {viewerModal.name}
+      </div>
+      <div className="vm-sub">
+        {viewerModal.type === "pdf"  ? "PDF Document"
+         : viewerModal.type === "doc" ? "Word Document"
+         : viewerModal.type === "xl"  ? "Excel / Spreadsheet"
+         : viewerModal.type === "img" ? "Image File"
+         : "Document"}
+      </div>
+    </div>
+  </div>
+  <div className="vm-actions">
+    <a
+      href={viewerModal.url}
+      download={viewerModal.name}
+      target="_blank"
+      rel="noreferrer"
+      className="vm-dl-btn"
+    >
+      ⬇ Download
+    </a>
+    <button className="vm-close-btn" onClick={() => setViewerModal(null)}>✕</button>
+  </div>
+</div>
+
+              
+              <div className="vm-body">
+
+              
+                {viewerModal.type === "img" && (
+                  <div className="vm-img-wrap">
+                    <img src={viewerModal.url} alt={viewerModal.name} />
+                  </div>
+                )}
+
+               
+                {/* {viewerModal.type === "pdf" && (
+                  <iframe
+                    key={viewerModal.url}
+                    className="vm-iframe"
+                    src={viewerModal.url}
+                    title={viewerModal.name}
+                    allow="fullscreen"
+                  />
+                )} */}
+
+
+                {viewerModal.type === "pdf" && (
+  <iframe
+    key={viewerModal.url}
+    className="vm-iframe"
+    src={`https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(viewerModal.url)}`}
+    title={viewerModal.name}
+    allow="fullscreen"
+  />
+)}
+
+               
+                {viewerModal.type === "doc" && (
+                  <iframe
+                    key={viewerModal.url}
+                    className="vm-iframe"
+                    src={`https://docs.google.com/viewer?url=${encodeURIComponent(viewerModal.url)}&embedded=true`}
+                    title={viewerModal.name}
+                    allow="fullscreen"
+                  />
+                )}
+
+              
+                {viewerModal.type === "xl" && (
+                  <iframe
+                    key={viewerModal.url}
+                    className="vm-iframe"
+                    src={`https://docs.google.com/viewer?url=${encodeURIComponent(viewerModal.url)}&embedded=true`}
+                    title={viewerModal.name}
+                    allow="fullscreen"
+                  />
+                )}
+
+               
+                {viewerModal.type === "other" && (
+                  <div className="vm-empty">
+                    <span>📁</span>
+                    <p>Preview उपलब्ध नाही</p>
+                    <small>खाली download करा</small>
+                    <a
+                      href={viewerModal.url}
+                      download={viewerModal.name}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="vm-dl-btn"
+                      style={{ marginTop: 8 }}
+                    >
+                      ⬇ Download करा
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -686,4 +1130,12 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
   );
 }
 
-const modalOverlay = { position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000, padding: 16 };
+const modalOverlay = {
+  position: "fixed", inset: 0,
+  background: "rgba(0,0,0,0.4)",
+  display: "flex", justifyContent: "center", alignItems: "center",
+  zIndex: 1000, padding: 16,
+};
+
+
+
