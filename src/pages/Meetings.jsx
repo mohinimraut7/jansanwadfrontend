@@ -251,23 +251,27 @@ export default function Meetings() {
     return `${hour}:${minute} ${ampm}`;
   };
 
+  // ✅ FIX: Use axiosInstance so auth headers are always sent,
+  // ensuring meetingDate and meetingTime are returned in every response.
   const fetchMeetings = async (searchVal = "") => {
     try {
       setLoading(true);
-      const url = searchVal
-        ? `${BASE_URL}/getMeetings?search=${searchVal}`
-        : `${BASE_URL}/getMeetings`;
-      const res  = await fetch(url);
-      const data = await res.json();
+      const params = searchVal ? { search: searchVal } : {};
+      const res = await axiosInstance.get("/getMeetings", { params });
+      const data = res.data;
       if (data.success) {
         const authUser     = getAuthUser();
         const userRole     = authUser?.role           || "";
         const userDept     = authUser?.departmentName || "";
         const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
+
+        // ✅ Preserve ALL fields from each meeting (including meetingDate, meetingTime)
+        const allMeetings = data.data || [];
+
         if (isFullAccess) {
-          setMeetings(data.data);
+          setMeetings(allMeetings);
         } else {
-          const filtered = (data.data || []).filter(meeting =>
+          const filtered = allMeetings.filter(meeting =>
             Array.isArray(meeting.subjects) &&
             meeting.subjects.some(sub =>
               Array.isArray(sub.tagTo) && sub.tagTo.includes(userDept)
@@ -301,8 +305,8 @@ export default function Meetings() {
     setExistingAgendaFiles([]);
     setShowModal(true);
     try {
-      const res  = await fetch(`${BASE_URL}/getNextMeetingId`);
-      const data = await res.json();
+      const res  = await axiosInstance.get("/getNextMeetingId");
+      const data = res.data;
       setFormData({ ...emptyForm, meetingNumber: data.success ? data.meetingId : generateMeetingId(meetings) });
     } catch {
       setFormData({ ...emptyForm, meetingNumber: generateMeetingId(meetings) });
@@ -350,8 +354,8 @@ export default function Meetings() {
       if (formData.meetingDate) fd.append("meetingDate", formData.meetingDate);
       if (buildTimeString())    fd.append("meetingTime", buildTimeString());
       agendaFiles.forEach(f => fd.append("agendaFiles", f));
-      const res  = await fetch(`${BASE_URL}/createMeeting`, { method: "POST", body: fd });
-      const data = await res.json();
+      const res  = await axiosInstance.post("/createMeeting", fd);
+      const data = res.data;
       if (data.success) { setShowModal(false); showToast("Meeting created!"); fetchMeetings(search); }
       else showToast(data.message || "Failed", "error");
     } catch { showToast("Server error.", "error"); }
@@ -381,8 +385,8 @@ export default function Meetings() {
       } else if (recordingVal && !manualRecordingFile) {
         fd.append("existingRecordingUrl", recordingVal);
       }
-      const res  = await fetch(`${BASE_URL}/updateMeeting/${editId}`, { method: "PUT", body: fd });
-      const data = await res.json();
+      const res  = await axiosInstance.put(`/updateMeeting/${editId}`, fd);
+      const data = res.data;
       if (data.success) { setShowModal(false); setEditId(null); showToast("Meeting updated!"); fetchMeetings(search); }
       else showToast(data.message || "Failed", "error");
     } catch { showToast("Server error.", "error"); }
@@ -400,21 +404,23 @@ export default function Meetings() {
   const handleDelete = async (id) => {
     try {
       setLoading(true);
-      const res  = await fetch(`${BASE_URL}/deleteMeeting/${id}`, { method: "DELETE" });
-      const data = await res.json();
+      const res  = await axiosInstance.delete(`/deleteMeeting/${id}`);
+      const data = res.data;
       if (data.success) { setDeleteConfirm(null); showToast("Meeting deleted!"); fetchMeetings(search); }
       else showToast(data.message || "Failed", "error");
     } catch { showToast("Server error.", "error"); }
     finally { setLoading(false); }
   };
 
+  // ✅ FIX: Pass meetingDate and meetingTime explicitly from the meeting object
+  // so SpecificMeetingSubjects always receives them via navigation state.
   const handleMeetingClick = (m) => {
     navigate(`/proceedingsmeeting/${m._id}`, {
       state: {
         meetingNumber: m.meetingNumber,
         meetingType:   m.meetingType,
-        meetingDate:   m.meetingDate,
-        meetingTime:   m.meetingTime,
+        meetingDate:   m.meetingDate   || null,
+        meetingTime:   m.meetingTime   || null,
       },
     });
   };
@@ -443,15 +449,6 @@ export default function Meetings() {
     };
   };
 
-  // ✅ Open viewer modal
-  // const openViewer = (url) => {
-  //   const cleanUrl = getCloudinaryUrl(url);
-  //   const { type } = getFileInfo(url);
-  //   const fname = url.split("/").pop()?.split("?")[0] || "Document";
-  //   setViewerModal({ url: cleanUrl, name: fname, type });
-  // };
-
-
 // ✅ Signed URL घेऊन viewer उघडा
 const openViewer = async (url) => {
   const { type } = getFileInfo(url);
@@ -464,12 +461,8 @@ const openViewer = async (url) => {
   }
 
   try {
-    const res  = await fetch(`${BASE_URL}/getSignedFileUrl`, {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ fileUrl: url }),
-    });
-    const data = await res.json();
+    const res  = await axiosInstance.post("/getSignedFileUrl", { fileUrl: url });
+    const data = res.data;
     if (data.success) {
       setViewerModal({ url: data.url, name: fname, type });
     } else {
@@ -677,8 +670,15 @@ box-shadow:0 8px 32px rgba(26,122,74,0.13),0 2px 8px rgba(0,0,0,0.08);border:1.5
                       </div>
                     </div>
                     <div className="pm-card-row"><span className="pm-card-label">Type</span><span>{m.meetingType || "-"}</span></div>
-                    <div className="pm-card-row"><span className="pm-card-label">Date</span><span>{m.meetingDate ? new Date(m.meetingDate).toLocaleDateString("en-IN") : "-"}</span></div>
-                    <div className="pm-card-row"><span className="pm-card-label">Time</span><span className="time-badge">{formatTime(m.meetingTime)}</span></div>
+                    {/* ✅ FIX: Always show Date and Time from fetched meeting data */}
+                    <div className="pm-card-row">
+                      <span className="pm-card-label">Date</span>
+                      <span>{m.meetingDate ? new Date(m.meetingDate).toLocaleDateString("en-IN") : "-"}</span>
+                    </div>
+                    <div className="pm-card-row">
+                      <span className="pm-card-label">Time</span>
+                      <span className="time-badge">{formatTime(m.meetingTime)}</span>
+                    </div>
                   </div>
                 ))
               }
@@ -710,6 +710,7 @@ box-shadow:0 8px 32px rgba(26,122,74,0.13),0 2px 8px rgba(0,0,0,0.08);border:1.5
                         </span>
                       </td>
                       <td>{m.meetingType}</td>
+                      {/* ✅ FIX: Date and Time always rendered from fetched m object */}
                       <td>{m.meetingDate ? new Date(m.meetingDate).toLocaleDateString("en-IN") : "-"}</td>
                       <td><span className="time-badge">{formatTime(m.meetingTime)}</span></td>
 
@@ -1058,18 +1059,6 @@ box-shadow:0 8px 32px rgba(26,122,74,0.13),0 2px 8px rgba(0,0,0,0.08);border:1.5
                   </div>
                 )}
 
-               
-                {/* {viewerModal.type === "pdf" && (
-                  <iframe
-                    key={viewerModal.url}
-                    className="vm-iframe"
-                    src={viewerModal.url}
-                    title={viewerModal.name}
-                    allow="fullscreen"
-                  />
-                )} */}
-
-
                 {viewerModal.type === "pdf" && (
   <iframe
     key={viewerModal.url}
@@ -1136,6 +1125,3 @@ const modalOverlay = {
   display: "flex", justifyContent: "center", alignItems: "center",
   zIndex: 1000, padding: 16,
 };
-
-
-

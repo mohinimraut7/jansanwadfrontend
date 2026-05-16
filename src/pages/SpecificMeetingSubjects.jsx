@@ -42,8 +42,18 @@ export default function SpecificMeetingSubjects() {
   const location      = useLocation();
   const navigate      = useNavigate();
 
-  // Meeting info from navigation state OR fetch
-  const [meetingInfo, setMeetingInfo] = useState(location.state || null);
+  // ✅ FIX: Initialise meetingInfo from navigation state immediately so
+  // meetingDate and meetingTime are visible before fetchSubjects completes.
+  const [meetingInfo, setMeetingInfo] = useState(
+    location.state
+      ? {
+          meetingNumber: location.state.meetingNumber || null,
+          meetingType:   location.state.meetingType   || null,
+          meetingDate:   location.state.meetingDate   || null,
+          meetingTime:   location.state.meetingTime   || null,
+        }
+      : null
+  );
 
   // Selected meeting
   const [selectedMeetingId, setSelectedMeetingId] = useState(meetingId || null);
@@ -94,62 +104,47 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
     fetchDepts();
   }, []);
 
-  // Fetch subjects for selected meeting
-  // const fetchSubjects = async (mId) => {
-  //   if (!mId) return;
-  //   try {
-  //     setLoading(true);
-  //     const res  = await fetch(`${BASE_URL}/getMeetings`);
-  //     const data = await res.json();
-  //     if (data.success) {
-  //       const meeting = data.data.find(m => m._id === mId);
-  //       if (meeting) {
-  //         setMeetingInfo({ meetingNumber: meeting.meetingNumber, meetingType: meeting.meetingType, meetingDate: meeting.meetingDate, meetingTime: meeting.meetingTime });
-  //         setSubjects(Array.isArray(meeting.subjects) ? meeting.subjects : []);
-  //       }
-  //     }
-  //   } catch { showToast("Failed to load subjects", "error"); }
-  //   finally { setLoading(false); }
-  // };
-
+  // ✅ FIX: fetchSubjects always preserves meetingDate and meetingTime from API response.
+  // Navigation state provides immediate display; API response keeps it accurate after refresh.
   const fetchSubjects = async (mId) => {
-  if (!mId) return;
-  try {
-    setLoading(true);
-    const res  = await fetch(`${BASE_URL}/getMeetings`);
-    const data = await res.json();
-    if (data.success) {
-      const authUser     = getAuthUser();
-      const userRole     = authUser?.role           || "";
-      const userDept     = authUser?.departmentName || "";
-      const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
+    if (!mId) return;
+    try {
+      setLoading(true);
+      const res  = await axiosInstance.get("/getMeetings");
+      const data = res.data;
+      if (data.success) {
+        const authUser     = getAuthUser();
+        const userRole     = authUser?.role           || "";
+        const userDept     = authUser?.departmentName || "";
+        const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
 
-      const meeting = data.data.find(m => m._id === mId);
-      if (meeting) {
-        setMeetingInfo({
-          meetingNumber: meeting.meetingNumber,
-          meetingType:   meeting.meetingType,
-          meetingDate:   meeting.meetingDate,
-          meetingTime:   meeting.meetingTime,
-        });
+        const meeting = data.data.find(m => m._id === mId);
+        if (meeting) {
+          // ✅ Always set ALL four fields so date and time are never lost
+          setMeetingInfo({
+            meetingNumber: meeting.meetingNumber || null,
+            meetingType:   meeting.meetingType   || null,
+            meetingDate:   meeting.meetingDate   || null,
+            meetingTime:   meeting.meetingTime   || null,
+          });
 
-        const allSubjects = Array.isArray(meeting.subjects) ? meeting.subjects : [];
+          const allSubjects = Array.isArray(meeting.subjects) ? meeting.subjects : [];
 
-        if (isFullAccess) {
-          // ── Super Admin / Mayor etc → सगळे subjects ──
-          setSubjects(allSubjects);
-        } else {
-          // ── Department user → फक्त tagTo मध्ये त्यांचा dept असलेले ──
-          const filtered = allSubjects.filter(sub =>
-            Array.isArray(sub.tagTo) && sub.tagTo.includes(userDept)
-          );
-          setSubjects(filtered);
+          if (isFullAccess) {
+            // ── Super Admin / Mayor etc → सगळे subjects ──
+            setSubjects(allSubjects);
+          } else {
+            // ── Department user → फक्त tagTo मध्ये त्यांचा dept असलेले ──
+            const filtered = allSubjects.filter(sub =>
+              Array.isArray(sub.tagTo) && sub.tagTo.includes(userDept)
+            );
+            setSubjects(filtered);
+          }
         }
       }
-    }
-  } catch { showToast("Failed to load subjects", "error"); }
-  finally { setLoading(false); }
-};
+    } catch { showToast("Failed to load subjects", "error"); }
+    finally { setLoading(false); }
+  };
 
   useEffect(() => {
     if (selectedMeetingId) fetchSubjects(selectedMeetingId);
@@ -196,49 +191,6 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
   };
 
   // ── Save Subject (Add or Edit) ─────────────────────────────
-  // const handleSaveSubject = async () => {
-  //   if (!subjectForm.subjectName.trim()) { showToast("Subject Name is required", "error"); return; }
-
-  //   try {
-  //     setLoading(true);
-
-  //     let updatedSubjects;
-  //     if (editSubjectIdx === null) {
-  //       const newSubject = {
-  //         subjectId:         getSubjectId(meetingInfo?.meetingNumber, subjects.length),
-  //         subjectName:       subjectForm.subjectName,
-  //         subjectType:       subjectForm.subjectType,
-  //         decisionInMeeting: subjectForm.decisionInMeeting,
-  //         tagTo:             subjectForm.tagTo,
-  //       };
-  //       updatedSubjects = [...subjects, newSubject];
-  //     } else {
-  //       updatedSubjects = subjects.map((sub, i) =>
-  //         i === editSubjectIdx
-  //           ? { ...sub, subjectName: subjectForm.subjectName, subjectType: subjectForm.subjectType, decisionInMeeting: subjectForm.decisionInMeeting, tagTo: subjectForm.tagTo }
-  //           : sub
-  //       );
-  //     }
-
-  //     const fd = new FormData();
-  //     fd.append("subjects", JSON.stringify(updatedSubjects));
-  //     if (meetingInfo?.meetingNumber) fd.append("meetingNumber", meetingInfo.meetingNumber);
-  //     if (meetingInfo?.meetingType)   fd.append("meetingType",   meetingInfo.meetingType);
-
-  //     const res  = await fetch(`${BASE_URL}/updateMeeting/${selectedMeetingId}`, { method: "PUT", body: fd });
-  //     const data = await res.json();
-  //     if (data.success) {
-  //       showToast(editSubjectIdx === null ? "Subject added!" : "Subject updated!");
-  //       setShowModal(false);
-  //       fetchSubjects(selectedMeetingId);
-  //     } else {
-  //       showToast(data.message || "Failed to save", "error");
-  //     }
-  //   } catch { showToast("Server error", "error"); }
-  //   finally { setLoading(false); }
-  // };
-
-  // ── Save Subject (Add or Edit) ─────────────────────────────
 const handleSaveSubject = async () => {
   if (!subjectForm.subjectName.trim()) { showToast("Subject Name is required", "error"); return; }
 
@@ -256,8 +208,8 @@ const handleSaveSubject = async () => {
       fd.append("decisionInMeeting", subjectForm.decisionInMeeting || "");
       fd.append("tagTo",             JSON.stringify(subjectForm.tagTo));
 
-      const res  = await fetch(`${BASE_URL}/updateMeeting/updateSubject/${subjectId}`, { method: "PUT", body: fd });
-      const data = await res.json();
+      const res  = await axiosInstance.put(`/updateMeeting/updateSubject/${subjectId}`, fd);
+      const data = res.data;
 
       if (data.success) {
         showToast("Subject updated!");
@@ -282,9 +234,12 @@ const handleSaveSubject = async () => {
       fd.append("subjects", JSON.stringify(updatedSubjects));
       if (meetingInfo?.meetingNumber) fd.append("meetingNumber", meetingInfo.meetingNumber);
       if (meetingInfo?.meetingType)   fd.append("meetingType",   meetingInfo.meetingType);
+      // ADD block — after fd.append("meetingType", ...)
+if (meetingInfo?.meetingDate) fd.append("meetingDate", meetingInfo.meetingDate);
+if (meetingInfo?.meetingTime) fd.append("meetingTime", meetingInfo.meetingTime);
 
-      const res  = await fetch(`${BASE_URL}/updateMeeting/${selectedMeetingId}`, { method: "PUT", body: fd });
-      const data = await res.json();
+      const res  = await axiosInstance.put(`/updateMeeting/${selectedMeetingId}`, fd);
+      const data = res.data;
 
       if (data.success) {
         showToast("Subject added!");
@@ -308,9 +263,11 @@ const handleSaveSubject = async () => {
       fd.append("subjects", JSON.stringify(updatedSubjects));
       if (meetingInfo?.meetingNumber) fd.append("meetingNumber", meetingInfo.meetingNumber);
       if (meetingInfo?.meetingType)   fd.append("meetingType",   meetingInfo.meetingType);
+      if (meetingInfo?.meetingDate) fd.append("meetingDate", meetingInfo.meetingDate);
+if (meetingInfo?.meetingTime) fd.append("meetingTime", meetingInfo.meetingTime);
 
-      const res  = await fetch(`${BASE_URL}/updateMeeting/${selectedMeetingId}`, { method: "PUT", body: fd });
-      const data = await res.json();
+      const res  = await axiosInstance.put(`/updateMeeting/${selectedMeetingId}`, fd);
+      const data = res.data;
       if (data.success) { showToast("Subject deleted!"); setDeleteConfirm(null); fetchSubjects(selectedMeetingId); }
       else showToast(data.message || "Failed", "error");
     } catch { showToast("Server error", "error"); }
@@ -507,7 +464,7 @@ const handleSaveSubject = async () => {
           )}
         </div>
 
-        {/* Meeting Info Card */}
+        {/* ✅ Meeting Info Card — Date and Time always visible from meetingInfo state */}
         {meetingInfo && selectedMeetingId && (
           <div className="sms-meeting-card">
             <div className="sms-meeting-chip">
@@ -589,15 +546,10 @@ const handleSaveSubject = async () => {
             ) : (
               <table className="sms-table" style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
-                  {/* <tr>
-                    {["#", "Subject ID", "Subject Name", "Subject Type", "Decision", "Departments", "Actions"].map(h => <th key={h}>{h}</th>)}
-                  </tr> */}
                 <tr>
                  {["#", "Subject ID", "Subject Name", "Subject Type", "Decision", "Departments"].map(h => <th key={h}>{h}</th>)}
                  {isFullAccess && <th>Actions</th>}
                 </tr>
-
-
                 </thead>
                 <tbody>
                   {filteredSubjects.map((sub, i) => {
