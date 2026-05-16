@@ -79,6 +79,10 @@ export default function SpecificMeetingSubjects() {
   // Delete confirm
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
+  const [actionTakenModal, setActionTakenModal] = useState(null);
+const [actionTakenValue, setActionTakenValue] = useState("");
+const [actionTakenLoading, setActionTakenLoading] = useState(false);
+
   // States nanter he add kara:
 const authUser     = getAuthUser();
 const userRole     = authUser?.role || "";
@@ -280,6 +284,66 @@ if (meetingInfo?.meetingTime) fd.append("meetingTime", meetingInfo.meetingTime);
       tagTo: f.tagTo.includes(dept) ? f.tagTo.filter(d => d !== dept) : [...f.tagTo, dept],
     }));
   };
+
+
+
+
+
+  const getActionTakenOptions = (subjectType) => {
+  if (subjectType === "Administrative and Financial Approval") {
+    return [
+      "Tender Floated",
+      "1st Envelope Opened",
+      "2nd Envelope Opened",
+      "Nivida Samiti Rate Approval",
+      "Ghoshwara Ready",
+    ];
+  }
+  if (subjectType === "Contract Approval") {
+    return [
+      "LOI Issued",
+      "SD Submitted",
+      "Work Order Issued",
+      "Work Started",
+      "Work Progress - Physical Progress",
+      "Work Progress - Financial Progress",
+    ];
+  }
+  // General
+  return ["Yes", "No"];
+};
+
+const openActionTakenModal = (sub) => {
+  setActionTakenModal(sub);
+  setActionTakenValue(sub.actionTaken || "");
+};
+
+const handleSaveActionTaken = async () => {
+  if (!actionTakenModal) return;
+  try {
+    setActionTakenLoading(true);
+    const sub = actionTakenModal;
+    if (!sub.subjectId) { showToast("Subject ID missing", "error"); return; }
+
+    const fd = new FormData();
+    fd.append("subjectName",       sub.subjectName       || "");
+    fd.append("subjectType",       sub.subjectType       || "");
+    fd.append("decisionInMeeting", sub.decisionInMeeting || "");
+    fd.append("tagTo",             JSON.stringify(sub.tagTo || []));
+    fd.append("actionTaken",       actionTakenValue);
+
+    const res  = await axiosInstance.put(`/updateMeeting/updateSubject/${sub.subjectId}`, fd);
+    const data = res.data;
+    if (data.success) {
+      showToast("Action Taken saved!");
+      setActionTakenModal(null);
+      fetchSubjects(selectedMeetingId);
+    } else {
+      showToast(data.message || "Failed", "error");
+    }
+  } catch { showToast("Server error", "error"); }
+  finally { setActionTakenLoading(false); }
+};
 
   return (
     <>
@@ -533,6 +597,40 @@ if (meetingInfo?.meetingTime) fd.append("meetingTime", meetingInfo.meetingTime);
                       <div className="sms-card-row"><span className="sms-card-label">Subject Name</span><span style={{ fontWeight: 600 }}>{sub.subjectName || "-"}</span></div>
                       <div className="sms-card-row"><span className="sms-card-label">Subject Type</span><span className="sms-type-pill">{sub.subjectType || "-"}</span></div>
                       <div className="sms-card-row"><span className="sms-card-label">Decision</span><DecisionBadge val={sub.decisionInMeeting} /></div>
+
+                      <div className="sms-card-row">
+  <span className="sms-card-label">Action Taken</span>
+  <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end" }}>
+    {sub.actionTaken && (
+      <span style={{
+        background:
+          sub.actionTaken === "Yes" ? "#e6f4ec" :
+          sub.actionTaken === "No"  ? "#fdecea" : "#f0f0ff",
+        color:
+          sub.actionTaken === "Yes" ? "#1a6640" :
+          sub.actionTaken === "No"  ? "#c0392b" : "#3a3ab0",
+        fontSize: 11, fontWeight: 700,
+        padding: "2px 8px", borderRadius: 20,
+      }}>
+        {sub.actionTaken}
+      </span>
+    )}
+{Array.isArray(sub.tagTo) && sub.tagTo.includes(authUser?.departmentName) && (
+
+    <button
+      style={{
+        fontFamily: "'Nunito Sans', sans-serif", fontSize: 11.5, fontWeight: 700,
+        background: "#fff8e1", color: "#b07a00",
+        border: "1.5px solid #ffe082", borderRadius: 6,
+        padding: "3px 8px", cursor: "pointer",
+      }}
+      onClick={() => openActionTakenModal(sub)}
+    >
+      ⚡ Action
+    </button>
+    )}
+  </div>
+</div>
                       {Array.isArray(sub.tagTo) && sub.tagTo.length > 0 && (
                         <div className="sms-card-row">
                           <span className="sms-card-label">Departments</span>
@@ -547,8 +645,8 @@ if (meetingInfo?.meetingTime) fd.append("meetingTime", meetingInfo.meetingTime);
               <table className="sms-table" style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                 <tr>
-                 {["#", "Subject ID", "Subject Name", "Subject Type", "Decision", "Departments"].map(h => <th key={h}>{h}</th>)}
-                 {isFullAccess && <th>Actions</th>}
+                 {["#", "Subject ID", "Subject Name", "Subject Type", "Decision", "Departments","Action Taken","Actions"].map(h => <th key={h}>{h}</th>)}
+                 {/* {isFullAccess && <th>Actions</th>} */}
                 </tr>
                 </thead>
                 <tbody>
@@ -567,14 +665,80 @@ if (meetingInfo?.meetingTime) fd.append("meetingTime", meetingInfo.meetingTime);
                             : <span style={{ color: "#ccc" }}>—</span>
                           }
                         </td>
-                        {isFullAccess && 
+                         {/* <td>
+  <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-start" }}>
+    {sub.actionTaken && (
+      <span style={{
+        background:
+          sub.actionTaken === "Yes" ? "#e6f4ec" :
+          sub.actionTaken === "No"  ? "#fdecea" : "#f0f0ff",
+        color:
+          sub.actionTaken === "Yes" ? "#1a6640" :
+          sub.actionTaken === "No"  ? "#c0392b" : "#3a3ab0",
+        fontSize: 11, fontWeight: 700,
+        padding: "2px 8px", borderRadius: 20, whiteSpace: "nowrap",
+      }}>
+        {sub.actionTaken}
+      </span>
+    )}
+    <button
+      style={{
+        fontFamily: "'Nunito Sans', sans-serif", fontSize: 11.5, fontWeight: 700,
+        background: "#fff8e1", color: "#b07a00",
+        border: "1.5px solid #ffe082", borderRadius: 6,
+        padding: "3px 10px", cursor: "pointer", whiteSpace: "nowrap",
+      }}
+      onClick={() => openActionTakenModal(sub)}
+    >
+      ⚡ Action
+    </button>
+  </div>
+</td> */}
+
+<td style={{ maxWidth: 260, fontWeight: 600 }}>{sub.actionTaken|| "-"}</td>
+                         
+                      
                         <td>
                           <div style={{ display: "flex", gap: 6 }}>
-                            <button className="sms-btn-edit" onClick={() => openEditModal(sub, realIdx)}>✏️ Edit</button>
-                            <button className="sms-btn-delete" onClick={() => setDeleteConfirm(realIdx)}>🗑️ Delete</button>
+
+                            
+                             <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-start" }}>
+    {/* {sub.actionTaken && (
+      <span style={{
+        background:
+          sub.actionTaken === "Yes" ? "#e6f4ec" :
+          sub.actionTaken === "No"  ? "#fdecea" : "#f0f0ff",
+        color:
+          sub.actionTaken === "Yes" ? "#1a6640" :
+          sub.actionTaken === "No"  ? "#c0392b" : "#3a3ab0",
+        fontSize: 11, fontWeight: 700,
+        padding: "2px 8px", borderRadius: 20, whiteSpace: "nowrap",
+      }}>
+        {sub.actionTaken}
+      </span>
+    )} */}
+
+    {Array.isArray(sub.tagTo) && sub.tagTo.includes(authUser?.departmentName) && (
+    <button
+      style={{
+        fontFamily: "'Nunito Sans', sans-serif", fontSize: 11.5, fontWeight: 700,
+        background: "#fff8e1", color: "#b07a00",
+        border: "1.5px solid #ffe082", borderRadius: 6,
+        padding: "3px 10px", cursor: "pointer", whiteSpace: "nowrap",
+      }}
+      onClick={() => openActionTakenModal(sub)}
+    >
+      ⚡ Action
+    </button>
+    )}
+                            </div>
+
+
+                            {isFullAccess &&  <button className="sms-btn-edit" onClick={() => openEditModal(sub, realIdx)}>✏️ Edit</button>}
+                             {isFullAccess &&  <button className="sms-btn-delete" onClick={() => setDeleteConfirm(realIdx)}>🗑️ Delete</button>}
                           </div>
                         </td>
-                  }
+                  
                       </tr>
                     );
                   })}
@@ -704,6 +868,133 @@ if (meetingInfo?.meetingTime) fd.append("meetingTime", meetingInfo.meetingTime);
             </div>
           </div>
         )}
+
+        {/* ── Action Taken Modal ── */}
+{actionTakenModal && (
+  <div style={modalOverlay}>
+    <div style={{
+      background: "#fff", borderRadius: 14, padding: isMobile ? 18 : 28,
+      width: isMobile ? "95%" : "480px", maxWidth: 520,
+      boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+    }}>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 22 }}>⚡</span>
+          <h3 style={{ fontSize: 16, fontWeight: 800, color: "#1a4a2e", margin: 0 }}>
+            Action Taken
+          </h3>
+        </div>
+        <button
+          onClick={() => setActionTakenModal(null)}
+          style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: "#8a9a90" }}
+        >✕</button>
+      </div>
+
+      {/* Auto-filled Info */}
+      <div style={{
+        background: "#f7fbf8", border: "1.5px solid #d6ede0",
+        borderRadius: 10, padding: "12px 16px", marginBottom: 18,
+        display: "flex", flexDirection: "column", gap: 8,
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+          <span style={{ fontWeight: 700, color: "#5a7a6a" }}>Meeting No</span>
+          <span style={{
+            background: "#e6f4ec", color: "#1a6640",
+            fontWeight: 700, fontSize: 12.5, padding: "2px 10px", borderRadius: 6,
+          }}>
+            {meetingInfo?.meetingNumber || "-"}
+          </span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, borderTop: "1px solid #eef4ee", paddingTop: 8 }}>
+          <span style={{ fontWeight: 700, color: "#5a7a6a" }}>Subject ID</span>
+          <span style={{
+            background: "#eaf3fb", color: "#1565a8",
+            fontWeight: 700, fontSize: 12, padding: "2px 8px",
+            borderRadius: 5, fontFamily: "monospace",
+          }}>
+            {actionTakenModal.subjectId || "-"}
+          </span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, borderTop: "1px solid #eef4ee", paddingTop: 8 }}>
+          <span style={{ fontWeight: 700, color: "#5a7a6a" }}>Subject Name</span>
+          <span style={{ fontWeight: 600, color: "#2d3d35", maxWidth: 220, textAlign: "right" }}>
+            {actionTakenModal.subjectName || "-"}
+          </span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, borderTop: "1px solid #eef4ee", paddingTop: 8 }}>
+          <span style={{ fontWeight: 700, color: "#5a7a6a" }}>Subject Type</span>
+          <span style={{
+            background: "#f3f0ff", color: "#6a3ab0",
+            fontSize: 11.5, fontWeight: 600, padding: "2px 8px", borderRadius: 20,
+          }}>
+            {actionTakenModal.subjectType || "General"}
+          </span>
+        </div>
+      </div>
+
+      {/* Action Taken Dropdown */}
+      <div style={{ marginBottom: 22 }}>
+        <label className="sms-label" style={{ marginBottom: 6 }}>
+          Action Taken
+          <span style={{
+            display: "inline-block", background: "#fff8e1", color: "#b07a00",
+            fontSize: 10, fontWeight: 800, padding: "2px 7px",
+            borderRadius: 20, marginLeft: 6, textTransform: "uppercase",
+          }}>
+            {actionTakenModal.subjectType === "Administrative and Financial Approval"
+              ? "Prashaskiy"
+              : actionTakenModal.subjectType === "Contract Approval"
+              ? "Samvida"
+              : "General"}
+          </span>
+        </label>
+        <select
+          className="sms-input"
+          value={actionTakenValue}
+          onChange={e => setActionTakenValue(e.target.value)}
+        >
+          <option value="">-- Select --</option>
+          {getActionTakenOptions(actionTakenModal.subjectType).map((opt, i) => (
+            <option key={i} value={opt}>{opt}</option>
+          ))}
+        </select>
+
+        {/* Preview badge */}
+        {actionTakenValue && (
+          <div style={{ marginTop: 10 }}>
+            <span style={{
+              background:
+                actionTakenValue === "Yes" ? "#e6f4ec" :
+                actionTakenValue === "No"  ? "#fdecea" : "#f0f0ff",
+              color:
+                actionTakenValue === "Yes" ? "#1a6640" :
+                actionTakenValue === "No"  ? "#c0392b" : "#3a3ab0",
+              fontSize: 12, fontWeight: 700,
+              padding: "4px 12px", borderRadius: 20,
+            }}>
+              ✅ {actionTakenValue}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Buttons */}
+      <div style={{ display: "flex", gap: 10 }}>
+        <button className="sms-btn-cancel" onClick={() => setActionTakenModal(null)}>
+          Cancel
+        </button>
+        <button
+          className="sms-btn-primary"
+          onClick={handleSaveActionTaken}
+          disabled={actionTakenLoading || !actionTakenValue}
+        >
+          {actionTakenLoading ? "Saving..." : "Save Action Taken"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       </div>
     </>
