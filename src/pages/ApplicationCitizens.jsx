@@ -405,7 +405,7 @@ export default function ApplicationCitizens() {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 26, fontWeight: 700, color: "#1a4a2e", display: "flex", alignItems: "center", gap: 10 }}>
-            All Applications
+            Applications For Appointment
             <span style={{ background: "#d4edda", color: "#1a7a4a", borderRadius: 20, padding: "2px 10px", fontSize: 13, fontWeight: 700 }}>{apps.length}</span>
           </h1>
           <p style={{ margin: "4px 0 0", color: "#5a7a6a", fontSize: 14 }}>CitizenBridge — Inward Records · All citizen appointment requests</p>

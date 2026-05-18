@@ -662,7 +662,7 @@ const handleLimitChange = (newLimit) => {
       <div className="hdr-row" style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:18 }}>
         <div>
           <h1 className="page-title" style={{ margin:0, fontSize:24, fontWeight:700, color:C.dark, display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
-            All Applications
+            Applications
             {/* <span style={{ background:C.greenBadge, color:C.green, borderRadius:20, padding:"2px 10px", fontSize:13, fontWeight:700 }}>{applications.length}</span> */}
             <span style={{ background:C.greenBadge, color:C.green, borderRadius:20, padding:"2px 10px", fontSize:13, fontWeight:700 }}>{total}</span>
 
