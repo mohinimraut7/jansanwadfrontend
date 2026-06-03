@@ -56,15 +56,7 @@ export default function Home() {
     return () => clearInterval(t);
   }, [autoPlay, projects.length]);
 
-  // ADD THIS — news auto-play timer
-// useEffect(() => {
-//   if (!newsAuto) return;
-//   const t = setInterval(() => {
-//     setNewsIdx(i => i >= newsMaxIdx ? 0 : i + 1);
-//   }, 4000);
-//   return () => clearInterval(t);
-// }, [newsAuto]);
-
+  
 
 useEffect(() => {
   if (!newsAuto) return;
@@ -75,12 +67,6 @@ useEffect(() => {
 }, [newsAuto]);
 
 
-//   useEffect(() => {
-//   if (!newsViewport.current) return;
-//   const vp = newsViewport.current;
-//   const cardW = (vp.offsetWidth - 40) / 3;
-//   vp.scrollTo({ left: newsIdx * (cardW + 20), behavior: "smooth" });
-// }, [newsIdx]);
 
 
 useEffect(() => {
