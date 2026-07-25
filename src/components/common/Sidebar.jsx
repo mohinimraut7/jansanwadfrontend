@@ -181,7 +181,7 @@ export default function Sidebar() {
             alignItems: "center", gap: 6, overflow: "hidden",
           }}>
             <div style={{
-              color:`${GOLD}dd`, fontSize:13, fontWeight:800,
+              color:`${GOLD}dd`, fontSize:15.5, fontWeight:800,
               fontFamily:"'Noto Sans Devanagari','Nunito',sans-serif",
               whiteSpace:"nowrap", letterSpacing:0.1, lineHeight:1.3,
             }}>

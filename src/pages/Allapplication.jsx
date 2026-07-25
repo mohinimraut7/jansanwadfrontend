@@ -56,7 +56,7 @@ function formatDate(dateStr) {
 function StatusBadge({ status }) {
   const cfg = sc(status);
   return (
-    <span style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 10px", borderRadius:20, fontSize:11, fontWeight:700, background:cfg.bg, color:cfg.color, border:`1px solid ${cfg.border}`, whiteSpace:"nowrap" }}>
+    <span style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 10px", borderRadius:20, fontSize:12, fontWeight:700, background:cfg.bg, color:cfg.color, border:`1px solid ${cfg.border}`, whiteSpace:"nowrap" }}>
       <span style={{ width:6, height:6, borderRadius:"50%", background:cfg.dot, display:"inline-block" }} />{cfg.label}
     </span>
   );
@@ -740,7 +740,7 @@ const handleLimitChange = (newLimit) => {
                       <div><p style={{ margin:0, fontSize:13, fontWeight:700, color:C.dark }}>{app.fullName||"—"}</p><p style={{ margin:0, fontSize:11, color:C.muted }}>{app.mobile}</p></div>
                     </div>
                   </td>
-                  <td style={{ padding:"10px 12px" }}><span style={{ background:C.greenLight, color:C.green, borderRadius:6, padding:"2px 9px", fontSize:11, fontWeight:700, fontFamily:"monospace" }}>{app.tokenNo||"—"}</span></td>
+                  <td style={{ padding:"10px 12px" }}><span style={{ background:C.greenLight, color:C.green, borderRadius:6, padding:"2px 9px", fontSize:14, fontWeight:700, fontFamily:"monospace",whiteSpace:"nowrap" }}>{app.tokenNo||"—"}</span></td>
                   <td style={{ padding:"10px 12px" }}><StatusBadge status={app.status}/></td>
                   <td style={{ padding:"10px 12px", maxWidth:180 }}><span style={{ display:"block", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", maxWidth:170, fontSize:13, color:C.dark }} title={app.subject}>{app.subject||"—"}</span></td>
                   <td style={{ padding:"10px 12px", maxWidth:160 }}>
