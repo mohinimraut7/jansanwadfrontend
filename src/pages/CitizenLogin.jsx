@@ -44,7 +44,7 @@ export default function CitizenLogin() {
     e.preventDefault();
     setError("");
     if (!form.username || !form.password) {
-      setError("सर्व fields भरा ❌");
+      setError("Please fill in all required fields. ❌");
       return;
     }
     try {
@@ -71,7 +71,7 @@ export default function CitizenLogin() {
   const sendOtp = async () => {
     const mobile = mobileNo.trim();
     if (!/^[0-9]{10}$/.test(mobile)) {
-      setError("10 digit valid mobile number enter करा!");
+      setError("Please enter a valid mobile number.");
       return;
     }
     setError("");
@@ -81,12 +81,12 @@ export default function CitizenLogin() {
     try {
       const checkRes = await citizenAxios.post("/citizen/check-mobile", { mobileNo: mobile });
       if (!checkRes.data.success) {
-        setError(checkRes.data.message || "Mobile not registered ❌");
+        setError(checkRes.data.message || "Mobile number is not registered. ❌");
         setOtpLoading(false);
         return;
       }
     } catch (err) {
-      setError(err?.response?.data?.message || "Mobile number not registered. Please Register first ❌");
+      setError(err?.response?.data?.message || "Mobile number is not registered. Please register first.");
       setOtpLoading(false);
       return;
     }
@@ -110,11 +110,11 @@ export default function CitizenLogin() {
   // ── Verify OTP → POST /citizen/citizenLoginByMobile ──────────────────────
   const verifyOtp = async () => {
     const entered = otp.join("");
-    if (entered.length < 6) { setError("6 अंकी OTP टाका!"); return; }
-    if (timeLeft <= 0)       { setError("OTP expire झाला! पुन्हा पाठवा."); return; }
+    if (entered.length < 6) { setError("Please enter the 6-digit OTP."); return; }
+    if (timeLeft <= 0)       { setError("OTP has expired. Please request a new OTP."); return; }
 
     if (entered !== generatedOtp) {
-      setError("❌ चुकीचा OTP! पुन्हा try करा.");
+      setError("❌ Invalid OTP. Please try again.");
       setOtp(["", "", "", "", "", ""]);
       setTimeout(() => otpRefs.current[0]?.focus(), 50);
       return;
@@ -794,7 +794,7 @@ export default function CitizenLogin() {
 
             {/* Page Heading */}
             <p className="cl-page-title">Welcome Back</p>
-            <p className="cl-page-sub">Mayor Appointment Portal वर login करा</p>
+            <p className="cl-page-sub">Sign in to the Mayor Appointment Portal.</p>
 
             {/* Tabs */}
             <div className="cl-tabs">
@@ -826,7 +826,7 @@ export default function CitizenLogin() {
                       <input
                         className="cl-finput has-icon"
                         type="text"
-                        placeholder="Username टाका"
+                        placeholder="Enter your username"
                         value={form.username}
                         onChange={ch("username")}
                         autoComplete="username"
@@ -842,7 +842,7 @@ export default function CitizenLogin() {
                       <input
                         className="cl-finput has-icon"
                         type={showPass ? "text" : "password"}
-                        placeholder="Password टाका"
+                        placeholder="Enter your password"
                         value={form.password}
                         onChange={ch("password")}
                         autoComplete="current-password"
@@ -872,8 +872,8 @@ export default function CitizenLogin() {
                   <div className="cl-orl" /><span>or</span><div className="cl-orl" />
                 </div>
                 <p className="cl-reg">
-                  Account नाही?
-                  <span className="cl-link" onClick={() => navigate("/citizen-registration")}>Register करा</span>
+                  Don't have an account?
+                  <span className="cl-link" onClick={() => navigate("/citizen-registration")}>Register</span>
                 </p>
               </div>
             )}
@@ -893,7 +893,7 @@ export default function CitizenLogin() {
                           className="cl-finput with-prefix"
                           type="tel"
                           maxLength={10}
-                          placeholder="10 अंकी नंबर"
+                          placeholder="Enter 10-digit mobile number"
                           value={mobileNo}
                           onChange={(e) =>
                             setMobileNo(e.target.value.replace(/\D/g, "").slice(0, 10))
@@ -909,7 +909,7 @@ export default function CitizenLogin() {
                       onClick={sendOtp}
                       disabled={mobileNo.length !== 10 || otpLoading}
                     >
-                      {otpLoading ? "⏳ पाठवत आहे..." : "OTP पाठवा →"}
+                      {otpLoading ? "⏳ Sending..." : "Send OTP →"}
                     </button>
 
                     <div className="cl-or">
@@ -940,7 +940,7 @@ export default function CitizenLogin() {
                       <span style={{ color: "#CE9A54", fontWeight: 700 }}>
                         +91 ******{mobileNo.slice(-3)}
                       </span>{" "}
-                      वर OTP पाठवला
+                      OTP has been sent to
                     </p>
 
                     <div className="otp-row" onPaste={handleOtpPaste}>
@@ -962,18 +962,18 @@ export default function CitizenLogin() {
                     <div className="otp-timer">
                       {timeLeft > 0 ? (
                         <>
-                          OTP expire होईल:{" "}
+                          OTP expires in:{" "}
                           <strong style={{ color: timeLeft <= 15 ? "#ff6b6b" : "#CE9A54" }}>
                             {formatTime(timeLeft)}
                           </strong>
                         </>
                       ) : (
-                        <span style={{ color: "#ff6b6b", fontWeight: 600 }}>OTP expire झाला!</span>
+                        <span style={{ color: "#ff6b6b", fontWeight: 600 }}>OTP has expired!</span>
                       )}
                       <div style={{ marginTop: 6 }}>
-                        OTP नाही मिळाला?{" "}
+                        Didn't receive the OTP?{" "}
                         <button className="resend-btn" onClick={sendOtp} disabled={!canResend}>
-                          पुन्हा पाठवा
+                          Resend OTP
                         </button>
                       </div>
                     </div>

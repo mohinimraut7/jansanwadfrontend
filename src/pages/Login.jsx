@@ -61,8 +61,8 @@ useEffect(() => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!form.userName.trim()) { toast.error("Username टाका ✅"); return; }
-    if (!form.password)        { toast.error("Password टाका ✅"); return; }
+    if (!form.userName.trim()) { toast.error("Please enter your username."); return; }
+    if (!form.password)        { toast.error("Please enter your password."); return; }
     try {
       setLoading(true);
       const res  = await axiosInstance.post("/login", { userName: form.userName, password: form.password });

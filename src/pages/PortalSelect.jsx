@@ -1030,7 +1030,7 @@ export default function PortalSelect() {
               <div className="ps-card-sub">
                 For Municipal Corporation Officers, Employees, and Administrative Staff.
               </div>
-              <button className="ps-card-btn">Admin Login →</button>
+              <button className="ps-card-btn">Official Login →</button>
             </div>
 
             <div className="ps-card citizen" onClick={() => navigate("/citizen-login")}>
