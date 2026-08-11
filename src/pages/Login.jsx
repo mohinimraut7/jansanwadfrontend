@@ -125,7 +125,7 @@ useEffect(() => {
   const sendOtp = async () => {
   const mobile = mobileNo.trim();
   if (!/^[0-9]{10}$/.test(mobile)) {
-    toast.error("10 अंकी valid mobile number टाका!");
+    toast.error("Please enter a valid 10-digit mobile number.");
     return;
   }
 
@@ -137,7 +137,7 @@ useEffect(() => {
     const data = res.data;
 
     if (!data.success) {
-      toast.error(data.message || "OTP पाठवण्यात error");
+      toast.error(data.message || "Failed to send OTP. Please try again.");
       return;
     }
 
@@ -149,7 +149,7 @@ useEffect(() => {
     setCanResend(false);
     setOtp(["", "", "", "", "", ""]);
 
-    toast.success(`OTP पाठवला ******${mobile.slice(-3)} वर (WhatsApp)`);
+    toast.success(`OTP has been sent to ******${mobile.slice(-3)} via WhatsApp.`);
     setOtpStep("otp");
     setTimeout(() => otpRefs.current[0]?.focus(), 120);
 
@@ -182,10 +182,10 @@ useEffect(() => {
 
   const verifyOtp = async () => {
     const entered = otp.join("");
-    if (entered.length < 6) { toast.error("6 अंकी OTP टाका!"); return; }
-    if (timeLeft <= 0)       { toast.error("OTP expire झाला! पुन्हा पाठवा."); return; }
+    if (entered.length < 6) { toast.error("Please enter the 6-digit OTP."); return; }
+    if (timeLeft <= 0)       { toast.error("OTP has expired. Please request a new OTP."); return; }
     if (entered !== generatedOtp) {
-      toast.error("❌ चुकीचा OTP!");
+      toast.error("❌ Invalid OTP. Please try again.");
       setOtp(["", "", "", "", "", ""]);
       otpRefs.current[0]?.focus();
       return;
@@ -915,7 +915,7 @@ useEffect(() => {
                           className="lp-finput with-prefix"
                           type="tel"
                           maxLength={10}
-                          placeholder="10 अंकी नंबर"
+                          placeholder="Enter mobile number"
                           value={mobileNo}
                           onChange={(e) => setMobileNo(e.target.value.replace(/\D/g, "").slice(0, 10))}
                           onKeyDown={(e) => e.key === "Enter" && sendOtp()}
@@ -927,7 +927,7 @@ useEffect(() => {
                       onClick={sendOtp}
                       disabled={mobileNo.length !== 10 || otpLoading}
                     >
-                      {otpLoading ? "⏳ पाठवत आहे..." : "OTP पाठवा →"}
+                      {otpLoading ? "⏳ Sending..." : "Send OTP →"}
                     </button>
                     <div className="lp-or">
                       <div className="lp-orl" /><span>or</span><div className="lp-orl" />
@@ -945,11 +945,11 @@ useEffect(() => {
                       className="otp-back"
                       onClick={() => { setOtpStep("mobile"); setOtp(["","","","","",""]); }}
                     >
-                      ← मागे जा
+                      ← Back
                     </button>
-                    <p className="lp-ftitle">OTP व्हेरिफाय करा</p>
+                    <p className="lp-ftitle">Verify OTP</p>
                     <p style={{ fontSize: 12.5, color: "rgba(245,231,194,0.62)", marginBottom: 16, fontFamily: "'Outfit',sans-serif" }}>
-                      <span style={{ color: "#CE9A54", fontWeight: 700 }}>+91 ******{mobileNo.slice(-3)}</span> वर OTP पाठवला
+                      <span style={{ color: "#CE9A54", fontWeight: 700 }}>+91 ******{mobileNo.slice(-3)}</span> OTP has been sent to
                     </p>
                     <div className="otp-row" onPaste={handleOtpPaste}>
                       {otp.map((digit, i) => (
@@ -969,18 +969,18 @@ useEffect(() => {
                     <div className="otp-timer">
                       {timeLeft > 0 ? (
                         <>
-                          OTP expire होईल:{" "}
+                          OTP expires in:{" "}
                           <strong style={{ color: timeLeft <= 15 ? "#ff6b6b" : "#CE9A54" }}>
                             {formatTime(timeLeft)}
                           </strong>
                         </>
                       ) : (
-                        <span style={{ color: "#ff6b6b", fontWeight: 600 }}>OTP expire झाला!</span>
+                        <span style={{ color: "#ff6b6b", fontWeight: 600 }}>OTP has expired!</span>
                       )}
                       <div style={{ marginTop: 6 }}>
-                        OTP नाही मिळाला?{" "}
+                        Didn't receive the OTP?{" "}
                         <button className="resend-btn" onClick={sendOtp} disabled={!canResend}>
-                          पुन्हा पाठवा
+                          Resend OTP
                         </button>
                       </div>
                     </div>
