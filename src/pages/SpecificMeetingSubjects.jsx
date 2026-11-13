@@ -136,6 +136,12 @@ const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
 
           if (isFullAccess) {
             // ── Super Admin / Mayor etc → सगळे subjects ──
+          //   setSubjects(allSubjects);
+          // } else {
+          //   // ── Department user → फक्त tagTo मध्ये त्यांचा dept असलेले ──
+                      setSubjects(allSubjects);
+          } else if (["corporator", "ward councillor"].includes(userRole.toLowerCase())) {
+            // ── नगरसेवक → meeting दिसत असेल (server filter) तर सगळे subjects ──
             setSubjects(allSubjects);
           } else {
             // ── Department user → फक्त tagTo मध्ये त्यांचा dept असलेले ──

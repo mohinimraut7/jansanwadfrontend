@@ -268,7 +268,11 @@ export default function Meetings() {
         // ✅ Preserve ALL fields from each meeting (including meetingDate, meetingTime)
         const allMeetings = data.data || [];
 
-        if (isFullAccess) {
+              if (isFullAccess) {
+          setMeetings(allMeetings);
+        } else if (["corporator", "ward councillor"].includes(userRole.toLowerCase())) {
+          // नगरसेवक: server आधीच filter करतो —
+          // General Body सर्व नगरसेवकांना, Standing Committee फक्त सदस्यांना (Yes)
           setMeetings(allMeetings);
         } else {
           const filtered = allMeetings.filter(meeting =>
