@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+// import logo from "../../assets/vvcmclogo.jpg";
 import logo from "../../assets/vvcmclogo.jpg";
+import LanguageToggle from "../../i18n/LanguageToggle";
 
 export default function NavbarLanding() {
   const navigate = useNavigate();
@@ -258,6 +260,9 @@ export default function NavbarLanding() {
           flex-shrink: 0;
         }
 
+                /* ── Language toggle (mobile menu) ── */
+        .cn-lang-mobile { display: flex; justify-content: center; padding: 2px 0 6px; }
+
         /* ── Mobile dropdown ── */
         .cn-mobile-menu {
           display: none;
@@ -337,7 +342,8 @@ export default function NavbarLanding() {
           </div>
 
           {/* ── Desktop links ── */}
-          <div className="cn-links">
+                    <div className="cn-links">
+            <LanguageToggle variant="dark" />
             <button
               className={`cn-link${isActive("/") ? " active" : ""}`}
               onClick={() => navigate("/")}
@@ -376,7 +382,8 @@ export default function NavbarLanding() {
       </div>
 
       {/* ── Mobile menu ── */}
-      <div className={`cn-mobile-menu${menu ? " open" : ""}`}>
+            <div className={`cn-mobile-menu${menu ? " open" : ""}`}>
+        <div className="cn-lang-mobile"><LanguageToggle variant="dark" /></div>
         <button
           className={`cn-mobile-link${isActive("/") ? " active" : ""}`}
           onClick={() => { navigate("/"); setMenu(false); }}

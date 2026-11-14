@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
+// import { useNavigate } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { FiUserPlus } from "react-icons/fi";
+import { MdQrCode2 } from "react-icons/md";
 // import heroBg from "../assets/vvcmcbuildingbanner.png";
 import heroBg from "../assets/ajivsir8.jpeg";
 
@@ -78,7 +81,7 @@ useEffect(() => {
 
 
   const steps = [
-    { lottie: "https://assets3.lottiefiles.com/packages/lf20_jbb3xnwi.json", title: "नोंदणी करा", desc: "Mobile number वापरून account तयार करा." },
+    { icon: <FiUserPlus size={32} color="#fff" />, lottie: "https://assets3.lottiefiles.com/packages/lf20_jbb3xnwi.json", title: "नोंदणी करा", desc: "Mobile number वापरून account तयार करा." },
     { lottie: "https://assets4.lottiefiles.com/packages/lf20_tljjahng.json", title: "तारीख निवडा", desc: "मा. श्री महापौर यांच्या available dates आणि time slots मधून निवडा" },
     { lottie: "https://assets9.lottiefiles.com/packages/lf20_xyadoh9h.json", title: "तपशील भरा", desc: "भेटीचे कारण, visitors संख्या आणि photo द्या" },
     { lottie: "https://assets10.lottiefiles.com/packages/lf20_attdh2fv.json", title: "टोकन मिळवा", desc: "Confirmation token आणि QR code मिळेल — भेटीच्या दिवशी दाखवा" },
@@ -936,7 +939,11 @@ const clampedNewsIdx = Math.min(newsIdx, newsMaxIdx);
                   <div key={i} className="hiw-card">
                     <div className="hiw-num">{i + 1}</div>
                     <div className="hiw-icon-wrap">
-                      <LottiePlayer src={s.lottie} style={{ width: 44, height: 44 }} />
+                      {/* <LottiePlayer src={s.lottie} style={{ width: 44, height: 44 }} /> */}
+                      {/* {s.icon ? s.icon : <LottiePlayer src={s.lottie} style={{ width: 44, height: 44 }} />} */}
+                      {i === 0 ? <FiUserPlus size={32} color="#fff" />
+  : i === 3 ? <MdQrCode2 size={34} color="#fff" />
+  : <LottiePlayer src={s.lottie} style={{ width: 44, height: 44 }} />}
                     </div>
                     <div className="hiw-step-title">{s.title}</div>
                     <div className="hiw-step-desc">{s.desc}</div>

@@ -1299,6 +1299,7 @@ import { logout } from "../../redux/slices/authSlice";
 import { FiBell, FiHelpCircle, FiLogOut, FiSearch, FiChevronDown } from "react-icons/fi";
 import logo from "../../assets/vvcmclogo.jpg";
 import { useSidebar } from "./SidebarContext";
+import LanguageToggle from "../../i18n/LanguageToggle";
 
 // ── Palette: White + Soft Teal + Subtle Gold ──
 const WHITE         = "#FFFFFF";
@@ -1569,6 +1570,11 @@ const Navbar = () => {
           <span className="nb-online-dot"/>
           {peopleOnline} Online
         </div> */}
+
+        <div className="nb-sep"/>
+
+              {/* ── Language toggle ── */}
+        <LanguageToggle variant="light" />
 
         <div className="nb-sep"/>
 

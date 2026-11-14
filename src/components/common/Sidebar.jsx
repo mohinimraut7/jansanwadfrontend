@@ -740,17 +740,772 @@
 // }
 
 
+// import React, { useEffect, useState } from "react";
+// import { NavLink, useNavigate } from "react-router-dom";
+// import { useDispatch, useSelector } from "react-redux";
+// import { logout } from "../../redux/slices/authSlice";
+// import {
+//   FiChevronLeft, FiChevronRight, FiX,
+//   FiLayout, FiFileText, FiSettings,
+//   FiLogOut, FiUsers, FiCalendar, FiUserCheck,
+// } from "react-icons/fi";
+// import logo from "../../assets/vvcmclogo.jpg";
+// import { useSidebar } from "./SidebarContext";
+// import LanguageToggle from "../../i18n/LanguageToggle";
+
+// const TEAL_FROM = "#187484";
+// const TEAL_TO   = "#0d4f5c";
+// const GOLD      = "#CE9A54";
+
+// const FULL_ACCESS_ROLES = ["Super Admin", "Guardian Minister","Mayor","Admin"];
+
+// export default function Sidebar() {
+//   const dispatch = useDispatch();
+//   const navigate = useNavigate();
+//   const { user } = useSelector((s) => s.auth);
+//   const { mode, setMode } = useSidebar();
+
+//   // ✅ ALL hooks must be declared before any early return
+//   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+//   useEffect(() => {
+//     const onResize = () => setIsMobile(window.innerWidth < 768);
+//     window.addEventListener("resize", onResize);
+//     return () => window.removeEventListener("resize", onResize);
+//   }, []);
+
+//   // ✅ Early return AFTER all hooks
+//   if (!user) return null;
+
+//   const handleLogout = () => {
+//     dispatch(logout());
+//     navigate("/login");
+//   };
+
+//   const handleOpenArrow    = () => setMode("open");
+//   const handleCollapseArrow = () => setMode("collapsed");
+//   const handleClose        = () => setMode("hidden");
+
+//   const isOpen      = mode === "open";
+//   const isCollapsed = mode === "collapsed";
+//   const isHidden    = mode === "hidden";
+
+//   // HIDDEN — render only the › floating button
+//   if (isHidden) {
+//     return (
+//       <button
+//         onClick={handleOpenArrow}
+//         title="Open sidebar"
+//         style={{
+//           position: isMobile ? "fixed" : "relative",
+//           top: isMobile ? 0 : "auto",
+//           left: isMobile ? 0 : "auto",
+//           alignSelf: "flex-start",
+//           margin: isMobile ? undefined : "2px 0 0 2px",
+//           zIndex: 200,
+//           background: `linear-gradient(135deg, ${TEAL_FROM}, ${TEAL_TO})`,
+//           color: "#fff", padding: "8px 10px", borderRadius: 10,
+//           boxShadow: "0 4px 16px rgba(24,116,132,0.4)",
+//           border: "none", cursor: "pointer",
+//           display: "flex", alignItems: "center", justifyContent: "center",
+//           flexShrink: 0,
+//           width: 40,
+//         }}
+//       >
+//         <FiChevronRight size={18} />
+//       </button>
+//     );
+//   }
+
+//   return (
+//     <>
+//       {/* Backdrop overlay on mobile when open */}
+//       {isMobile && isOpen && (
+//         <div
+//           onClick={handleClose}
+//           style={{
+//             position: "fixed", inset: 0, zIndex: 90,
+//           }}
+//         />
+//       )}
+
+//       <aside style={{
+//         width: isOpen ? 230 : 64,
+//         minHeight: "100vh",
+//         background: `linear-gradient(175deg, ${TEAL_FROM} 0%, ${TEAL_TO} 100%)`,
+//         display: "flex",
+//         flexDirection: "column",
+//         transition: "width 0.3s ease",
+//         overflow: "visible",
+//         boxShadow: "4px 0 24px rgba(13,79,92,0.35)",
+//         position: isMobile ? "fixed" : "relative",
+//         top: 0, left: 0,
+//         zIndex: isMobile ? 100 : "auto",
+//         height: isMobile ? "100vh" : "auto",
+//         flexShrink: 0,
+//         fontFamily: "'Montserrat','Noto Sans Devanagari','Segoe UI',sans-serif",
+//       }}>
+
+//         {/* Decorative circles */}
+//         <div style={{ position:"absolute", top:-40,   right:-40, width:130, height:130, borderRadius:"50%", background:"rgba(255,255,255,0.06)", pointerEvents:"none" }}/>
+//         <div style={{ position:"absolute", bottom:120, left:-30,  width:100, height:100, borderRadius:"50%", background:"rgba(255,255,255,0.04)", pointerEvents:"none" }}/>
+//         <div style={{ position:"absolute", bottom:-20, right:-20, width:80,  height:80,  borderRadius:"50%", background:"rgba(255,255,255,0.05)", pointerEvents:"none" }}/>
+
+//         <style>{`
+//           @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap');
+
+//           .sb-link {
+//             display: flex; align-items: center; gap: 12px;
+//             border-radius: 12px;
+//             // padding: 10px 16px;
+//             // margin: 2px 10px;
+
+//             padding: 10px 16px 10px 11px;  /* left padding 16 → 11px */
+//             margin: 2px 10px 2px 5px;
+//             text-decoration: none; color: #D1E5E9;
+//             font-size: 14px; font-weight: 500;
+//             font-family: 'Montserrat','Segoe UI',sans-serif;
+//             transition: all 200ms ease; border-left: 3px solid transparent;
+//             white-space: nowrap; overflow: hidden;
+//           }
+//           .sb-link:hover  { background: rgba(255,255,255,0.10); color:#FFFFFF; }
+//           .sb-link.active {
+//             background: rgba(255,255,255,0.16); color:#FFFFFF;
+//             font-size: 14px; font-weight:700;
+//             border-left: 3px solid ${GOLD};
+//             box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.14);
+//           }
+//           .sb-link .sb-icon        { flex-shrink:0; opacity:0.8; color:inherit; transition: all 200ms ease; }
+//           .sb-link:hover .sb-icon,
+//           .sb-link.active .sb-icon { opacity:1; color:#FFFFFF; }
+
+//           .sb-link-collapsed {
+//             display: flex; align-items: center; justify-content: center;
+//             padding: 10px 0; border-radius: 12px; margin: 2px 8px;
+//             text-decoration: none; color: #D1E5E9;
+//             transition: all 200ms ease; border-left: 3px solid transparent;
+//           }
+//           .sb-link-collapsed:hover  { background: rgba(255,255,255,0.10); color:#FFFFFF; }
+//           .sb-link-collapsed.active {
+//             background: rgba(255,255,255,0.16); color:#FFFFFF;
+//             border-left: 3px solid ${GOLD};
+//             box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.14);
+//           }
+
+//           .sb-pill-btn {
+//             position: absolute; top: 50%; right: -14px;
+//             transform: translateY(-50%);
+//             width: 28px; height: 28px; border-radius: 50%;
+//             background: ${TEAL_FROM};
+//             border: 2px solid rgba(255,255,255,0.3);
+//             box-shadow: 0 2px 10px rgba(13,79,92,0.5);
+//             color: #fff; cursor: pointer;
+//             display: flex; align-items: center; justify-content: center;
+//             transition: background 0.2s; z-index: 60;
+//           }
+//           .sb-pill-btn:hover { background: ${GOLD}; border-color: ${GOLD}; }
+//         `}</style>
+
+//         {/* ── ‹ Collapse pill — only when OPEN ── */}
+//         {isOpen && (
+//           <button className="sb-pill-btn" onClick={handleCollapseArrow} title="Collapse sidebar">
+//             <FiChevronLeft size={14}/>
+//           </button>
+//         )}
+
+//         {/* ── × Close pill — only when COLLAPSED ── */}
+//         {isCollapsed && (
+//           <button className="sb-pill-btn" onClick={handleClose} title="Hide sidebar">
+//             <FiX size={14}/>
+//           </button>
+//         )}
+
+//         {/* ── Header / Logo ── */}
+//         {isOpen ? (
+//           <div style={{
+//             padding: "24px 18px 18px",
+//             paddingTop: isMobile ? "46px" : "24px",
+//             display: "flex", flexDirection: "column",
+//             alignItems: "center", gap: 6, overflow: "hidden",
+//           }}>
+//             <div style={{
+//               color:`${GOLD}dd`, fontSize:15, fontWeight:700,
+//               fontFamily:"'Montserrat','Noto Sans Devanagari',sans-serif",
+//               whiteSpace:"nowrap", letterSpacing:0.1, lineHeight:1.3,
+//             }}>
+//               वसई-विरार शहर महानगरपालिका
+//             </div>
+//             <div style={{
+//               color:"#fff", fontSize:21, fontWeight:800,
+//               fontFamily:"'Montserrat','Noto Sans Devanagari',sans-serif",
+//               whiteSpace:"nowrap", letterSpacing:0.3, lineHeight:1,
+//               textShadow:`0 2px 10px ${GOLD}55`, textAlign:"center",
+//             }}>
+//               जन संवाद
+//             </div>
+//             <div style={{
+//               width:140, height:140, borderRadius:"5%",
+//               background:`linear-gradient(135deg,${GOLD},#b8832e)`,
+//               boxShadow:`0 4px 14px ${GOLD}88`, overflow:"hidden",
+//               border:"2px solid rgba(255,255,255,0.25)",
+//               display:"flex", alignItems:"center", justifyContent:"center",
+//             }}>
+//               <img src={logo} alt="VVCMC"
+//                 style={{ width:"100%", height:"100%", objectFit:"cover" }}
+//                 onError={e=>{ e.target.style.display="none"; e.target.parentNode.innerHTML='<span style="font-size:24px">⚖️</span>'; }}
+//               />
+//             </div>
+//           </div>
+//         ) : (
+//           <div style={{
+//             width:"100%", padding:"20px 0",
+//             display:"flex", alignItems:"center", justifyContent:"center",
+//           }}>
+//             <div style={{
+//               width:40, height:40, borderRadius:10,
+//               background:`linear-gradient(135deg,${GOLD},#b8832e)`,
+//               boxShadow:`0 4px 14px ${GOLD}77`, overflow:"hidden",
+//               display:"flex", alignItems:"center", justifyContent:"center",
+//             }}>
+//               <img src={logo} alt="जन संवाद"
+//                 style={{ width:"100%", height:"100%", objectFit:"cover" }}
+//                 onError={e=>{ e.target.style.display="none"; e.target.parentNode.innerHTML='<span style="font-size:18px">⚖️</span>'; }}
+//               />
+//             </div>
+//           </div>
+//         )}
+
+//         {/* Divider */}
+//         <div style={{ margin:"0 16px 10px", borderTop:"1px solid rgba(255,255,255,0.1)" }}/>
+
+//         {/* ── Nav ── */}
+//         <nav style={{ flex:1, display:"flex", flexDirection:"column", gap:2, paddingTop:4, overflowY:"auto", overflowX:"hidden" }}>
+//           {isOpen ? (
+//             <>
+//               <NavLink to="/dashboard" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+//                 <span className="sb-icon"><FiLayout size={18}/></span><span>Dashboard</span>
+//               </NavLink>
+
+//               {/* {FULL_ACCESS_ROLES.includes(user?.role) && ( */}
+//                 <NavLink to="/meetings" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+//                   <span className="sb-icon"><FiCalendar size={18}/></span><span>Meetings</span>
+//                 </NavLink>
+//               {/* )} */}
+//                {/* {FULL_ACCESS_ROLES.includes(user?.role) && (
+//                 <NavLink to="/meetingsubjects" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+//                   <span className="sb-icon"><FiCalendar size={18}/></span><span>Meetings Subjects</span>
+//                 </NavLink>
+//               )} */}
+//               {FULL_ACCESS_ROLES.includes(user?.role) && (
+//                 <NavLink to="/availability" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+//                   <span className="sb-icon"><FiCalendar size={18}/></span><span>Availability</span>
+//                 </NavLink>
+//               )}
+
+//               <NavLink to="/allapplication" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+//                 <span className="sb-icon"><FiFileText size={18}/></span><span>Applications</span>
+//               </NavLink>
+
+//               {FULL_ACCESS_ROLES.includes(user?.role) && (
+//                 <NavLink to="/allapplicationcitizens" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+//                   <span className="sb-icon"><FiFileText size={18}/></span><span>Appointment Applications</span>
+//                 </NavLink>
+//               )}
+//               {FULL_ACCESS_ROLES.includes(user?.role) && (
+//                 <NavLink to="/users" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+//                   <span className="sb-icon"><FiUsers size={18}/></span><span>Users</span>
+//                 </NavLink>
+//               )}
+//               {FULL_ACCESS_ROLES.includes(user?.role) && (
+//                 <NavLink to="/corporators" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+//                   <span className="sb-icon"><FiUserCheck size={18}/></span><span>Corporators</span>
+//                 </NavLink>
+//               )}
+//             </>
+//           ) : (
+//             <>
+//               <NavLink to="/dashboard"              className={({isActive})=>`sb-link-collapsed${isActive?" active":""}`}><FiLayout size={18}/></NavLink>
+//               <NavLink to="/availability"           className={({isActive})=>`sb-link-collapsed${isActive?" active":""}`}><FiCalendar size={18}/></NavLink>
+//               <NavLink to="/allapplication"         className={({isActive})=>`sb-link-collapsed${isActive?" active":""}`}><FiFileText size={18}/></NavLink>
+//               <NavLink to="/allapplicationcitizens" className={({isActive})=>`sb-link-collapsed${isActive?" active":""}`}><FiFileText size={18}/></NavLink>
+//               {FULL_ACCESS_ROLES.includes(user?.role) && (
+//                 <NavLink to="/users" className={({isActive})=>`sb-link-collapsed${isActive?" active":""}`}><FiUsers size={18}/></NavLink>
+//               )}
+//               {FULL_ACCESS_ROLES.includes(user?.role) && (
+//                 <NavLink to="/corporators" className={({isActive})=>`sb-link-collapsed${isActive?" active":""}`}><FiUserCheck size={18}/></NavLink>
+//               )}
+//             </>
+//           )}
+//         </nav>
+
+//         {/* ── Bottom: Settings + User ── */}
+//         <div style={{ marginTop:"auto" }}>
+//           <div style={{ margin:"0 10px 4px" }}>
+//             {isOpen ? (
+//               <NavLink to="/settings" className={({isActive})=>`sb-link${isActive?" active":""}`} style={{ margin:0 }}>
+//                 <span className="sb-icon"><FiSettings size={18}/></span><span>Settings</span>
+//               </NavLink>
+//             ) : (
+//               <NavLink to="/settings" className={({isActive})=>`sb-link-collapsed${isActive?" active":""}`} style={{ margin:"2px 8px" }}>
+//                 <FiSettings size={18}/>
+//               </NavLink>
+//             )}
+//           </div>
+
+//           <div style={{ margin:"6px 16px", borderTop:"1px solid rgba(255,255,255,0.1)" }}/>
+
+//           <div style={{ padding: isOpen ? "10px 16px 20px" : "10px 0 20px" }}>
+//             {isOpen ? (
+//               <div>
+//                 <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
+//                   <div style={{
+//                     width:34, height:34, borderRadius:"50%", flexShrink:0,
+//                     background:`linear-gradient(135deg,${GOLD},#b8832e)`,
+//                     display:"flex", alignItems:"center", justifyContent:"center",
+//                     color:"#fff", fontSize:14, fontWeight:900,
+//                     boxShadow:`0 3px 10px ${GOLD}66`, fontFamily:"'Montserrat',sans-serif",
+//                   }}>
+//                     {(user?.fullName || user?.userName || "A")[0].toUpperCase()}
+//                   </div>
+//                   <div style={{ overflow:"hidden" }}>
+//                     <div style={{ color:"#fff", fontSize:14, fontWeight:700, lineHeight:1.2, fontFamily:"'Montserrat',sans-serif", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", maxWidth:130 }}>
+//                       {user?.fullName || user?.userName || "Admin User"}
+//                     </div>
+//                     <div style={{ color:"#B8D5DB", fontSize:11, fontWeight:500, fontFamily:"'Montserrat',sans-serif" }}>{user?.role}</div>
+//                   </div>
+//                 </div>
+//                 {user?.departmentName && (
+//                   <div style={{ fontSize:10.5, color:"rgba(255,255,255,0.45)", fontWeight:600, marginBottom:10, paddingLeft:2 }}>
+//                     Dept: <span style={{ color:"rgba(255,255,255,0.75)", fontWeight:700 }}>{user.departmentName}</span>
+//                   </div>
+//                 )}
+                 
+//                                  {isMobile && (
+//                   <div style={{ display:"flex", justifyContent:"center", marginBottom:10 }}>
+//                     <LanguageToggle variant="dark" />
+//                   </div>
+//                 )}
+//                 <button onClick={handleLogout} style={{
+//                   width:"100%", background:"rgba(255,255,255,0.1)",
+//                   color:"rgba(255,255,255,0.85)", border:"1px solid rgba(255,255,255,0.2)",
+//                   borderRadius:10, padding:"8px", fontSize:12, fontWeight:600, cursor:"pointer",
+//                   letterSpacing:0.8, textTransform:"uppercase",
+//                   display:"flex", alignItems:"center", justifyContent:"center", gap:7,
+//                   transition:"all 200ms ease", fontFamily:"'Montserrat',sans-serif",
+//                 }}
+//                   onMouseEnter={e=>{ e.currentTarget.style.background="rgba(220,50,50,0.3)"; e.currentTarget.style.borderColor="rgba(220,50,50,0.4)"; }}
+//                   onMouseLeave={e=>{ e.currentTarget.style.background="rgba(255,255,255,0.1)"; e.currentTarget.style.borderColor="rgba(255,255,255,0.2)"; }}
+//                 >
+//                   <FiLogOut size={13}/> Logout
+//                 </button>
+//               </div>
+//             ) : (
+//               <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:10 }}>
+//                 <div style={{
+//                   width:34, height:34, borderRadius:"50%",
+//                   background:`linear-gradient(135deg,${GOLD},#b8832e)`,
+//                   display:"flex", alignItems:"center", justifyContent:"center",
+//                   color:"#fff", fontSize:13, fontWeight:900,
+//                 }}>
+//                   {(user?.fullName || user?.userName || "A")[0].toUpperCase()}
+//                 </div>
+//                 <button onClick={handleLogout} style={{
+//                   background:"transparent", border:"none", cursor:"pointer",
+//                   color:"rgba(255,255,255,0.5)", padding:6, borderRadius:8,
+//                   display:"flex", alignItems:"center", justifyContent:"center", transition:"all 200ms ease",
+//                 }}
+//                   onMouseEnter={e=>e.currentTarget.style.color="#fff"}
+//                   onMouseLeave={e=>e.currentTarget.style.color="rgba(255,255,255,0.5)"}
+//                 >
+//                   <FiLogOut size={17}/>
+//                 </button>
+//               </div>
+//             )}
+//           </div>
+//         </div>
+//       </aside>
+//     </>
+//   );
+// }
+
+
+
+// import React, { useEffect, useState } from "react";
+// import { NavLink, useNavigate } from "react-router-dom";
+// import { useDispatch, useSelector } from "react-redux";
+// import { logout } from "../../redux/slices/authSlice";
+// import {
+//   FiChevronLeft, FiChevronRight,
+//   FiLayout, FiFileText, FiSettings,
+//   FiLogOut, FiUsers, FiCalendar, FiUserCheck,
+// } from "react-icons/fi";
+// import logo from "../../assets/vvcmclogo.jpg";
+// import { useSidebar } from "./SidebarContext";
+// import LanguageToggle from "../../i18n/LanguageToggle";
+
+// const TEAL_FROM = "#187484";
+// const TEAL_TO   = "#0d4f5c";
+// const GOLD      = "#CE9A54";
+
+// const FULL_ACCESS_ROLES = ["Super Admin", "Guardian Minister","Mayor","Admin"];
+
+// export default function Sidebar() {
+//   const dispatch = useDispatch();
+//   const navigate = useNavigate();
+//   const { user } = useSelector((s) => s.auth);
+//   const { mode, setMode } = useSidebar();
+
+//   // ✅ ALL hooks must be declared before any early return
+//   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+//   useEffect(() => {
+//     const onResize = () => setIsMobile(window.innerWidth < 768);
+//     window.addEventListener("resize", onResize);
+//     return () => window.removeEventListener("resize", onResize);
+//   }, []);
+
+//   // ✅ Early return AFTER all hooks
+//   if (!user) return null;
+
+//   const handleLogout = () => {
+//     dispatch(logout());
+//     navigate("/login");
+//   };
+
+//   const handleOpenArrow     = () => setMode("open");
+//   const handleCollapseArrow = () => setMode("collapsed");
+
+//   // Only two states now: open / collapsed (old "hidden" value is treated as collapsed)
+//   const isOpen      = mode === "open";
+//   const isCollapsed = !isOpen;
+
+//   return (
+//     <>
+//       {/* Backdrop overlay on mobile when open */}
+//       {isMobile && isOpen && (
+//         <div
+//           onClick={handleCollapseArrow}
+//           style={{
+//             position: "fixed", inset: 0, zIndex: 90,
+//           }}
+//         />
+//       )}
+
+//       <aside style={{
+//         width: isOpen ? 230 : 64,
+//         minHeight: "100vh",
+//         background: `linear-gradient(175deg, ${TEAL_FROM} 0%, ${TEAL_TO} 100%)`,
+//         display: "flex",
+//         flexDirection: "column",
+//         transition: "width 0.3s ease",
+//         overflow: "visible",
+//         boxShadow: "4px 0 24px rgba(13,79,92,0.35)",
+//         position: isMobile ? "fixed" : "relative",
+//         top: 0, left: 0,
+//         zIndex: isMobile ? 100 : "auto",
+//         height: isMobile ? "100vh" : "auto",
+//         flexShrink: 0,
+//         fontFamily: "'Montserrat','Noto Sans Devanagari','Segoe UI',sans-serif",
+//       }}>
+
+//         {/* Decorative circles */}
+//         <div style={{ position:"absolute", top:-40,   right:-40, width:130, height:130, borderRadius:"50%", background:"rgba(255,255,255,0.06)", pointerEvents:"none" }}/>
+//         <div style={{ position:"absolute", bottom:120, left:-30,  width:100, height:100, borderRadius:"50%", background:"rgba(255,255,255,0.04)", pointerEvents:"none" }}/>
+//         <div style={{ position:"absolute", bottom:-20, right:-20, width:80,  height:80,  borderRadius:"50%", background:"rgba(255,255,255,0.05)", pointerEvents:"none" }}/>
+
+//         <style>{`
+//           @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap');
+
+//           .sb-link {
+//             display: flex; align-items: center; gap: 12px;
+//             border-radius: 12px;
+//             // padding: 10px 16px;
+//             // margin: 2px 10px;
+
+//             padding: 10px 16px 10px 11px;  /* left padding 16 → 11px */
+//             margin: 2px 10px 2px 5px;
+//             text-decoration: none; color: #D1E5E9;
+//             font-size: 14px; font-weight: 500;
+//             font-family: 'Montserrat','Segoe UI',sans-serif;
+//             transition: all 200ms ease; border-left: 3px solid transparent;
+//             white-space: nowrap; overflow: hidden;
+//           }
+//           .sb-link:hover  { background: rgba(255,255,255,0.10); color:#FFFFFF; }
+//           .sb-link.active {
+//             background: rgba(255,255,255,0.16); color:#FFFFFF;
+//             font-size: 14px; font-weight:700;
+//             border-left: 3px solid ${GOLD};
+//             box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.14);
+//           }
+//           .sb-link .sb-label {
+//             display: block; max-width: 150px; min-width: 0;
+//             overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+//           }
+//           .sb-link .sb-icon        { flex-shrink:0; opacity:0.8; color:inherit; transition: all 200ms ease; }
+//           .sb-link:hover .sb-icon,
+//           .sb-link.active .sb-icon { opacity:1; color:#FFFFFF; }
+
+//           .sb-link-collapsed {
+//             display: flex; align-items: center; justify-content: center;
+//             padding: 10px 0; border-radius: 12px; margin: 2px 8px;
+//             text-decoration: none; color: #D1E5E9;
+//             transition: all 200ms ease; border-left: 3px solid transparent;
+//           }
+//           .sb-link-collapsed:hover  { background: rgba(255,255,255,0.10); color:#FFFFFF; }
+//           .sb-link-collapsed.active {
+//             background: rgba(255,255,255,0.16); color:#FFFFFF;
+//             border-left: 3px solid ${GOLD};
+//             box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.14);
+//           }
+
+//           .sb-pill-btn {
+//             position: absolute; top: 50%; right: -14px;
+//             transform: translateY(-50%);
+//             width: 28px; height: 28px; border-radius: 50%;
+//             background: ${TEAL_FROM};
+//             border: 2px solid rgba(255,255,255,0.3);
+//             box-shadow: 0 2px 10px rgba(13,79,92,0.5);
+//             color: #fff; cursor: pointer;
+//             display: flex; align-items: center; justify-content: center;
+//             transition: background 0.2s; z-index: 60;
+//           }
+//           .sb-pill-btn:hover { background: ${GOLD}; border-color: ${GOLD}; }
+//         `}</style>
+
+//         {/* ── ‹ Collapse pill — only when OPEN ── */}
+//         {isOpen && (
+//           <button className="sb-pill-btn" onClick={handleCollapseArrow} title="Collapse sidebar">
+//             <FiChevronLeft size={14}/>
+//           </button>
+//         )}
+
+//         {/* ── › Expand pill — only when COLLAPSED ── */}
+//         {isCollapsed && (
+//           <button className="sb-pill-btn" onClick={handleOpenArrow} title="Expand sidebar">
+//             <FiChevronRight size={14}/>
+//           </button>
+//         )}
+
+//         {/* ── Header / Logo ── */}
+//         {isOpen ? (
+//           <div style={{
+//             padding: "24px 18px 18px",
+//             paddingTop: isMobile ? "46px" : "24px",
+//             display: "flex", flexDirection: "column",
+//             alignItems: "center", gap: 6, overflow: "hidden",
+//           }}>
+//             <div style={{
+//               color:`${GOLD}dd`, fontSize:12.5, fontWeight:700,
+//               fontFamily:"'Montserrat','Noto Sans Devanagari',sans-serif",
+//               whiteSpace:"nowrap", letterSpacing:0, lineHeight:1.3,
+//               maxWidth:"100%", overflow:"hidden", textOverflow:"ellipsis", textAlign:"center",
+//             }} title="वसई-विरार शहर महानगरपालिका">
+//               वसई-विरार शहर महानगरपालिका
+//             </div>
+//             <div style={{
+//               color:"#fff", fontSize:21, fontWeight:800,
+//               fontFamily:"'Montserrat','Noto Sans Devanagari',sans-serif",
+//               whiteSpace:"nowrap", letterSpacing:0.3, lineHeight:1,
+//               textShadow:`0 2px 10px ${GOLD}55`, textAlign:"center",
+//             }}>
+//               जन संवाद
+//             </div>
+//             <div style={{
+//               width:140, height:140, borderRadius:"5%",
+//               background:`linear-gradient(135deg,${GOLD},#b8832e)`,
+//               boxShadow:`0 4px 14px ${GOLD}88`, overflow:"hidden",
+//               border:"2px solid rgba(255,255,255,0.25)",
+//               display:"flex", alignItems:"center", justifyContent:"center",
+//             }}>
+//               <img src={logo} alt="VVCMC"
+//                 style={{ width:"100%", height:"100%", objectFit:"cover" }}
+//                 onError={e=>{ e.target.style.display="none"; e.target.parentNode.innerHTML='<span style="font-size:24px">⚖️</span>'; }}
+//               />
+//             </div>
+//           </div>
+//         ) : (
+//           <div style={{
+//             width:"100%", padding:"20px 0",
+//             display:"flex", alignItems:"center", justifyContent:"center",
+//           }}>
+//             <div style={{
+//               width:40, height:40, borderRadius:10,
+//               background:`linear-gradient(135deg,${GOLD},#b8832e)`,
+//               boxShadow:`0 4px 14px ${GOLD}77`, overflow:"hidden",
+//               display:"flex", alignItems:"center", justifyContent:"center",
+//             }}>
+//               <img src={logo} alt="जन संवाद"
+//                 style={{ width:"100%", height:"100%", objectFit:"cover" }}
+//                 onError={e=>{ e.target.style.display="none"; e.target.parentNode.innerHTML='<span style="font-size:18px">⚖️</span>'; }}
+//               />
+//             </div>
+//           </div>
+//         )}
+
+//         {/* Divider */}
+//         <div style={{ margin:"0 16px 10px", borderTop:"1px solid rgba(255,255,255,0.1)" }}/>
+
+//         {/* ── Nav ── */}
+//         <nav style={{ flex:1, display:"flex", flexDirection:"column", gap:2, paddingTop:4, overflowY:"auto", overflowX:"hidden" }}>
+//           {isOpen ? (
+//             <>
+//               <NavLink to="/dashboard" title="Dashboard" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+//                 <span className="sb-icon"><FiLayout size={18}/></span><span className="sb-label">Dashboard</span>
+//               </NavLink>
+
+//               {/* {FULL_ACCESS_ROLES.includes(user?.role) && ( */}
+//                 <NavLink to="/meetings" title="Meetings" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+//                   <span className="sb-icon"><FiCalendar size={18}/></span><span className="sb-label">Meetings</span>
+//                 </NavLink>
+//               {/* )} */}
+//                {/* {FULL_ACCESS_ROLES.includes(user?.role) && (
+//                 <NavLink to="/meetingsubjects" title="Meetings Subjects" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+//                   <span className="sb-icon"><FiCalendar size={18}/></span><span className="sb-label">Meetings Subjects</span>
+//                 </NavLink>
+//               )} */}
+//               {FULL_ACCESS_ROLES.includes(user?.role) && (
+//                 <NavLink to="/availability" title="Availability" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+//                   <span className="sb-icon"><FiCalendar size={18}/></span><span className="sb-label">Availability</span>
+//                 </NavLink>
+//               )}
+
+//               <NavLink to="/allapplication" title="Applications" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+//                 <span className="sb-icon"><FiFileText size={18}/></span><span className="sb-label">Applications</span>
+//               </NavLink>
+
+//               {FULL_ACCESS_ROLES.includes(user?.role) && (
+//                 <NavLink to="/allapplicationcitizens" title="Appointment Applications" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+//                   <span className="sb-icon"><FiFileText size={18}/></span><span className="sb-label">Appointment Applications</span>
+//                 </NavLink>
+//               )}
+//               {FULL_ACCESS_ROLES.includes(user?.role) && (
+//                 <NavLink to="/users" title="Users" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+//                   <span className="sb-icon"><FiUsers size={18}/></span><span className="sb-label">Users</span>
+//                 </NavLink>
+//               )}
+//               {FULL_ACCESS_ROLES.includes(user?.role) && (
+//                 <NavLink to="/corporators" title="Corporators" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+//                   <span className="sb-icon"><FiUserCheck size={18}/></span><span className="sb-label">Corporators</span>
+//                 </NavLink>
+//               )}
+//             </>
+//           ) : (
+//             <>
+//               <NavLink to="/dashboard"              className={({isActive})=>`sb-link-collapsed${isActive?" active":""}`}><FiLayout size={18}/></NavLink>
+//               <NavLink to="/availability"           className={({isActive})=>`sb-link-collapsed${isActive?" active":""}`}><FiCalendar size={18}/></NavLink>
+//               <NavLink to="/allapplication"         className={({isActive})=>`sb-link-collapsed${isActive?" active":""}`}><FiFileText size={18}/></NavLink>
+//               <NavLink to="/allapplicationcitizens" className={({isActive})=>`sb-link-collapsed${isActive?" active":""}`}><FiFileText size={18}/></NavLink>
+//               {FULL_ACCESS_ROLES.includes(user?.role) && (
+//                 <NavLink to="/users" className={({isActive})=>`sb-link-collapsed${isActive?" active":""}`}><FiUsers size={18}/></NavLink>
+//               )}
+//               {FULL_ACCESS_ROLES.includes(user?.role) && (
+//                 <NavLink to="/corporators" className={({isActive})=>`sb-link-collapsed${isActive?" active":""}`}><FiUserCheck size={18}/></NavLink>
+//               )}
+//             </>
+//           )}
+//         </nav>
+
+//         {/* ── Bottom: Settings + User ── */}
+//         <div style={{ marginTop:"auto" }}>
+//           <div style={{ margin:"0 10px 4px" }}>
+//             {isOpen ? (
+//               <NavLink to="/settings" title="Settings" className={({isActive})=>`sb-link${isActive?" active":""}`} style={{ margin:0 }}>
+//                 <span className="sb-icon"><FiSettings size={18}/></span><span className="sb-label">Settings</span>
+//               </NavLink>
+//             ) : (
+//               <NavLink to="/settings" className={({isActive})=>`sb-link-collapsed${isActive?" active":""}`} style={{ margin:"2px 8px" }}>
+//                 <FiSettings size={18}/>
+//               </NavLink>
+//             )}
+//           </div>
+
+//           <div style={{ margin:"6px 16px", borderTop:"1px solid rgba(255,255,255,0.1)" }}/>
+
+//           <div style={{ padding: isOpen ? "10px 16px 20px" : "10px 0 20px" }}>
+//             {isOpen ? (
+//               <div>
+//                 <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
+//                   <div style={{
+//                     width:34, height:34, borderRadius:"50%", flexShrink:0,
+//                     background:`linear-gradient(135deg,${GOLD},#b8832e)`,
+//                     display:"flex", alignItems:"center", justifyContent:"center",
+//                     color:"#fff", fontSize:14, fontWeight:900,
+//                     boxShadow:`0 3px 10px ${GOLD}66`, fontFamily:"'Montserrat',sans-serif",
+//                   }}>
+//                     {(user?.fullName || user?.userName || "A")[0].toUpperCase()}
+//                   </div>
+//                   <div style={{ overflow:"hidden" }}>
+//                     <div style={{ color:"#fff", fontSize:14, fontWeight:700, lineHeight:1.2, fontFamily:"'Montserrat',sans-serif", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", maxWidth:130 }}>
+//                       {user?.fullName || user?.userName || "Admin User"}
+//                     </div>
+//                     <div style={{ color:"#B8D5DB", fontSize:11, fontWeight:500, fontFamily:"'Montserrat',sans-serif" }}>{user?.role}</div>
+//                   </div>
+//                 </div>
+//                 {user?.departmentName && (
+//                   <div style={{ fontSize:10.5, color:"rgba(255,255,255,0.45)", fontWeight:600, marginBottom:10, paddingLeft:2 }}>
+//                     Dept: <span style={{ color:"rgba(255,255,255,0.75)", fontWeight:700 }}>{user.departmentName}</span>
+//                   </div>
+//                 )}
+                 
+//                                  {isMobile && (
+//                   <div style={{ display:"flex", justifyContent:"center", marginBottom:10 }}>
+//                     <LanguageToggle variant="dark" />
+//                   </div>
+//                 )}
+//                 <button onClick={handleLogout} style={{
+//                   width:"100%", background:"rgba(255,255,255,0.1)",
+//                   color:"rgba(255,255,255,0.85)", border:"1px solid rgba(255,255,255,0.2)",
+//                   borderRadius:10, padding:"8px", fontSize:12, fontWeight:600, cursor:"pointer",
+//                   letterSpacing:0.8, textTransform:"uppercase",
+//                   display:"flex", alignItems:"center", justifyContent:"center", gap:7,
+//                   transition:"all 200ms ease", fontFamily:"'Montserrat',sans-serif",
+//                 }}
+//                   onMouseEnter={e=>{ e.currentTarget.style.background="rgba(220,50,50,0.3)"; e.currentTarget.style.borderColor="rgba(220,50,50,0.4)"; }}
+//                   onMouseLeave={e=>{ e.currentTarget.style.background="rgba(255,255,255,0.1)"; e.currentTarget.style.borderColor="rgba(255,255,255,0.2)"; }}
+//                 >
+//                   <FiLogOut size={13}/> Logout
+//                 </button>
+//               </div>
+//             ) : (
+//               <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:10 }}>
+//                 <div style={{
+//                   width:34, height:34, borderRadius:"50%",
+//                   background:`linear-gradient(135deg,${GOLD},#b8832e)`,
+//                   display:"flex", alignItems:"center", justifyContent:"center",
+//                   color:"#fff", fontSize:13, fontWeight:900,
+//                 }}>
+//                   {(user?.fullName || user?.userName || "A")[0].toUpperCase()}
+//                 </div>
+//                 <button onClick={handleLogout} style={{
+//                   background:"transparent", border:"none", cursor:"pointer",
+//                   color:"rgba(255,255,255,0.5)", padding:6, borderRadius:8,
+//                   display:"flex", alignItems:"center", justifyContent:"center", transition:"all 200ms ease",
+//                 }}
+//                   onMouseEnter={e=>e.currentTarget.style.color="#fff"}
+//                   onMouseLeave={e=>e.currentTarget.style.color="rgba(255,255,255,0.5)"}
+//                 >
+//                   <FiLogOut size={17}/>
+//                 </button>
+//               </div>
+//             )}
+//           </div>
+//         </div>
+//       </aside>
+//     </>
+//   );
+// }
+
+
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/slices/authSlice";
 import {
-  FiChevronLeft, FiChevronRight, FiX,
+  FiChevronLeft, FiChevronRight,
   FiLayout, FiFileText, FiSettings,
   FiLogOut, FiUsers, FiCalendar, FiUserCheck,
 } from "react-icons/fi";
 import logo from "../../assets/vvcmclogo.jpg";
 import { useSidebar } from "./SidebarContext";
+import LanguageToggle from "../../i18n/LanguageToggle";
 
 const TEAL_FROM = "#187484";
 const TEAL_TO   = "#0d4f5c";
@@ -780,47 +1535,19 @@ export default function Sidebar() {
     navigate("/login");
   };
 
-  const handleOpenArrow    = () => setMode("open");
+  const handleOpenArrow     = () => setMode("open");
   const handleCollapseArrow = () => setMode("collapsed");
-  const handleClose        = () => setMode("hidden");
 
+  // Only two states now: open / collapsed (old "hidden" value is treated as collapsed)
   const isOpen      = mode === "open";
-  const isCollapsed = mode === "collapsed";
-  const isHidden    = mode === "hidden";
-
-  // HIDDEN — render only the › floating button
-  if (isHidden) {
-    return (
-      <button
-        onClick={handleOpenArrow}
-        title="Open sidebar"
-        style={{
-          position: isMobile ? "fixed" : "relative",
-          top: isMobile ? 0 : "auto",
-          left: isMobile ? 0 : "auto",
-          alignSelf: "flex-start",
-          margin: isMobile ? undefined : "2px 0 0 2px",
-          zIndex: 200,
-          background: `linear-gradient(135deg, ${TEAL_FROM}, ${TEAL_TO})`,
-          color: "#fff", padding: "8px 10px", borderRadius: 10,
-          boxShadow: "0 4px 16px rgba(24,116,132,0.4)",
-          border: "none", cursor: "pointer",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          flexShrink: 0,
-          width: 40,
-        }}
-      >
-        <FiChevronRight size={18} />
-      </button>
-    );
-  }
+  const isCollapsed = !isOpen;
 
   return (
     <>
       {/* Backdrop overlay on mobile when open */}
       {isMobile && isOpen && (
         <div
-          onClick={handleClose}
+          onClick={handleCollapseArrow}
           style={{
             position: "fixed", inset: 0, zIndex: 90,
           }}
@@ -873,6 +1600,10 @@ export default function Sidebar() {
             border-left: 3px solid ${GOLD};
             box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.14);
           }
+          .sb-link .sb-label {
+            display: block; max-width: 150px; min-width: 0;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+          }
           .sb-link .sb-icon        { flex-shrink:0; opacity:0.8; color:inherit; transition: all 200ms ease; }
           .sb-link:hover .sb-icon,
           .sb-link.active .sb-icon { opacity:1; color:#FFFFFF; }
@@ -911,10 +1642,10 @@ export default function Sidebar() {
           </button>
         )}
 
-        {/* ── × Close pill — only when COLLAPSED ── */}
+        {/* ── › Expand pill — only when COLLAPSED ── */}
         {isCollapsed && (
-          <button className="sb-pill-btn" onClick={handleClose} title="Hide sidebar">
-            <FiX size={14}/>
+          <button className="sb-pill-btn" onClick={handleOpenArrow} title="Expand sidebar">
+            <FiChevronRight size={14}/>
           </button>
         )}
 
@@ -930,8 +1661,9 @@ export default function Sidebar() {
               color:`${GOLD}dd`, fontSize:15, fontWeight:700,
               fontFamily:"'Montserrat','Noto Sans Devanagari',sans-serif",
               whiteSpace:"nowrap", letterSpacing:0.1, lineHeight:1.3,
+              textAlign:"center",
             }}>
-              वसई-विरार शहर महानगरपालिका
+              वसई-विरार शहर<br/>महानगरपालिका
             </div>
             <div style={{
               color:"#fff", fontSize:21, fontWeight:800,
@@ -980,43 +1712,43 @@ export default function Sidebar() {
         <nav style={{ flex:1, display:"flex", flexDirection:"column", gap:2, paddingTop:4, overflowY:"auto", overflowX:"hidden" }}>
           {isOpen ? (
             <>
-              <NavLink to="/dashboard" className={({isActive})=>`sb-link${isActive?" active":""}`}>
-                <span className="sb-icon"><FiLayout size={18}/></span><span>Dashboard</span>
+              <NavLink to="/dashboard" title="Dashboard" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+                <span className="sb-icon"><FiLayout size={18}/></span><span className="sb-label">Dashboard</span>
               </NavLink>
 
               {/* {FULL_ACCESS_ROLES.includes(user?.role) && ( */}
-                <NavLink to="/meetings" className={({isActive})=>`sb-link${isActive?" active":""}`}>
-                  <span className="sb-icon"><FiCalendar size={18}/></span><span>Meetings</span>
+                <NavLink to="/meetings" title="Meetings" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+                  <span className="sb-icon"><FiCalendar size={18}/></span><span className="sb-label">Meetings</span>
                 </NavLink>
               {/* )} */}
                {/* {FULL_ACCESS_ROLES.includes(user?.role) && (
-                <NavLink to="/meetingsubjects" className={({isActive})=>`sb-link${isActive?" active":""}`}>
-                  <span className="sb-icon"><FiCalendar size={18}/></span><span>Meetings Subjects</span>
+                <NavLink to="/meetingsubjects" title="Meetings Subjects" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+                  <span className="sb-icon"><FiCalendar size={18}/></span><span className="sb-label">Meetings Subjects</span>
                 </NavLink>
               )} */}
               {FULL_ACCESS_ROLES.includes(user?.role) && (
-                <NavLink to="/availability" className={({isActive})=>`sb-link${isActive?" active":""}`}>
-                  <span className="sb-icon"><FiCalendar size={18}/></span><span>Availability</span>
+                <NavLink to="/availability" title="Availability" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+                  <span className="sb-icon"><FiCalendar size={18}/></span><span className="sb-label">Availability</span>
                 </NavLink>
               )}
 
-              <NavLink to="/allapplication" className={({isActive})=>`sb-link${isActive?" active":""}`}>
-                <span className="sb-icon"><FiFileText size={18}/></span><span>Applications</span>
+              <NavLink to="/allapplication" title="Applications" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+                <span className="sb-icon"><FiFileText size={18}/></span><span className="sb-label">Applications</span>
               </NavLink>
 
               {FULL_ACCESS_ROLES.includes(user?.role) && (
-                <NavLink to="/allapplicationcitizens" className={({isActive})=>`sb-link${isActive?" active":""}`}>
-                  <span className="sb-icon"><FiFileText size={18}/></span><span>Appointment Applications</span>
+                <NavLink to="/allapplicationcitizens" title="Appointment Applications" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+                  <span className="sb-icon"><FiFileText size={18}/></span><span className="sb-label">Appointment Applications</span>
                 </NavLink>
               )}
               {FULL_ACCESS_ROLES.includes(user?.role) && (
-                <NavLink to="/users" className={({isActive})=>`sb-link${isActive?" active":""}`}>
-                  <span className="sb-icon"><FiUsers size={18}/></span><span>Users</span>
+                <NavLink to="/users" title="Users" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+                  <span className="sb-icon"><FiUsers size={18}/></span><span className="sb-label">Users</span>
                 </NavLink>
               )}
               {FULL_ACCESS_ROLES.includes(user?.role) && (
-                <NavLink to="/corporators" className={({isActive})=>`sb-link${isActive?" active":""}`}>
-                  <span className="sb-icon"><FiUserCheck size={18}/></span><span>Corporators</span>
+                <NavLink to="/corporators" title="Corporators" className={({isActive})=>`sb-link${isActive?" active":""}`}>
+                  <span className="sb-icon"><FiUserCheck size={18}/></span><span className="sb-label">Corporators</span>
                 </NavLink>
               )}
             </>
@@ -1038,17 +1770,17 @@ export default function Sidebar() {
 
         {/* ── Bottom: Settings + User ── */}
         <div style={{ marginTop:"auto" }}>
-          <div style={{ margin:"0 10px 4px" }}>
+          {/* <div style={{ margin:"0 10px 4px" }}>
             {isOpen ? (
-              <NavLink to="/settings" className={({isActive})=>`sb-link${isActive?" active":""}`} style={{ margin:0 }}>
-                <span className="sb-icon"><FiSettings size={18}/></span><span>Settings</span>
+              <NavLink to="/settings" title="Settings" className={({isActive})=>`sb-link${isActive?" active":""}`} style={{ margin:0 }}>
+                <span className="sb-icon"><FiSettings size={18}/></span><span className="sb-label">Settings</span>
               </NavLink>
             ) : (
               <NavLink to="/settings" className={({isActive})=>`sb-link-collapsed${isActive?" active":""}`} style={{ margin:"2px 8px" }}>
                 <FiSettings size={18}/>
               </NavLink>
             )}
-          </div>
+          </div> */}
 
           <div style={{ margin:"6px 16px", borderTop:"1px solid rgba(255,255,255,0.1)" }}/>
 
@@ -1075,6 +1807,12 @@ export default function Sidebar() {
                 {user?.departmentName && (
                   <div style={{ fontSize:10.5, color:"rgba(255,255,255,0.45)", fontWeight:600, marginBottom:10, paddingLeft:2 }}>
                     Dept: <span style={{ color:"rgba(255,255,255,0.75)", fontWeight:700 }}>{user.departmentName}</span>
+                  </div>
+                )}
+                 
+                                 {isMobile && (
+                  <div style={{ display:"flex", justifyContent:"center", marginBottom:10 }}>
+                    <LanguageToggle variant="dark" />
                   </div>
                 )}
                 <button onClick={handleLogout} style={{
@@ -1119,4 +1857,3 @@ export default function Sidebar() {
     </>
   );
 }
-
