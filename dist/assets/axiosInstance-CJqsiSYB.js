@@ -1,1 +1,0 @@
-import{a as t}from"./vendor-utils-CRNBIpRx.js";const s=t.create({baseURL:"https://jansamvad.saavi.co.in/api"});s.interceptors.request.use(a=>{const e=localStorage.getItem("token");return e&&(a.headers.Authorization=`Bearer ${e}`),a});export{s as a};
