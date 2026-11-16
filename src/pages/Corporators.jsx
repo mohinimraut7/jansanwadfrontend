@@ -1,3 +1,1426 @@
+// // import React, { useState, useEffect } from "react";
+// // import axiosInstance from "../services/axiosInstance";
+// // import { toast } from "react-toastify";
+
+// // // ── Color Theme (Users page शी same) ──────────────────────────────────────────
+// // const G = {
+// //   primary:      "#1a5c45",
+// //   primaryHov:   "#154d3a",
+// //   primaryLight: "#e8f5f0",
+// //   primaryBorder:"#b2d8cc",
+// //   primaryMid:   "#2d7a5f",
+// // };
+
+// // // ── Corporator (नगरसेवक) helpers ──────────────────────────────────────────────
+// // // Role / designation नेहमी small मध्ये "corporator" save होतात
+// // const CORPORATOR = "corporator";
+// // const isCorporator = (r) => ["corporator", "ward councillor"].includes(String(r || "").trim().toLowerCase());
+// // const normDesignation = (d) => String(d || "").trim().toLowerCase() === CORPORATOR ? CORPORATOR : (d || "");
+
+// // // Designation (backend PREDEFINED_DESIGNATIONS शी same) — value small, label display साठी
+// // const DESIGNATIONS = [
+// //   { value: "corporator",                  label: "Corporator" },
+// //   { value: "Mayor",                       label: "Mayor" },
+// //   { value: "Deputy Mayor",                label: "Deputy Mayor" },
+// //   { value: "Standing Committee Chairman", label: "Standing Committee Chairman" },
+// //   { value: "Leader of House",             label: "Leader of House" },
+// //   { value: "Leader of Opposition",        label: "Leader of Opposition" },
+// // ];
+// // const designationLabel = (d) => {
+// //   const v = normDesignation(d) || CORPORATOR;
+// //   return DESIGNATIONS.find((x) => x.value === v)?.label || v;
+// // };
+
+// // // ── Shared field styles (Users page शी same) ──────────────────────────────────
+// // const fieldCls = { border:"1px solid #d1e8df", borderRadius:8, padding:"10px 14px", transition:"border-color .2s", backgroundColor:"#fff" };
+// // const labelSt  = { display:"block", fontSize:".75rem", color:"#5a8a74", marginBottom:3, fontWeight:600, letterSpacing:".02em" };
+// // const inputSt  = { width:"100%", outline:"none", fontSize:".875rem", color:"#1a2e25", background:"transparent", border:"none", fontFamily:"inherit" };
+
+// // // Yes / No toggle (General Body / Standing Committee)
+// // function YesNo({ label, value, onChange }) {
+// //   const btn = (v, txt) => (
+// //     <button type="button" onClick={() => onChange(v)} style={{
+// //       flex:1, padding:"7px 0", borderRadius:6, fontSize:".8rem", fontWeight:600, cursor:"pointer",
+// //       border:`1px solid ${value === v ? G.primary : G.primaryBorder}`,
+// //       background: value === v ? G.primary : "#fff", color: value === v ? "#fff" : G.primary,
+// //     }}>{txt}</button>
+// //   );
+// //   return (
+// //     <div style={{ flex:1, minWidth:150 }}>
+// //       <label style={labelSt}>{label}</label>
+// //       <div style={{ display:"flex", gap:6 }}>{btn(true, "Yes")}{btn(false, "No")}</div>
+// //     </div>
+// //   );
+// // }
+
+// // const pill = (yes) => (
+// //   <span style={{ display:"inline-block", minWidth:44, textAlign:"center", padding:"3px 10px", borderRadius:20, fontSize:".78rem", fontWeight:700,
+// //     background: yes ? "#e6f6ec" : "#fdeeee", color: yes ? "#1f7a45" : "#c0392b", border:`1px solid ${yes ? "#b7e2c6" : "#f3c4bd"}` }}>
+// //     {yes ? "Yes" : "No"}
+// //   </span>
+// // );
+
+// // // ── Add / Edit Corporator Modal ───────────────────────────────────────────────
+// // function CorporatorModal({ corporator, onClose, onSuccess }) {
+// //   const isEdit = !!corporator;
+// //   const [submitting, setSubmitting] = useState(false);
+// //   const [form, setForm] = useState({
+// //     wardNo:                    corporator?.wardNo        || "",
+// //     fullName:                  corporator?.fullName      || "",
+// //     mobileNumber:              corporator?.mobileNumber  || "",
+// //     designation:               normDesignation(corporator?.designation) || CORPORATOR,
+// //     isGeneralBodyMember:       corporator ? corporator.isGeneralBodyMember !== false : true,
+// //     isStandingCommitteeMember: corporator ? !!corporator.isStandingCommitteeMember : false,
+// //     password:                  "",
+// //   });
+
+// //   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+// //   const mobileOk = /^\d{10}$/.test(form.mobileNumber.trim());
+// //   const canSave  = form.wardNo.trim() && form.fullName.trim() && mobileOk && (isEdit || form.password) && !submitting;
+
+// //   const handleSubmit = async (e) => {
+// //     e.preventDefault();
+// //     if (!canSave) { toast.warn("सर्व fields भरा ❌"); return; }
+// //     const mobile = form.mobileNumber.trim();
+// //     const common = {
+// //       role:                      CORPORATOR,
+// //       wardNo:                    form.wardNo.trim(),
+// //       fullName:                  form.fullName.trim(),
+// //       mobileNumber:              mobile,
+// //       designation:               form.designation,
+// //       isGeneralBodyMember:       form.isGeneralBodyMember,
+// //       isStandingCommitteeMember: form.isStandingCommitteeMember,
+// //     };
+// //     try {
+// //       setSubmitting(true);
+// //       let res;
+// //       if (isEdit) {
+// //         // username = जुना mobile असेल तर नवीन mobile प्रमाणे username पण बदला (login साठी)
+// //         const payload = { ...common };
+// //         if (!corporator.userName || corporator.userName === corporator.mobileNumber) payload.userName = mobile;
+// //         res = await axiosInstance.patch(`/users/${corporator._id}`, payload);
+// //       } else {
+// //         // Login: Username = mobile number + password, किंवा mobile OTP
+// //         res = await axiosInstance.post("/register", { ...common, userName: mobile, password: form.password });
+// //       }
+// //       if (!res.data.success) { toast.error(res.data.message || "Save failed ❌"); return; }
+// //       toast.success(isEdit ? "Corporator Updated Successfully ✅" : "Corporator Added Successfully ✅");
+// //       onSuccess(); onClose();
+// //     } catch (error) {
+// //       toast.error(error?.response?.data?.message || "Server Error ❌");
+// //     } finally { setSubmitting(false); }
+// //   };
+
+// //   const box = { ...inputSt };
+// //   return (
+// //     <div style={{ position:"fixed", inset:0, zIndex:50, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(0,0,0,.45)", backdropFilter:"blur(4px)", padding:16 }}>
+// //       <div style={{ background:"#fff", borderRadius:16, boxShadow:"0 20px 60px rgba(0,0,0,.2)", width:"100%", maxWidth:460, maxHeight:"90vh", overflowY:"auto" }}>
+// //         <div style={{ background:`linear-gradient(135deg, ${G.primary} 0%, ${G.primaryMid} 100%)`, borderRadius:"16px 16px 0 0", padding:"18px 24px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+// //           <div>
+// //             <p style={{ fontSize:".7rem", color:"rgba(255,255,255,.7)", fontWeight:600, letterSpacing:".08em", textTransform:"uppercase", marginBottom:2 }}>Corporators / नगरसेवक</p>
+// //             <h2 style={{ fontSize:"1.1rem", fontWeight:700, color:"#fff", margin:0 }}>{isEdit ? `Edit — ${corporator.fullName}` : "Add Corporator"}</h2>
+// //           </div>
+// //           <button onClick={onClose} style={{ width:30, height:30, borderRadius:"50%", background:"rgba(255,255,255,.2)", border:"none", color:"#fff", fontWeight:700, cursor:"pointer", fontSize:".875rem", display:"flex", alignItems:"center", justifyContent:"center" }}>✕</button>
+// //         </div>
+// //         <div style={{ padding:"24px 28px" }}>
+// //           <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:12 }}>
+// //             <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
+// //               <div style={{ ...fieldCls, flex:"0 0 130px" }}>
+// //                 <label style={labelSt}>Ward seat no.</label>
+// //                 <input name="wardNo" value={form.wardNo} onChange={handleChange} placeholder="e.g. 1A" style={box} />
+// //               </div>
+// //               <div style={{ ...fieldCls, flex:1, minWidth:180 }}>
+// //                 <label style={labelSt}>Name of corporator</label>
+// //                 <input name="fullName" value={form.fullName} onChange={handleChange} placeholder="Enter full name" style={box} />
+// //               </div>
+// //             </div>
+// //             <div style={fieldCls}>
+// //               <label style={labelSt}>Mobile number</label>
+// //               <input type="tel" name="mobileNumber" value={form.mobileNumber} onChange={handleChange} placeholder="10 digit mobile number" maxLength={10} style={box} />
+// //             </div>
+// //             <div style={fieldCls}>
+// //               <label style={labelSt}>Designation</label>
+// //               <select name="designation" value={form.designation} onChange={handleChange} style={{ ...box, cursor:"pointer" }}>
+// //                 {DESIGNATIONS.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+// //               </select>
+// //             </div>
+// //             <div style={{ display:"flex", gap:12, flexWrap:"wrap" }}>
+// //               <YesNo label="General Body" value={form.isGeneralBodyMember}
+// //                 onChange={(v) => setForm({ ...form, isGeneralBodyMember: v })} />
+// //               <YesNo label="Standing Committee" value={form.isStandingCommitteeMember}
+// //                 onChange={(v) => setForm({ ...form, isStandingCommitteeMember: v })} />
+// //             </div>
+// //             {!isEdit && (
+// //               <div style={fieldCls}>
+// //                 <label style={labelSt}>Password</label>
+// //                 <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="Enter password" style={box} />
+// //               </div>
+// //             )}
+// //             {/* <div style={{ fontSize:".75rem", color:"#5a8a74", background:G.primaryLight, borderRadius:8, padding:"8px 12px" }}>
+// //               Login: Username = mobile number{isEdit ? "" : " + वरील password"}, किंवा mobile number वर OTP.
+// //             </div> */}
+// //             <div style={{ display:"flex", gap:10, paddingTop:4 }}>
+// //               <button type="button" onClick={onClose} style={{ flex:1, padding:"11px 0", borderRadius:8, border:`1px solid ${G.primaryBorder}`, background:"#fff", color:G.primary, fontWeight:600, fontSize:".875rem", cursor:"pointer" }}>
+// //                 Cancel
+// //               </button>
+// //               <button type="submit" disabled={!canSave} style={{ flex:1, padding:"11px 0", borderRadius:8, border:"none", background: canSave ? G.primary : "#ccc", color:"#fff", fontWeight:600, fontSize:".875rem", cursor: canSave ? "pointer" : "not-allowed", opacity: canSave ? 1 : .65 }}>
+// //                 {submitting ? "Saving..." : isEdit ? "💾 Save Changes" : "+ Add Corporator"}
+// //               </button>
+// //             </div>
+// //           </form>
+// //         </div>
+// //       </div>
+// //     </div>
+// //   );
+// // }
+
+// // // ── Main Corporators Page ─────────────────────────────────────────────────────
+// // export default function Corporators() {
+// //   const [users, setUsers]           = useState([]);
+// //   const [loading, setLoading]       = useState(true);
+// //   const [search, setSearch]         = useState("");
+// //   const [showAdd, setShowAdd]       = useState(false);
+// //   const [editItem, setEditItem]     = useState(null);
+// //   const [deletingId, setDeletingId] = useState(null);
+
+// //   useEffect(() => { fetchCorporators(); }, []);
+
+// //   const fetchCorporators = async () => {
+// //     try {
+// //       setLoading(true);
+// //       const res = await axiosInstance.get("/getUsers");
+// //       if (res.data.success) setUsers((res.data.users || []).filter((u) => isCorporator(u.role)));
+// //       else toast.error(res.data.message || "Corporators fetch failed ❌");
+// //     } catch {
+// //       toast.error("Corporators fetch करताना error आला ❌");
+// //     } finally { setLoading(false); }
+// //   };
+
+// //   const handleDelete = async (u) => {
+// //     if (!window.confirm(`"${u.fullName}" ला delete करायचे आहे का?`)) return;
+// //     try {
+// //       setDeletingId(u._id);
+// //       const res = await axiosInstance.delete(`/deleteUser/${u._id}`);
+// //       if (res.data.success) {
+// //         setUsers((prev) => prev.filter((x) => x._id !== u._id));
+// //         toast.success(`"${u.fullName}" Deleted Successfully ✅`);
+// //       } else { toast.error(res.data.message || "Delete failed ❌"); }
+// //     } catch (err) {
+// //       toast.error(err?.response?.data?.message || "Server Error ❌");
+// //     } finally { setDeletingId(null); }
+// //   };
+
+// //   const q = search.trim().toLowerCase();
+// //   const list = users
+// //     .filter((u) => !q
+// //       || u.fullName?.toLowerCase().includes(q)
+// //       || u.mobileNumber?.includes(q)
+// //       || String(u.wardNo || "").toLowerCase().includes(q)
+// //       || designationLabel(u.designation).toLowerCase().includes(q))
+// //     .sort((a, b) => String(a.wardNo || "").localeCompare(String(b.wardNo || ""), "en", { numeric: true }));
+
+// //   const gbCount = users.filter((u) => u.isGeneralBodyMember !== false).length;
+// //   const scCount = users.filter((u) => u.isStandingCommitteeMember).length;
+
+// //   return (
+// //     <div style={{ minHeight:"100vh", background:"#f0f7f4", padding:24 }}>
+// //       <style>{`
+// //         @keyframes cspin { to { transform:rotate(360deg) } }
+// //         .c-th { padding:0 16px; height:50px; font-weight:600; font-size:.8rem; color:${G.primary}; text-align:left; white-space:nowrap; background:${G.primaryLight}; border-bottom:1px solid ${G.primaryBorder}; letter-spacing:.04em; text-transform:uppercase; }
+// //         .c-tr { border-bottom:1px solid #e8f2ee; transition:background .12s; }
+// //         .c-tr:last-child { border-bottom:none; }
+// //         .c-tr:hover { background:#e8f5f0 !important; }
+// //         .c-td { padding:0 16px; height:54px; vertical-align:middle; font-size:.875rem; }
+// //         .c-mono { display:inline-block; padding:2px 8px; background:${G.primaryLight}; border:1px solid ${G.primaryBorder}; border-radius:4px; font-family:monospace; font-size:.8rem; color:${G.primary}; font-weight:600; }
+// //         .c-footer { display:flex; align-items:center; justify-content:space-between; padding:0 16px; height:46px; border-top:1px solid ${G.primaryBorder}; background:${G.primaryLight}; font-size:.8125rem; color:${G.primaryMid}; }
+// //         .c-edit-btn { display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:6px; font-size:.78rem; font-weight:600; border:1px solid #6ee7b7; background:#f0fdf4; color:#065f46; cursor:pointer; transition:all .15s; }
+// //         .c-edit-btn:hover { background:#d1fae5 !important; border-color:#6ee7b7 !important; }
+// //         .c-del-btn { display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:6px; font-size:.78rem; font-weight:600; border:1px solid #fca5a5; background:#fff5f5; color:#dc2626; cursor:pointer; transition:all .15s; }
+// //         .c-del-btn:hover:not(:disabled) { background:#fee2e2 !important; border-color:#f87171 !important; }
+// //         .c-del-btn:disabled { opacity:.5; cursor:not-allowed; }
+// //         .c-ref-btn:hover { background:#e8f5f0 !important; color:#1a5c45 !important; border-color:#b2d8cc !important; }
+// //         .c-add-btn:hover { background:#154d3a !important; }
+// //         .c-search-input:focus { border-color:#1a5c45 !important; box-shadow:0 0 0 3px rgba(26,92,69,.12) !important; }
+// //       `}</style>
+
+// //       <div style={{ maxWidth:1280, margin:"0 auto" }}>
+
+// //         {/* ── Page Header ── */}
+// //         <div style={{ marginBottom:24 }}>
+// //           <h1 style={{ fontSize:"1.6rem", fontWeight:800, color:"#1a2e25", margin:0, display:"flex", alignItems:"center", gap:12 }}>
+// //             Corporators
+// //             <span style={{ fontSize:".8125rem", fontWeight:700, color:G.primary, background:G.primaryLight, border:`1px solid ${G.primaryBorder}`, padding:"2px 10px", borderRadius:20 }}>
+// //               {users.length}
+// //             </span>
+// //           </h1>
+// //           <p style={{ color:"#5a8a74", fontSize:".9rem", fontWeight:500, marginTop:4 }}>
+// //             General Body <strong style={{ color:G.primary }}>{gbCount}</strong> · Standing Committee <strong style={{ color:G.primary }}>{scCount}</strong>
+// //           </p>
+// //         </div>
+
+// //         {/* ── Action Bar ── */}
+// //         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, marginBottom:16, flexWrap:"wrap" }}>
+// //           <div style={{ position:"relative", flex:"1 1 300px", maxWidth:480 }}>
+// //             <span style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)", color:"#5a8a74", fontSize:".9rem" }}>🔍</span>
+// //             <input type="text" placeholder="Search by name, ward, mobile, designation..." value={search}
+// //               onChange={(e) => setSearch(e.target.value)} className="c-search-input"
+// //               style={{ width:"100%", paddingLeft:36, paddingRight:14, paddingTop:9, paddingBottom:9, fontSize:".875rem", border:`1px solid ${G.primaryBorder}`, borderRadius:8, outline:"none", background:"#fff", color:"#1a2e25", transition:"border-color .2s, box-shadow .2s", boxSizing:"border-box" }} />
+// //           </div>
+// //           <div style={{ display:"flex", gap:10, flexShrink:0 }}>
+// //             <button onClick={fetchCorporators} className="c-ref-btn"
+// //               style={{ display:"flex", alignItems:"center", gap:6, padding:"9px 16px", border:`1px solid ${G.primaryBorder}`, borderRadius:8, background:"#fff", color:"#3a6b57", fontWeight:600, fontSize:".8125rem", cursor:"pointer", transition:"all .15s" }}>
+// //               🔄 Refresh
+// //             </button>
+// //             <button onClick={() => setShowAdd(true)} className="c-add-btn"
+// //               style={{ display:"flex", alignItems:"center", gap:6, padding:"9px 18px", border:"none", borderRadius:8, background:G.primary, color:"#fff", fontWeight:600, fontSize:".8125rem", cursor:"pointer", transition:"background .15s" }}>
+// //               + Add Corporator
+// //             </button>
+// //           </div>
+// //         </div>
+
+// //         {/* ── Table Card ── */}
+// //         <div style={{ background:"#fff", border:`1px solid ${G.primaryBorder}`, borderRadius:10, overflow:"hidden", boxShadow:"0 2px 8px rgba(26,92,69,.08)" }}>
+// //           <div style={{ overflowX:"auto" }}>
+// //             <table style={{ width:"100%", borderCollapse:"collapse" }}>
+// //               <thead>
+// //                 <tr>
+// //                   {["Sr. No.","Ward seat no.","Names of corporators","Mobile number","Designation","General Body","Standing Committee","Action"].map((h) => (
+// //                     <th key={h} className="c-th">{h}</th>
+// //                   ))}
+// //                 </tr>
+// //               </thead>
+// //               <tbody>
+// //                 {loading ? (
+// //                   <tr><td colSpan={8} style={{ textAlign:"center", padding:"64px 0", color:"#5a8a74" }}>
+// //                     <div style={{ width:32, height:32, margin:"0 auto 12px", border:`3px solid ${G.primaryBorder}`, borderTopColor:G.primary, borderRadius:"50%", animation:"cspin .8s linear infinite" }} />
+// //                     <div style={{ fontWeight:500 }}>Loading corporators…</div>
+// //                   </td></tr>
+// //                 ) : list.length === 0 ? (
+// //                   <tr><td colSpan={8} style={{ textAlign:"center", padding:"64px 0", color:"#5a8a74" }}>
+// //                     <div style={{ fontSize:40, marginBottom:8 }}>🏛</div>
+// //                     <div style={{ fontWeight:500 }}>No corporators found — "+ Add Corporator" वर click करा</div>
+// //                   </td></tr>
+// //                 ) : list.map((u, i) => (
+// //                   <tr key={u._id} className="c-tr" style={{ background: i % 2 === 0 ? "#fff" : "#fafcfb" }}>
+// //                     <td className="c-td" style={{ width:70, fontWeight:600, color:"#5a8a74" }}>{i + 1}</td>
+// //                     <td className="c-td" style={{ width:120 }}><span className="c-mono">{u.wardNo || "—"}</span></td>
+// //                     <td className="c-td" style={{ minWidth:200, fontWeight:600, color:"#1a2e25" }}>{u.fullName || "—"}</td>
+// //                     <td className="c-td" style={{ width:140, color:"#2d5a45" }}>{u.mobileNumber || "—"}</td>
+// //                     <td className="c-td" style={{ minWidth:140, color:"#2d5a45" }}>{designationLabel(u.designation)}</td>
+// //                     <td className="c-td" style={{ width:120 }}>{pill(u.isGeneralBodyMember !== false)}</td>
+// //                     <td className="c-td" style={{ width:150 }}>{pill(!!u.isStandingCommitteeMember)}</td>
+// //                     <td className="c-td" style={{ width:170 }}>
+// //                       <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+// //                         <button className="c-edit-btn" onClick={() => setEditItem(u)}>✏️ Edit</button>
+// //                         <button className="c-del-btn" disabled={deletingId === u._id} onClick={() => handleDelete(u)}>
+// //                           {deletingId === u._id ? (
+// //                             <><span style={{ width:11, height:11, border:"2px solid #fca5a5", borderTopColor:"#dc2626", borderRadius:"50%", display:"inline-block", animation:"cspin .7s linear infinite" }} />Deleting…</>
+// //                           ) : <>🗑️ Delete</>}
+// //                         </button>
+// //                       </div>
+// //                     </td>
+// //                   </tr>
+// //                 ))}
+// //               </tbody>
+// //             </table>
+// //           </div>
+
+// //           {!loading && list.length > 0 && (
+// //             <div className="c-footer">
+// //               <span>Showing <strong style={{ color:G.primary }}>{list.length}</strong> of <strong style={{ color:G.primary }}>{users.length}</strong> corporators</span>
+// //             </div>
+// //           )}
+// //         </div>
+// //       </div>
+
+// //       {showAdd  && <CorporatorModal onClose={() => setShowAdd(false)} onSuccess={fetchCorporators} />}
+// //       {editItem && <CorporatorModal corporator={editItem} onClose={() => setEditItem(null)} onSuccess={fetchCorporators} />}
+// //     </div>
+// //   );
+// // }
+
+
+
+
+
+// // import React, { useState, useEffect } from "react";
+// // import axiosInstance from "../services/axiosInstance";
+// // import { toast } from "react-toastify";
+// // import { FiUserCheck, FiSearch, FiRefreshCw, FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
+
+// // // ── Color Theme (Users page शी same) ──────────────────────────────────────────
+// // const G = {
+// //   primary:      "#1a5c45",
+// //   primaryHov:   "#154d3a",
+// //   primaryLight: "#e8f5f0",
+// //   primaryBorder:"#b2d8cc",
+// //   primaryMid:   "#2d7a5f",
+// // };
+
+// // // ── Corporator (नगरसेवक) helpers ──────────────────────────────────────────────
+// // // Role / designation नेहमी small मध्ये "corporator" save होतात
+// // const CORPORATOR = "corporator";
+// // const isCorporator = (r) => ["corporator", "ward councillor"].includes(String(r || "").trim().toLowerCase());
+// // const normDesignation = (d) => String(d || "").trim().toLowerCase() === CORPORATOR ? CORPORATOR : (d || "");
+
+// // // Designation (backend PREDEFINED_DESIGNATIONS शी same) — value small, label display साठी
+// // const DESIGNATIONS = [
+// //   { value: "corporator",                  label: "Corporator" },
+// //   { value: "Mayor",                       label: "Mayor" },
+// //   { value: "Deputy Mayor",                label: "Deputy Mayor" },
+// //   { value: "Standing Committee Chairman", label: "Standing Committee Chairman" },
+// //   { value: "Leader of House",             label: "Leader of House" },
+// //   { value: "Leader of Opposition",        label: "Leader of Opposition" },
+// // ];
+// // const designationLabel = (d) => {
+// //   const v = normDesignation(d) || CORPORATOR;
+// //   return DESIGNATIONS.find((x) => x.value === v)?.label || v;
+// // };
+
+// // // ── Shared field styles (Users page शी same) ──────────────────────────────────
+// // const fieldCls = { border:"1px solid #d1e8df", borderRadius:8, padding:"10px 14px", transition:"border-color .2s", backgroundColor:"#fff" };
+// // const labelSt  = { display:"block", fontSize:".75rem", color:"#5a8a74", marginBottom:3, fontWeight:600, letterSpacing:".02em" };
+// // const inputSt  = { width:"100%", outline:"none", fontSize:".875rem", color:"#1a2e25", background:"transparent", border:"none", fontFamily:"inherit" };
+
+// // // Yes / No toggle (General Body / Standing Committee)
+// // function YesNo({ label, value, onChange }) {
+// //   const btn = (v, txt) => (
+// //     <button type="button" onClick={() => onChange(v)} style={{
+// //       flex:1, padding:"7px 0", borderRadius:6, fontSize:".8rem", fontWeight:600, cursor:"pointer",
+// //       border:`1px solid ${value === v ? G.primary : G.primaryBorder}`,
+// //       background: value === v ? G.primary : "#fff", color: value === v ? "#fff" : G.primary,
+// //     }}>{txt}</button>
+// //   );
+// //   return (
+// //     <div style={{ flex:1, minWidth:150 }}>
+// //       <label style={labelSt}>{label}</label>
+// //       <div style={{ display:"flex", gap:6 }}>{btn(true, "Yes")}{btn(false, "No")}</div>
+// //     </div>
+// //   );
+// // }
+
+// // const pill = (yes) => (
+// //   <span style={{ display:"inline-block", minWidth:44, textAlign:"center", padding:"3px 10px", borderRadius:20, fontSize:".78rem", fontWeight:700,
+// //     background: yes ? "#e6f6ec" : "#fdeeee", color: yes ? "#1f7a45" : "#c0392b", border:`1px solid ${yes ? "#b7e2c6" : "#f3c4bd"}` }}>
+// //     {yes ? "Yes" : "No"}
+// //   </span>
+// // );
+
+// // // ── Add / Edit Corporator Modal ───────────────────────────────────────────────
+// // function CorporatorModal({ corporator, onClose, onSuccess }) {
+// //   const isEdit = !!corporator;
+// //   const [submitting, setSubmitting] = useState(false);
+// //   const [form, setForm] = useState({
+// //     wardNo:                    corporator?.wardNo        || "",
+// //     fullName:                  corporator?.fullName      || "",
+// //     mobileNumber:              corporator?.mobileNumber  || "",
+// //     designation:               normDesignation(corporator?.designation) || CORPORATOR,
+// //     isGeneralBodyMember:       corporator ? corporator.isGeneralBodyMember !== false : true,
+// //     isStandingCommitteeMember: corporator ? !!corporator.isStandingCommitteeMember : false,
+// //     password:                  "",
+// //   });
+
+// //   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+// //   const mobileOk = /^\d{10}$/.test(form.mobileNumber.trim());
+// //   const canSave  = form.wardNo.trim() && form.fullName.trim() && mobileOk && (isEdit || form.password) && !submitting;
+
+// //   const handleSubmit = async (e) => {
+// //     e.preventDefault();
+// //     if (!canSave) { toast.warn("सर्व fields भरा ❌"); return; }
+// //     const mobile = form.mobileNumber.trim();
+// //     const common = {
+// //       role:                      CORPORATOR,
+// //       wardNo:                    form.wardNo.trim(),
+// //       fullName:                  form.fullName.trim(),
+// //       mobileNumber:              mobile,
+// //       designation:               form.designation,
+// //       isGeneralBodyMember:       form.isGeneralBodyMember,
+// //       isStandingCommitteeMember: form.isStandingCommitteeMember,
+// //     };
+// //     try {
+// //       setSubmitting(true);
+// //       let res;
+// //       if (isEdit) {
+// //         // username = जुना mobile असेल तर नवीन mobile प्रमाणे username पण बदला (login साठी)
+// //         const payload = { ...common };
+// //         if (!corporator.userName || corporator.userName === corporator.mobileNumber) payload.userName = mobile;
+// //         res = await axiosInstance.patch(`/users/${corporator._id}`, payload);
+// //       } else {
+// //         // Login: Username = mobile number + password, किंवा mobile OTP
+// //         res = await axiosInstance.post("/register", { ...common, userName: mobile, password: form.password });
+// //       }
+// //       if (!res.data.success) { toast.error(res.data.message || "Save failed ❌"); return; }
+// //       toast.success(isEdit ? "Corporator Updated Successfully ✅" : "Corporator Added Successfully ✅");
+// //       onSuccess(); onClose();
+// //     } catch (error) {
+// //       toast.error(error?.response?.data?.message || "Server Error ❌");
+// //     } finally { setSubmitting(false); }
+// //   };
+
+// //   const box = { ...inputSt };
+// //   return (
+// //     <div style={{ position:"fixed", inset:0, zIndex:50, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(0,0,0,.45)", backdropFilter:"blur(4px)", padding:16 }}>
+// //       <div style={{ background:"#fff", borderRadius:16, boxShadow:"0 20px 60px rgba(0,0,0,.2)", width:"100%", maxWidth:460, maxHeight:"90vh", overflowY:"auto" }}>
+// //         <div style={{ background:`linear-gradient(135deg, ${G.primary} 0%, ${G.primaryMid} 100%)`, borderRadius:"16px 16px 0 0", padding:"18px 24px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+// //           <div>
+// //             <p style={{ fontSize:".7rem", color:"rgba(255,255,255,.7)", fontWeight:600, letterSpacing:".08em", textTransform:"uppercase", marginBottom:2 }}>Corporators / नगरसेवक</p>
+// //             <h2 style={{ fontSize:"1.1rem", fontWeight:700, color:"#fff", margin:0 }}>{isEdit ? `Edit — ${corporator.fullName}` : "Add Corporator"}</h2>
+// //           </div>
+// //           <button onClick={onClose} style={{ width:30, height:30, borderRadius:"50%", background:"rgba(255,255,255,.2)", border:"none", color:"#fff", fontWeight:700, cursor:"pointer", fontSize:".875rem", display:"flex", alignItems:"center", justifyContent:"center" }}>✕</button>
+// //         </div>
+// //         <div style={{ padding:"24px 28px" }}>
+// //           <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:12 }}>
+// //             <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
+// //               <div style={{ ...fieldCls, flex:"0 0 130px" }}>
+// //                 <label style={labelSt}>Ward seat no.</label>
+// //                 <input name="wardNo" value={form.wardNo} onChange={handleChange} placeholder="e.g. 1A" style={box} />
+// //               </div>
+// //               <div style={{ ...fieldCls, flex:1, minWidth:180 }}>
+// //                 <label style={labelSt}>Name of corporator</label>
+// //                 <input name="fullName" value={form.fullName} onChange={handleChange} placeholder="Enter full name" style={box} />
+// //               </div>
+// //             </div>
+// //             <div style={fieldCls}>
+// //               <label style={labelSt}>Mobile number</label>
+// //               <input type="tel" name="mobileNumber" value={form.mobileNumber} onChange={handleChange} placeholder="10 digit mobile number" maxLength={10} style={box} />
+// //             </div>
+// //             <div style={fieldCls}>
+// //               <label style={labelSt}>Designation</label>
+// //               <select name="designation" value={form.designation} onChange={handleChange} style={{ ...box, cursor:"pointer" }}>
+// //                 {DESIGNATIONS.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+// //               </select>
+// //             </div>
+// //             <div style={{ display:"flex", gap:12, flexWrap:"wrap" }}>
+// //               <YesNo label="General Body" value={form.isGeneralBodyMember}
+// //                 onChange={(v) => setForm({ ...form, isGeneralBodyMember: v })} />
+// //               <YesNo label="Standing Committee" value={form.isStandingCommitteeMember}
+// //                 onChange={(v) => setForm({ ...form, isStandingCommitteeMember: v })} />
+// //             </div>
+// //             {!isEdit && (
+// //               <div style={fieldCls}>
+// //                 <label style={labelSt}>Password</label>
+// //                 <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="Enter password" style={box} />
+// //               </div>
+// //             )}
+// //             {/* <div style={{ fontSize:".75rem", color:"#5a8a74", background:G.primaryLight, borderRadius:8, padding:"8px 12px" }}>
+// //               Login: Username = mobile number{isEdit ? "" : " + वरील password"}, किंवा mobile number वर OTP.
+// //             </div> */}
+// //             <div style={{ display:"flex", gap:10, paddingTop:4 }}>
+// //               <button type="button" onClick={onClose} style={{ flex:1, padding:"11px 0", borderRadius:8, border:`1px solid ${G.primaryBorder}`, background:"#fff", color:G.primary, fontWeight:600, fontSize:".875rem", cursor:"pointer" }}>
+// //                 Cancel
+// //               </button>
+// //               <button type="submit" disabled={!canSave} style={{ flex:1, padding:"11px 0", borderRadius:8, border:"none", background: canSave ? G.primary : "#ccc", color:"#fff", fontWeight:600, fontSize:".875rem", cursor: canSave ? "pointer" : "not-allowed", opacity: canSave ? 1 : .65 }}>
+// //                 {submitting ? "Saving..." : isEdit ? "💾 Save Changes" : "+ Add Corporator"}
+// //               </button>
+// //             </div>
+// //           </form>
+// //         </div>
+// //       </div>
+// //     </div>
+// //   );
+// // }
+
+// // // ── Main Corporators Page ─────────────────────────────────────────────────────
+// // export default function Corporators() {
+// //   const [users, setUsers]           = useState([]);
+// //   const [loading, setLoading]       = useState(true);
+// //   const [search, setSearch]         = useState("");
+// //   const [showAdd, setShowAdd]       = useState(false);
+// //   const [editItem, setEditItem]     = useState(null);
+// //   const [deletingId, setDeletingId] = useState(null);
+
+// //   useEffect(() => { fetchCorporators(); }, []);
+
+// //   const fetchCorporators = async () => {
+// //     try {
+// //       setLoading(true);
+// //       const res = await axiosInstance.get("/getUsers");
+// //       if (res.data.success) setUsers((res.data.users || []).filter((u) => isCorporator(u.role)));
+// //       else toast.error(res.data.message || "Corporators fetch failed ❌");
+// //     } catch {
+// //       toast.error("Corporators fetch करताना error आला ❌");
+// //     } finally { setLoading(false); }
+// //   };
+
+// //   const handleDelete = async (u) => {
+// //     if (!window.confirm(`"${u.fullName}" ला delete करायचे आहे का?`)) return;
+// //     try {
+// //       setDeletingId(u._id);
+// //       const res = await axiosInstance.delete(`/deleteUser/${u._id}`);
+// //       if (res.data.success) {
+// //         setUsers((prev) => prev.filter((x) => x._id !== u._id));
+// //         toast.success(`"${u.fullName}" Deleted Successfully ✅`);
+// //       } else { toast.error(res.data.message || "Delete failed ❌"); }
+// //     } catch (err) {
+// //       toast.error(err?.response?.data?.message || "Server Error ❌");
+// //     } finally { setDeletingId(null); }
+// //   };
+
+// //   const q = search.trim().toLowerCase();
+// //   const list = users
+// //     .filter((u) => !q
+// //       || u.fullName?.toLowerCase().includes(q)
+// //       || u.mobileNumber?.includes(q)
+// //       || String(u.wardNo || "").toLowerCase().includes(q)
+// //       || designationLabel(u.designation).toLowerCase().includes(q))
+// //     .sort((a, b) => String(a.wardNo || "").localeCompare(String(b.wardNo || ""), "en", { numeric: true }));
+
+// //   const gbCount = users.filter((u) => u.isGeneralBodyMember !== false).length;
+// //   const scCount = users.filter((u) => u.isStandingCommitteeMember).length;
+
+// //   return (
+// //     <div style={{ minHeight:"100vh", background:"linear-gradient(180deg, #F0F7F7 0%, #EAF4F5 100%)", padding:24 }}>
+// //       <style>{`
+// //         @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&display=swap');
+// //         @keyframes cspin { to { transform:rotate(360deg) } }
+// //         .c-body, .c-body * { font-family:'Nunito Sans', sans-serif; box-sizing:border-box; }
+// //         .c-head { display:flex; align-items:center; gap:14px; }
+// //         .c-head-icon { width:54px; height:54px; border-radius:14px; background:#fff; color:#187484; display:flex; align-items:center; justify-content:center; border:1px solid #E3EFF0; box-shadow:0 4px 14px rgba(13,79,92,0.10); flex-shrink:0; }
+// //         .c-count { font-size:.8125rem; font-weight:800; color:#0d4f5c; background:#E3F4F1; padding:3px 11px; border-radius:20px; }
+// //         .c-card { background:#fff; border:1px solid #E3EFF0; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(13,79,92,0.06); padding:16px; }
+// //         .c-table { width:100%; border-collapse:separate; border-spacing:0; min-width:980px; }
+// //         .c-th { padding:0 16px; height:50px; font-weight:800; font-size:.78rem; color:#0d4f5c; text-align:left; white-space:nowrap; background:#E4F1F2; letter-spacing:.06em; text-transform:uppercase; }
+// //         .c-th:first-child { border-radius:10px 0 0 10px; }
+// //         .c-th:last-child  { border-radius:0 10px 10px 0; }
+// //         .c-tr { transition:background .12s; }
+// //         .c-tr td { border-bottom:1px solid #EEF5F6; }
+// //         .c-tr:last-child td { border-bottom:none; }
+// //         .c-tr:hover td { background:#F3FAFA !important; }
+// //         .c-td { padding:0 16px; height:58px; vertical-align:middle; font-size:.875rem; color:#24424a; }
+// //         .c-mono { display:inline-block; padding:4px 11px; background:#E3F4F1; border-radius:8px; font-size:.8rem; color:#0d4f5c; font-weight:800; letter-spacing:.3px; }
+// //         .c-footer { display:flex; align-items:center; justify-content:space-between; padding:0 16px; height:46px; margin-top:8px; border-radius:10px; background:#F2F9F9; font-size:.8125rem; color:#5f7f86; }
+// //         .c-edit-btn { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:8px; font-size:.8rem; font-weight:700; border:1px solid #D3E4F8; background:#E8F1FD; color:#1F5FAD; cursor:pointer; transition:background .15s; }
+// //         .c-edit-btn:hover { background:#D7E8FB !important; }
+// //         .c-del-btn { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:8px; font-size:.8rem; font-weight:700; border:1px solid #F8D5D9; background:#FDECEE; color:#C62F3B; cursor:pointer; transition:background .15s; }
+// //         .c-del-btn:hover:not(:disabled) { background:#FBDADE !important; }
+// //         .c-del-btn:disabled { opacity:.5; cursor:not-allowed; }
+// //         .c-ref-btn { display:inline-flex; align-items:center; gap:7px; padding:10px 18px; border:1.5px solid #BFDDE1; border-radius:12px; background:#fff; color:#187484; font-weight:800; font-size:.8125rem; cursor:pointer; box-shadow:0 2px 8px rgba(13,79,92,0.06); transition:background .15s, border-color .15s; }
+// //         .c-ref-btn:hover { background:#F2F9F9 !important; border-color:#187484 !important; }
+// //         .c-add-btn { display:inline-flex; align-items:center; gap:7px; padding:10px 20px; border:none; border-radius:12px; background:linear-gradient(135deg,#1f8a9b 0%,#187484 55%,#0d4f5c 100%); color:#fff; font-weight:800; font-size:.8125rem; cursor:pointer; box-shadow:0 6px 16px rgba(24,116,132,0.28); transition:transform .15s, box-shadow .15s; }
+// //         .c-add-btn:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(24,116,132,0.36); }
+// //         .c-search-input { width:100%; padding:10px 14px 10px 38px; font-size:.875rem; border:1px solid #D6E9EB; border-radius:12px; outline:none; background:#F2F9F9; color:#24424a; transition:border-color .2s, box-shadow .2s, background .2s; }
+// //         .c-search-input::placeholder { color:#8AA6AB; }
+// //         .c-search-input:focus { border-color:#187484 !important; background:#fff; box-shadow:0 0 0 3px rgba(24,116,132,.12) !important; }
+// //         @media (max-width:640px) { .c-title { font-size:1.3rem !important; } .c-head-icon { width:46px; height:46px; } }
+// //       `}</style>
+
+// //       <div className="c-body" style={{ maxWidth:1280, margin:"0 auto" }}>
+
+// //         {/* ── Page Header ── */}
+// //         <div className="c-head" style={{ marginBottom:20 }}>
+// //           <div className="c-head-icon"><FiUserCheck size={24} /></div>
+// //           <div>
+// //             <h1 className="c-title" style={{ fontSize:"1.6rem", fontWeight:800, color:"#0d4f5c", margin:0, display:"flex", alignItems:"center", gap:12, letterSpacing:"-0.3px" }}>
+// //               Corporators
+// //               <span className="c-count">{users.length}</span>
+// //             </h1>
+// //             <p style={{ color:"#5f7f86", fontSize:".9rem", fontWeight:500, margin:"4px 0 0" }}>
+// //               General Body <strong style={{ color:"#187484" }}>{gbCount}</strong> · Standing Committee <strong style={{ color:"#187484" }}>{scCount}</strong>
+// //             </p>
+// //           </div>
+// //         </div>
+
+// //         {/* ── Action Bar ── */}
+// //         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, marginBottom:16, flexWrap:"wrap" }}>
+// //           <div style={{ position:"relative", flex:"1 1 300px", maxWidth:480 }}>
+// //             <FiSearch size={16} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"#187484", pointerEvents:"none" }} />
+// //             <input type="text" placeholder="Search by name, ward, mobile, designation..." value={search}
+// //               onChange={(e) => setSearch(e.target.value)} className="c-search-input" />
+// //           </div>
+// //           <div style={{ display:"flex", gap:10, flexShrink:0 }}>
+// //             <button onClick={fetchCorporators} className="c-ref-btn">
+// //               <FiRefreshCw size={15} /> Refresh
+// //             </button>
+// //             <button onClick={() => setShowAdd(true)} className="c-add-btn">
+// //               <FiPlus size={16} /> Add Corporator
+// //             </button>
+// //           </div>
+// //         </div>
+
+// //         {/* ── Table Card ── */}
+// //         <div className="c-card">
+// //           <div style={{ overflowX:"auto" }}>
+// //             <table className="c-table">
+// //               <thead>
+// //                 <tr>
+// //                   {["Sr. No.","Ward seat no.","Names of corporators","Mobile number","Designation","General Body","Standing Committee","Action"].map((h) => (
+// //                     <th key={h} className="c-th">{h}</th>
+// //                   ))}
+// //                 </tr>
+// //               </thead>
+// //               <tbody>
+// //                 {loading ? (
+// //                   <tr><td colSpan={8} style={{ textAlign:"center", padding:"64px 0", color:"#5f7f86" }}>
+// //                     <div style={{ width:32, height:32, margin:"0 auto 12px", border:"3px solid #BFDDE1", borderTopColor:"#187484", borderRadius:"50%", animation:"cspin .8s linear infinite" }} />
+// //                     <div style={{ fontWeight:500 }}>Loading corporators…</div>
+// //                   </td></tr>
+// //                 ) : list.length === 0 ? (
+// //                   <tr><td colSpan={8} style={{ textAlign:"center", padding:"64px 0", color:"#5f7f86" }}>
+// //                     <div style={{ fontSize:40, marginBottom:8 }}>🏛</div>
+// //                     <div style={{ fontWeight:500 }}>No corporators found — "+ Add Corporator" वर click करा</div>
+// //                   </td></tr>
+// //                 ) : list.map((u, i) => (
+// //                   <tr key={u._id} className="c-tr">
+// //                     <td className="c-td" style={{ width:70, fontWeight:700, color:"#5f7f86" }}>{i + 1}</td>
+// //                     <td className="c-td" style={{ width:120 }}><span className="c-mono">{u.wardNo || "—"}</span></td>
+// //                     <td className="c-td" style={{ minWidth:200, fontWeight:700, color:"#0d4f5c" }}>{u.fullName || "—"}</td>
+// //                     <td className="c-td" style={{ width:140 }}>{u.mobileNumber || "—"}</td>
+// //                     <td className="c-td" style={{ minWidth:140 }}>{designationLabel(u.designation)}</td>
+// //                     <td className="c-td" style={{ width:120 }}>{pill(u.isGeneralBodyMember !== false)}</td>
+// //                     <td className="c-td" style={{ width:150 }}>{pill(!!u.isStandingCommitteeMember)}</td>
+// //                     <td className="c-td" style={{ width:200 }}>
+// //                       <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+// //                         <button className="c-edit-btn" onClick={() => setEditItem(u)}><FiEdit2 size={14} /> Edit</button>
+// //                         <button className="c-del-btn" disabled={deletingId === u._id} onClick={() => handleDelete(u)}>
+// //                           {deletingId === u._id ? (
+// //                             <><span style={{ width:11, height:11, border:"2px solid #fca5a5", borderTopColor:"#dc2626", borderRadius:"50%", display:"inline-block", animation:"cspin .7s linear infinite" }} />Deleting…</>
+// //                           ) : <><FiTrash2 size={14} /> Delete</>}
+// //                         </button>
+// //                       </div>
+// //                     </td>
+// //                   </tr>
+// //                 ))}
+// //               </tbody>
+// //             </table>
+// //           </div>
+
+// //           {!loading && list.length > 0 && (
+// //             <div className="c-footer">
+// //               <span>Showing <strong style={{ color:"#187484" }}>{list.length}</strong> of <strong style={{ color:"#187484" }}>{users.length}</strong> corporators</span>
+// //             </div>
+// //           )}
+// //         </div>
+// //       </div>
+
+// //       {showAdd  && <CorporatorModal onClose={() => setShowAdd(false)} onSuccess={fetchCorporators} />}
+// //       {editItem && <CorporatorModal corporator={editItem} onClose={() => setEditItem(null)} onSuccess={fetchCorporators} />}
+// //     </div>
+// //   );
+// // }
+
+
+
+// // import React, { useState, useEffect } from "react";
+// // import axiosInstance from "../services/axiosInstance";
+// // import { toast } from "react-toastify";
+
+// // // ── Color Theme (Users page शी same) ──────────────────────────────────────────
+// // const G = {
+// //   primary:      "#1a5c45",
+// //   primaryHov:   "#154d3a",
+// //   primaryLight: "#e8f5f0",
+// //   primaryBorder:"#b2d8cc",
+// //   primaryMid:   "#2d7a5f",
+// // };
+
+// // // ── Corporator (नगरसेवक) helpers ──────────────────────────────────────────────
+// // // Role / designation नेहमी small मध्ये "corporator" save होतात
+// // const CORPORATOR = "corporator";
+// // const isCorporator = (r) => ["corporator", "ward councillor"].includes(String(r || "").trim().toLowerCase());
+// // const normDesignation = (d) => String(d || "").trim().toLowerCase() === CORPORATOR ? CORPORATOR : (d || "");
+
+// // // Designation (backend PREDEFINED_DESIGNATIONS शी same) — value small, label display साठी
+// // const DESIGNATIONS = [
+// //   { value: "corporator",                  label: "Corporator" },
+// //   { value: "Mayor",                       label: "Mayor" },
+// //   { value: "Deputy Mayor",                label: "Deputy Mayor" },
+// //   { value: "Standing Committee Chairman", label: "Standing Committee Chairman" },
+// //   { value: "Leader of House",             label: "Leader of House" },
+// //   { value: "Leader of Opposition",        label: "Leader of Opposition" },
+// // ];
+// // const designationLabel = (d) => {
+// //   const v = normDesignation(d) || CORPORATOR;
+// //   return DESIGNATIONS.find((x) => x.value === v)?.label || v;
+// // };
+
+// // // ── Shared field styles (Users page शी same) ──────────────────────────────────
+// // const fieldCls = { border:"1px solid #d1e8df", borderRadius:8, padding:"10px 14px", transition:"border-color .2s", backgroundColor:"#fff" };
+// // const labelSt  = { display:"block", fontSize:".75rem", color:"#5a8a74", marginBottom:3, fontWeight:600, letterSpacing:".02em" };
+// // const inputSt  = { width:"100%", outline:"none", fontSize:".875rem", color:"#1a2e25", background:"transparent", border:"none", fontFamily:"inherit" };
+
+// // // Yes / No toggle (General Body / Standing Committee)
+// // function YesNo({ label, value, onChange }) {
+// //   const btn = (v, txt) => (
+// //     <button type="button" onClick={() => onChange(v)} style={{
+// //       flex:1, padding:"7px 0", borderRadius:6, fontSize:".8rem", fontWeight:600, cursor:"pointer",
+// //       border:`1px solid ${value === v ? G.primary : G.primaryBorder}`,
+// //       background: value === v ? G.primary : "#fff", color: value === v ? "#fff" : G.primary,
+// //     }}>{txt}</button>
+// //   );
+// //   return (
+// //     <div style={{ flex:1, minWidth:150 }}>
+// //       <label style={labelSt}>{label}</label>
+// //       <div style={{ display:"flex", gap:6 }}>{btn(true, "Yes")}{btn(false, "No")}</div>
+// //     </div>
+// //   );
+// // }
+
+// // const pill = (yes) => (
+// //   <span style={{ display:"inline-block", minWidth:44, textAlign:"center", padding:"3px 10px", borderRadius:20, fontSize:".78rem", fontWeight:700,
+// //     background: yes ? "#e6f6ec" : "#fdeeee", color: yes ? "#1f7a45" : "#c0392b", border:`1px solid ${yes ? "#b7e2c6" : "#f3c4bd"}` }}>
+// //     {yes ? "Yes" : "No"}
+// //   </span>
+// // );
+
+// // // ── Add / Edit Corporator Modal ───────────────────────────────────────────────
+// // function CorporatorModal({ corporator, onClose, onSuccess }) {
+// //   const isEdit = !!corporator;
+// //   const [submitting, setSubmitting] = useState(false);
+// //   const [form, setForm] = useState({
+// //     wardNo:                    corporator?.wardNo        || "",
+// //     fullName:                  corporator?.fullName      || "",
+// //     mobileNumber:              corporator?.mobileNumber  || "",
+// //     designation:               normDesignation(corporator?.designation) || CORPORATOR,
+// //     isGeneralBodyMember:       corporator ? corporator.isGeneralBodyMember !== false : true,
+// //     isStandingCommitteeMember: corporator ? !!corporator.isStandingCommitteeMember : false,
+// //     password:                  "",
+// //   });
+
+// //   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+// //   const mobileOk = /^\d{10}$/.test(form.mobileNumber.trim());
+// //   const canSave  = form.wardNo.trim() && form.fullName.trim() && mobileOk && (isEdit || form.password) && !submitting;
+
+// //   const handleSubmit = async (e) => {
+// //     e.preventDefault();
+// //     if (!canSave) { toast.warn("सर्व fields भरा ❌"); return; }
+// //     const mobile = form.mobileNumber.trim();
+// //     const common = {
+// //       role:                      CORPORATOR,
+// //       wardNo:                    form.wardNo.trim(),
+// //       fullName:                  form.fullName.trim(),
+// //       mobileNumber:              mobile,
+// //       designation:               form.designation,
+// //       isGeneralBodyMember:       form.isGeneralBodyMember,
+// //       isStandingCommitteeMember: form.isStandingCommitteeMember,
+// //     };
+// //     try {
+// //       setSubmitting(true);
+// //       let res;
+// //       if (isEdit) {
+// //         // username = जुना mobile असेल तर नवीन mobile प्रमाणे username पण बदला (login साठी)
+// //         const payload = { ...common };
+// //         if (!corporator.userName || corporator.userName === corporator.mobileNumber) payload.userName = mobile;
+// //         res = await axiosInstance.patch(`/users/${corporator._id}`, payload);
+// //       } else {
+// //         // Login: Username = mobile number + password, किंवा mobile OTP
+// //         res = await axiosInstance.post("/register", { ...common, userName: mobile, password: form.password });
+// //       }
+// //       if (!res.data.success) { toast.error(res.data.message || "Save failed ❌"); return; }
+// //       toast.success(isEdit ? "Corporator Updated Successfully ✅" : "Corporator Added Successfully ✅");
+// //       onSuccess(); onClose();
+// //     } catch (error) {
+// //       toast.error(error?.response?.data?.message || "Server Error ❌");
+// //     } finally { setSubmitting(false); }
+// //   };
+
+// //   const box = { ...inputSt };
+// //   return (
+// //     <div style={{ position:"fixed", inset:0, zIndex:50, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(0,0,0,.45)", backdropFilter:"blur(4px)", padding:16 }}>
+// //       <div style={{ background:"#fff", borderRadius:16, boxShadow:"0 20px 60px rgba(0,0,0,.2)", width:"100%", maxWidth:460, maxHeight:"90vh", overflowY:"auto" }}>
+// //         <div style={{ background:`linear-gradient(135deg, ${G.primary} 0%, ${G.primaryMid} 100%)`, borderRadius:"16px 16px 0 0", padding:"18px 24px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+// //           <div>
+// //             <p style={{ fontSize:".7rem", color:"rgba(255,255,255,.7)", fontWeight:600, letterSpacing:".08em", textTransform:"uppercase", marginBottom:2 }}>Corporators / नगरसेवक</p>
+// //             <h2 style={{ fontSize:"1.1rem", fontWeight:700, color:"#fff", margin:0 }}>{isEdit ? `Edit — ${corporator.fullName}` : "Add Corporator"}</h2>
+// //           </div>
+// //           <button onClick={onClose} style={{ width:30, height:30, borderRadius:"50%", background:"rgba(255,255,255,.2)", border:"none", color:"#fff", fontWeight:700, cursor:"pointer", fontSize:".875rem", display:"flex", alignItems:"center", justifyContent:"center" }}>✕</button>
+// //         </div>
+// //         <div style={{ padding:"24px 28px" }}>
+// //           <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:12 }}>
+// //             <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
+// //               <div style={{ ...fieldCls, flex:"0 0 130px" }}>
+// //                 <label style={labelSt}>Ward seat no.</label>
+// //                 <input name="wardNo" value={form.wardNo} onChange={handleChange} placeholder="e.g. 1A" style={box} />
+// //               </div>
+// //               <div style={{ ...fieldCls, flex:1, minWidth:180 }}>
+// //                 <label style={labelSt}>Name of corporator</label>
+// //                 <input name="fullName" value={form.fullName} onChange={handleChange} placeholder="Enter full name" style={box} />
+// //               </div>
+// //             </div>
+// //             <div style={fieldCls}>
+// //               <label style={labelSt}>Mobile number</label>
+// //               <input type="tel" name="mobileNumber" value={form.mobileNumber} onChange={handleChange} placeholder="10 digit mobile number" maxLength={10} style={box} />
+// //             </div>
+// //             <div style={fieldCls}>
+// //               <label style={labelSt}>Designation</label>
+// //               <select name="designation" value={form.designation} onChange={handleChange} style={{ ...box, cursor:"pointer" }}>
+// //                 {DESIGNATIONS.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+// //               </select>
+// //             </div>
+// //             <div style={{ display:"flex", gap:12, flexWrap:"wrap" }}>
+// //               <YesNo label="General Body" value={form.isGeneralBodyMember}
+// //                 onChange={(v) => setForm({ ...form, isGeneralBodyMember: v })} />
+// //               <YesNo label="Standing Committee" value={form.isStandingCommitteeMember}
+// //                 onChange={(v) => setForm({ ...form, isStandingCommitteeMember: v })} />
+// //             </div>
+// //             {!isEdit && (
+// //               <div style={fieldCls}>
+// //                 <label style={labelSt}>Password</label>
+// //                 <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="Enter password" style={box} />
+// //               </div>
+// //             )}
+// //             {/* <div style={{ fontSize:".75rem", color:"#5a8a74", background:G.primaryLight, borderRadius:8, padding:"8px 12px" }}>
+// //               Login: Username = mobile number{isEdit ? "" : " + वरील password"}, किंवा mobile number वर OTP.
+// //             </div> */}
+// //             <div style={{ display:"flex", gap:10, paddingTop:4 }}>
+// //               <button type="button" onClick={onClose} style={{ flex:1, padding:"11px 0", borderRadius:8, border:`1px solid ${G.primaryBorder}`, background:"#fff", color:G.primary, fontWeight:600, fontSize:".875rem", cursor:"pointer" }}>
+// //                 Cancel
+// //               </button>
+// //               <button type="submit" disabled={!canSave} style={{ flex:1, padding:"11px 0", borderRadius:8, border:"none", background: canSave ? G.primary : "#ccc", color:"#fff", fontWeight:600, fontSize:".875rem", cursor: canSave ? "pointer" : "not-allowed", opacity: canSave ? 1 : .65 }}>
+// //                 {submitting ? "Saving..." : isEdit ? "💾 Save Changes" : "+ Add Corporator"}
+// //               </button>
+// //             </div>
+// //           </form>
+// //         </div>
+// //       </div>
+// //     </div>
+// //   );
+// // }
+
+// // // ── Main Corporators Page ─────────────────────────────────────────────────────
+// // export default function Corporators() {
+// //   const [users, setUsers]           = useState([]);
+// //   const [loading, setLoading]       = useState(true);
+// //   const [search, setSearch]         = useState("");
+// //   const [showAdd, setShowAdd]       = useState(false);
+// //   const [editItem, setEditItem]     = useState(null);
+// //   const [deletingId, setDeletingId] = useState(null);
+
+// //   useEffect(() => { fetchCorporators(); }, []);
+
+// //   const fetchCorporators = async () => {
+// //     try {
+// //       setLoading(true);
+// //       const res = await axiosInstance.get("/getUsers");
+// //       if (res.data.success) setUsers((res.data.users || []).filter((u) => isCorporator(u.role)));
+// //       else toast.error(res.data.message || "Corporators fetch failed ❌");
+// //     } catch {
+// //       toast.error("Corporators fetch करताना error आला ❌");
+// //     } finally { setLoading(false); }
+// //   };
+
+// //   const handleDelete = async (u) => {
+// //     if (!window.confirm(`"${u.fullName}" ला delete करायचे आहे का?`)) return;
+// //     try {
+// //       setDeletingId(u._id);
+// //       const res = await axiosInstance.delete(`/deleteUser/${u._id}`);
+// //       if (res.data.success) {
+// //         setUsers((prev) => prev.filter((x) => x._id !== u._id));
+// //         toast.success(`"${u.fullName}" Deleted Successfully ✅`);
+// //       } else { toast.error(res.data.message || "Delete failed ❌"); }
+// //     } catch (err) {
+// //       toast.error(err?.response?.data?.message || "Server Error ❌");
+// //     } finally { setDeletingId(null); }
+// //   };
+
+// //   const q = search.trim().toLowerCase();
+// //   const list = users
+// //     .filter((u) => !q
+// //       || u.fullName?.toLowerCase().includes(q)
+// //       || u.mobileNumber?.includes(q)
+// //       || String(u.wardNo || "").toLowerCase().includes(q)
+// //       || designationLabel(u.designation).toLowerCase().includes(q))
+// //     .sort((a, b) => String(a.wardNo || "").localeCompare(String(b.wardNo || ""), "en", { numeric: true }));
+
+// //   const gbCount = users.filter((u) => u.isGeneralBodyMember !== false).length;
+// //   const scCount = users.filter((u) => u.isStandingCommitteeMember).length;
+
+// //   return (
+// //     <div style={{ minHeight:"100vh", background:"#f0f7f4", padding:24 }}>
+// //       <style>{`
+// //         @keyframes cspin { to { transform:rotate(360deg) } }
+// //         .c-th { padding:0 16px; height:50px; font-weight:600; font-size:.8rem; color:${G.primary}; text-align:left; white-space:nowrap; background:${G.primaryLight}; border-bottom:1px solid ${G.primaryBorder}; letter-spacing:.04em; text-transform:uppercase; }
+// //         .c-tr { border-bottom:1px solid #e8f2ee; transition:background .12s; }
+// //         .c-tr:last-child { border-bottom:none; }
+// //         .c-tr:hover { background:#e8f5f0 !important; }
+// //         .c-td { padding:0 16px; height:54px; vertical-align:middle; font-size:.875rem; }
+// //         .c-mono { display:inline-block; padding:2px 8px; background:${G.primaryLight}; border:1px solid ${G.primaryBorder}; border-radius:4px; font-family:monospace; font-size:.8rem; color:${G.primary}; font-weight:600; }
+// //         .c-footer { display:flex; align-items:center; justify-content:space-between; padding:0 16px; height:46px; border-top:1px solid ${G.primaryBorder}; background:${G.primaryLight}; font-size:.8125rem; color:${G.primaryMid}; }
+// //         .c-edit-btn { display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:6px; font-size:.78rem; font-weight:600; border:1px solid #6ee7b7; background:#f0fdf4; color:#065f46; cursor:pointer; transition:all .15s; }
+// //         .c-edit-btn:hover { background:#d1fae5 !important; border-color:#6ee7b7 !important; }
+// //         .c-del-btn { display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:6px; font-size:.78rem; font-weight:600; border:1px solid #fca5a5; background:#fff5f5; color:#dc2626; cursor:pointer; transition:all .15s; }
+// //         .c-del-btn:hover:not(:disabled) { background:#fee2e2 !important; border-color:#f87171 !important; }
+// //         .c-del-btn:disabled { opacity:.5; cursor:not-allowed; }
+// //         .c-ref-btn:hover { background:#e8f5f0 !important; color:#1a5c45 !important; border-color:#b2d8cc !important; }
+// //         .c-add-btn:hover { background:#154d3a !important; }
+// //         .c-search-input:focus { border-color:#1a5c45 !important; box-shadow:0 0 0 3px rgba(26,92,69,.12) !important; }
+// //       `}</style>
+
+// //       <div style={{ maxWidth:1280, margin:"0 auto" }}>
+
+// //         {/* ── Page Header ── */}
+// //         <div style={{ marginBottom:24 }}>
+// //           <h1 style={{ fontSize:"1.6rem", fontWeight:800, color:"#1a2e25", margin:0, display:"flex", alignItems:"center", gap:12 }}>
+// //             Corporators
+// //             <span style={{ fontSize:".8125rem", fontWeight:700, color:G.primary, background:G.primaryLight, border:`1px solid ${G.primaryBorder}`, padding:"2px 10px", borderRadius:20 }}>
+// //               {users.length}
+// //             </span>
+// //           </h1>
+// //           <p style={{ color:"#5a8a74", fontSize:".9rem", fontWeight:500, marginTop:4 }}>
+// //             General Body <strong style={{ color:G.primary }}>{gbCount}</strong> · Standing Committee <strong style={{ color:G.primary }}>{scCount}</strong>
+// //           </p>
+// //         </div>
+
+// //         {/* ── Action Bar ── */}
+// //         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, marginBottom:16, flexWrap:"wrap" }}>
+// //           <div style={{ position:"relative", flex:"1 1 300px", maxWidth:480 }}>
+// //             <span style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)", color:"#5a8a74", fontSize:".9rem" }}>🔍</span>
+// //             <input type="text" placeholder="Search by name, ward, mobile, designation..." value={search}
+// //               onChange={(e) => setSearch(e.target.value)} className="c-search-input"
+// //               style={{ width:"100%", paddingLeft:36, paddingRight:14, paddingTop:9, paddingBottom:9, fontSize:".875rem", border:`1px solid ${G.primaryBorder}`, borderRadius:8, outline:"none", background:"#fff", color:"#1a2e25", transition:"border-color .2s, box-shadow .2s", boxSizing:"border-box" }} />
+// //           </div>
+// //           <div style={{ display:"flex", gap:10, flexShrink:0 }}>
+// //             <button onClick={fetchCorporators} className="c-ref-btn"
+// //               style={{ display:"flex", alignItems:"center", gap:6, padding:"9px 16px", border:`1px solid ${G.primaryBorder}`, borderRadius:8, background:"#fff", color:"#3a6b57", fontWeight:600, fontSize:".8125rem", cursor:"pointer", transition:"all .15s" }}>
+// //               🔄 Refresh
+// //             </button>
+// //             <button onClick={() => setShowAdd(true)} className="c-add-btn"
+// //               style={{ display:"flex", alignItems:"center", gap:6, padding:"9px 18px", border:"none", borderRadius:8, background:G.primary, color:"#fff", fontWeight:600, fontSize:".8125rem", cursor:"pointer", transition:"background .15s" }}>
+// //               + Add Corporator
+// //             </button>
+// //           </div>
+// //         </div>
+
+// //         {/* ── Table Card ── */}
+// //         <div style={{ background:"#fff", border:`1px solid ${G.primaryBorder}`, borderRadius:10, overflow:"hidden", boxShadow:"0 2px 8px rgba(26,92,69,.08)" }}>
+// //           <div style={{ overflowX:"auto" }}>
+// //             <table style={{ width:"100%", borderCollapse:"collapse" }}>
+// //               <thead>
+// //                 <tr>
+// //                   {["Sr. No.","Ward seat no.","Names of corporators","Mobile number","Designation","General Body","Standing Committee","Action"].map((h) => (
+// //                     <th key={h} className="c-th">{h}</th>
+// //                   ))}
+// //                 </tr>
+// //               </thead>
+// //               <tbody>
+// //                 {loading ? (
+// //                   <tr><td colSpan={8} style={{ textAlign:"center", padding:"64px 0", color:"#5a8a74" }}>
+// //                     <div style={{ width:32, height:32, margin:"0 auto 12px", border:`3px solid ${G.primaryBorder}`, borderTopColor:G.primary, borderRadius:"50%", animation:"cspin .8s linear infinite" }} />
+// //                     <div style={{ fontWeight:500 }}>Loading corporators…</div>
+// //                   </td></tr>
+// //                 ) : list.length === 0 ? (
+// //                   <tr><td colSpan={8} style={{ textAlign:"center", padding:"64px 0", color:"#5a8a74" }}>
+// //                     <div style={{ fontSize:40, marginBottom:8 }}>🏛</div>
+// //                     <div style={{ fontWeight:500 }}>No corporators found — "+ Add Corporator" वर click करा</div>
+// //                   </td></tr>
+// //                 ) : list.map((u, i) => (
+// //                   <tr key={u._id} className="c-tr" style={{ background: i % 2 === 0 ? "#fff" : "#fafcfb" }}>
+// //                     <td className="c-td" style={{ width:70, fontWeight:600, color:"#5a8a74" }}>{i + 1}</td>
+// //                     <td className="c-td" style={{ width:120 }}><span className="c-mono">{u.wardNo || "—"}</span></td>
+// //                     <td className="c-td" style={{ minWidth:200, fontWeight:600, color:"#1a2e25" }}>{u.fullName || "—"}</td>
+// //                     <td className="c-td" style={{ width:140, color:"#2d5a45" }}>{u.mobileNumber || "—"}</td>
+// //                     <td className="c-td" style={{ minWidth:140, color:"#2d5a45" }}>{designationLabel(u.designation)}</td>
+// //                     <td className="c-td" style={{ width:120 }}>{pill(u.isGeneralBodyMember !== false)}</td>
+// //                     <td className="c-td" style={{ width:150 }}>{pill(!!u.isStandingCommitteeMember)}</td>
+// //                     <td className="c-td" style={{ width:170 }}>
+// //                       <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+// //                         <button className="c-edit-btn" onClick={() => setEditItem(u)}>✏️ Edit</button>
+// //                         <button className="c-del-btn" disabled={deletingId === u._id} onClick={() => handleDelete(u)}>
+// //                           {deletingId === u._id ? (
+// //                             <><span style={{ width:11, height:11, border:"2px solid #fca5a5", borderTopColor:"#dc2626", borderRadius:"50%", display:"inline-block", animation:"cspin .7s linear infinite" }} />Deleting…</>
+// //                           ) : <>🗑️ Delete</>}
+// //                         </button>
+// //                       </div>
+// //                     </td>
+// //                   </tr>
+// //                 ))}
+// //               </tbody>
+// //             </table>
+// //           </div>
+
+// //           {!loading && list.length > 0 && (
+// //             <div className="c-footer">
+// //               <span>Showing <strong style={{ color:G.primary }}>{list.length}</strong> of <strong style={{ color:G.primary }}>{users.length}</strong> corporators</span>
+// //             </div>
+// //           )}
+// //         </div>
+// //       </div>
+
+// //       {showAdd  && <CorporatorModal allUsers={users} onClose={() => setShowAdd(false)} onSuccess={fetchCorporators} />}
+// //       {editItem && <CorporatorModal corporator={editItem} allUsers={users} onClose={() => setEditItem(null)} onSuccess={fetchCorporators} />}
+// //     </div>
+// //   );
+// // }
+
+
+
+
+
+// import React, { useState, useEffect } from "react";
+// import axiosInstance from "../services/axiosInstance";
+// import { toast } from "react-toastify";
+// import { FiUserCheck, FiSearch, FiRefreshCw, FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
+
+// // ── Color Theme (Users page शी same) ──────────────────────────────────────────
+// const G = {
+//   primary:      "#1a5c45",
+//   primaryHov:   "#154d3a",
+//   primaryLight: "#e8f5f0",
+//   primaryBorder:"#b2d8cc",
+//   primaryMid:   "#2d7a5f",
+// };
+
+// // ── Corporator (नगरसेवक) helpers ──────────────────────────────────────────────
+// // Role / designation नेहमी small मध्ये "corporator" save होतात
+// const CORPORATOR = "corporator";
+// const isCorporator = (r) => ["corporator", "ward councillor"].includes(String(r || "").trim().toLowerCase());
+// const normDesignation = (d) => String(d || "").trim().toLowerCase() === CORPORATOR ? CORPORATOR : (d || "");
+
+// // Designation (backend PREDEFINED_DESIGNATIONS शी same) — value small, label display साठी
+// // value = DB मध्ये save होणारी (backend शी same), label = screen वर दिसणारी
+// const DESIGNATIONS = [
+//   { value: "corporator",                  label: "Corporator",        color: "#2d5a45", bg: "transparent", bd: "transparent" },
+//   { value: "Mayor",                       label: "Mayor",             color: "#8a5a00", bg: "#fff6e0",     bd: "#f2d48a" },
+//   { value: "Deputy Mayor",                label: "Dy. Mayor",         color: "#5b3fa0", bg: "#f2edff",     bd: "#cfc2f2" },
+//   { value: "Standing Committee Chairman", label: "Standing Chairman", color: "#0b6177", bg: "#e6f6fa",     bd: "#a9dbe6" },
+// ];
+// // Mayor / Dy. Mayor / Standing Chairman — प्रत्येकी फक्त एकच व्यक्ती
+// const UNIQUE_POSTS = ["Mayor", "Deputy Mayor", "Standing Committee Chairman"];
+// const findDesignation = (d) => DESIGNATIONS.find((x) => x.value === (normDesignation(d) || CORPORATOR));
+// const designationLabel = (d) => findDesignation(d)?.label || d || "Corporator";
+// const designationBadge = (d) => {
+//   const x = findDesignation(d);
+//   if (!x || x.value === CORPORATOR) return <span style={{ color:"#2d5a45" }}>{designationLabel(d)}</span>;
+//   return (
+//     <span style={{ display:"inline-block", padding:"3px 10px", borderRadius:20, fontSize:".78rem", fontWeight:700,
+//       color:x.color, background:x.bg, border:`1px solid ${x.bd}`, whiteSpace:"nowrap" }}>{x.label}</span>
+//   );
+// };
+
+// // ── Shared field styles (Users page शी same) ──────────────────────────────────
+// const fieldCls = { border:"1px solid #d1e8df", borderRadius:8, padding:"10px 14px", transition:"border-color .2s", backgroundColor:"#fff" };
+// const labelSt  = { display:"block", fontSize:".75rem", color:"#5a8a74", marginBottom:3, fontWeight:600, letterSpacing:".02em" };
+// const inputSt  = { width:"100%", outline:"none", fontSize:".875rem", color:"#1a2e25", background:"transparent", border:"none", fontFamily:"inherit" };
+
+// // Yes / No toggle (General Body / Standing Committee)
+// function YesNo({ label, value, onChange }) {
+//   const btn = (v, txt) => (
+//     <button type="button" onClick={() => onChange(v)} style={{
+//       flex:1, padding:"7px 0", borderRadius:6, fontSize:".8rem", fontWeight:600, cursor:"pointer",
+//       border:`1px solid ${value === v ? G.primary : G.primaryBorder}`,
+//       background: value === v ? G.primary : "#fff", color: value === v ? "#fff" : G.primary,
+//     }}>{txt}</button>
+//   );
+//   return (
+//     <div style={{ flex:1, minWidth:150 }}>
+//       <label style={labelSt}>{label}</label>
+//       <div style={{ display:"flex", gap:6 }}>{btn(true, "Yes")}{btn(false, "No")}</div>
+//     </div>
+//   );
+// }
+
+// const pill = (yes) => (
+//   <span style={{ display:"inline-block", minWidth:44, textAlign:"center", padding:"3px 10px", borderRadius:20, fontSize:".78rem", fontWeight:700,
+//     background: yes ? "#e6f6ec" : "#fdeeee", color: yes ? "#1f7a45" : "#c0392b", border:`1px solid ${yes ? "#b7e2c6" : "#f3c4bd"}` }}>
+//     {yes ? "Yes" : "No"}
+//   </span>
+// );
+
+// // ── Add / Edit Corporator Modal ───────────────────────────────────────────────
+// function CorporatorModal({ corporator, allUsers = [], onClose, onSuccess }) {
+//   const isEdit = !!corporator;
+//   const [submitting, setSubmitting] = useState(false);
+//   const [form, setForm] = useState({
+//     wardNo:                    corporator?.wardNo        || "",
+//     fullName:                  corporator?.fullName      || "",
+//     mobileNumber:              corporator?.mobileNumber  || "",
+//     designation:               normDesignation(corporator?.designation) || CORPORATOR,
+//     isGeneralBodyMember:       corporator ? corporator.isGeneralBodyMember !== false : true,
+//     isStandingCommitteeMember: corporator ? !!corporator.isStandingCommitteeMember : false,
+//     password:                  "",
+//   });
+
+//   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+//   const mobileOk = /^\d{10}$/.test(form.mobileNumber.trim());
+//   const canSave  = form.wardNo.trim() && form.fullName.trim() && mobileOk && (isEdit || form.password) && !submitting;
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     if (!canSave) { toast.warn("सर्व fields भरा ❌"); return; }
+//     if (UNIQUE_POSTS.includes(form.designation)) {
+//       const holder = allUsers.find((u) => u._id !== corporator?._id && u.designation === form.designation);
+//       if (holder) {
+//         toast.warn(`${designationLabel(form.designation)} आधीच "${holder.fullName}" आहेत — आधी त्यांचे designation बदला ❌`);
+//         return;
+//       }
+//     }
+//     const mobile = form.mobileNumber.trim();
+//     const common = {
+//       role:                      CORPORATOR,
+//       wardNo:                    form.wardNo.trim(),
+//       fullName:                  form.fullName.trim(),
+//       mobileNumber:              mobile,
+//       designation:               form.designation,
+//       isGeneralBodyMember:       form.isGeneralBodyMember,
+//       isStandingCommitteeMember: form.isStandingCommitteeMember,
+//     };
+//     try {
+//       setSubmitting(true);
+//       let res;
+//       if (isEdit) {
+//         // username = जुना mobile असेल तर नवीन mobile प्रमाणे username पण बदला (login साठी)
+//         const payload = { ...common };
+//         if (!corporator.userName || corporator.userName === corporator.mobileNumber) payload.userName = mobile;
+//         res = await axiosInstance.patch(`/users/${corporator._id}`, payload);
+//       } else {
+//         // Login: Username = mobile number + password, किंवा mobile OTP
+//         res = await axiosInstance.post("/register", { ...common, userName: mobile, password: form.password });
+//       }
+//       if (!res.data.success) { toast.error(res.data.message || "Save failed ❌"); return; }
+//       toast.success(isEdit ? "Corporator Updated Successfully ✅" : "Corporator Added Successfully ✅");
+//       onSuccess(); onClose();
+//     } catch (error) {
+//       toast.error(error?.response?.data?.message || "Server Error ❌");
+//     } finally { setSubmitting(false); }
+//   };
+
+//   const box = { ...inputSt };
+//   return (
+//     <div style={{ position:"fixed", inset:0, zIndex:50, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(0,0,0,.45)", backdropFilter:"blur(4px)", padding:16 }}>
+//       <div style={{ background:"#fff", borderRadius:16, boxShadow:"0 20px 60px rgba(0,0,0,.2)", width:"100%", maxWidth:460, maxHeight:"90vh", overflowY:"auto" }}>
+//         <div style={{ background:`linear-gradient(135deg, ${G.primary} 0%, ${G.primaryMid} 100%)`, borderRadius:"16px 16px 0 0", padding:"18px 24px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+//           <div>
+//             <p style={{ fontSize:".7rem", color:"rgba(255,255,255,.7)", fontWeight:600, letterSpacing:".08em", textTransform:"uppercase", marginBottom:2 }}>Corporators</p>
+//             <h2 style={{ fontSize:"1.1rem", fontWeight:700, color:"#fff", margin:0 }}>{isEdit ? `Edit — ${corporator.fullName}` : "Add Corporator"}</h2>
+//           </div>
+//           <button onClick={onClose} style={{ width:30, height:30, borderRadius:"50%", background:"rgba(255,255,255,.2)", border:"none", color:"#fff", fontWeight:700, cursor:"pointer", fontSize:".875rem", display:"flex", alignItems:"center", justifyContent:"center" }}>✕</button>
+//         </div>
+//         <div style={{ padding:"24px 28px" }}>
+//           <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:12 }}>
+//             <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
+//               <div style={{ ...fieldCls, flex:"0 0 130px" }}>
+//                 <label style={labelSt}>Ward seat no.</label>
+//                 <input name="wardNo" value={form.wardNo} onChange={handleChange} placeholder="e.g. 1A" style={box} />
+//               </div>
+//               <div style={{ ...fieldCls, flex:1, minWidth:180 }}>
+//                 <label style={labelSt}>Name of corporator</label>
+//                 <input name="fullName" value={form.fullName} onChange={handleChange} placeholder="Enter full name" style={box} />
+//               </div>
+//             </div>
+//             <div style={fieldCls}>
+//               <label style={labelSt}>Mobile number</label>
+//               <input type="tel" name="mobileNumber" value={form.mobileNumber} onChange={handleChange} placeholder="10 digit mobile number" maxLength={10} style={box} />
+//             </div>
+//             <div style={fieldCls}>
+//               <label style={labelSt}>Designation</label>
+//               <select name="designation" value={form.designation} onChange={handleChange} style={{ ...box, cursor:"pointer" }}>
+//                 {DESIGNATIONS.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+//                 {/* जुने designation (उदा. Leader of House) असेल तर edit करताना ते दिसावे */}
+//                 {!findDesignation(form.designation) && <option value={form.designation}>{form.designation}</option>}
+//               </select>
+//             </div>
+//             <div style={{ display:"flex", gap:12, flexWrap:"wrap" }}>
+//               <YesNo label="General Body" value={form.isGeneralBodyMember}
+//                 onChange={(v) => setForm({ ...form, isGeneralBodyMember: v })} />
+//               <YesNo label="Standing Committee" value={form.isStandingCommitteeMember}
+//                 onChange={(v) => setForm({ ...form, isStandingCommitteeMember: v })} />
+//             </div>
+//             {!isEdit && (
+//               <div style={fieldCls}>
+//                 <label style={labelSt}>Password</label>
+//                 <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="Enter password" style={box} />
+//               </div>
+//             )}
+//             {/* <div style={{ fontSize:".75rem", color:"#5a8a74", background:G.primaryLight, borderRadius:8, padding:"8px 12px" }}>
+//               Login: Username = mobile number{isEdit ? "" : " + वरील password"}, किंवा mobile number वर OTP.
+//             </div> */}
+//             <div style={{ display:"flex", gap:10, paddingTop:4 }}>
+//               <button type="button" onClick={onClose} style={{ flex:1, padding:"11px 0", borderRadius:8, border:`1px solid ${G.primaryBorder}`, background:"#fff", color:G.primary, fontWeight:600, fontSize:".875rem", cursor:"pointer" }}>
+//                 Cancel
+//               </button>
+//               <button type="submit" disabled={!canSave} style={{ flex:1, padding:"11px 0", borderRadius:8, border:"none", background: canSave ? G.primary : "#ccc", color:"#fff", fontWeight:600, fontSize:".875rem", cursor: canSave ? "pointer" : "not-allowed", opacity: canSave ? 1 : .65 }}>
+//                 {submitting ? "Saving..." : isEdit ? "💾 Save Changes" : "+ Add Corporator"}
+//               </button>
+//             </div>
+//           </form>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// // ── Main Corporators Page ─────────────────────────────────────────────────────
+// export default function Corporators() {
+//   const [users, setUsers]           = useState([]);
+//   const [loading, setLoading]       = useState(true);
+//   const [search, setSearch]         = useState("");
+//   const [showAdd, setShowAdd]       = useState(false);
+//   const [editItem, setEditItem]     = useState(null);
+//   const [deletingId, setDeletingId] = useState(null);
+
+//   useEffect(() => { fetchCorporators(); }, []);
+
+//   const fetchCorporators = async () => {
+//     try {
+//       setLoading(true);
+//       const res = await axiosInstance.get("/getUsers");
+//       if (res.data.success) setUsers((res.data.users || []).filter((u) => isCorporator(u.role)));
+//       else toast.error(res.data.message || "Corporators fetch failed ❌");
+//     } catch {
+//       toast.error("Corporators fetch करताना error आला ❌");
+//     } finally { setLoading(false); }
+//   };
+
+//   const handleDelete = async (u) => {
+//     if (!window.confirm(`"${u.fullName}" ला delete करायचे आहे का?`)) return;
+//     try {
+//       setDeletingId(u._id);
+//       const res = await axiosInstance.delete(`/deleteUser/${u._id}`);
+//       if (res.data.success) {
+//         setUsers((prev) => prev.filter((x) => x._id !== u._id));
+//         toast.success(`"${u.fullName}" Deleted Successfully ✅`);
+//       } else { toast.error(res.data.message || "Delete failed ❌"); }
+//     } catch (err) {
+//       toast.error(err?.response?.data?.message || "Server Error ❌");
+//     } finally { setDeletingId(null); }
+//   };
+
+//   const q = search.trim().toLowerCase();
+//   const list = users
+//     .filter((u) => !q
+//       || u.fullName?.toLowerCase().includes(q)
+//       || u.mobileNumber?.includes(q)
+//       || String(u.wardNo || "").toLowerCase().includes(q)
+//       || designationLabel(u.designation).toLowerCase().includes(q))
+//     .sort((a, b) => String(a.wardNo || "").localeCompare(String(b.wardNo || ""), "en", { numeric: true }));
+
+//   const gbCount = users.filter((u) => u.isGeneralBodyMember !== false).length;
+//   const scCount = users.filter((u) => u.isStandingCommitteeMember).length;
+
+//   return (
+//     <div style={{ minHeight:"100vh", background:"linear-gradient(180deg, #F0F7F7 0%, #EAF4F5 100%)", padding:24 }}>
+//       <style>{`
+//         @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&display=swap');
+//         @keyframes cspin { to { transform:rotate(360deg) } }
+//         .c-body, .c-body * { font-family:'Nunito Sans', sans-serif; box-sizing:border-box; }
+//         .c-head { display:flex; align-items:center; gap:14px; }
+//         .c-head-icon { width:54px; height:54px; border-radius:14px; background:#fff; color:#187484; display:flex; align-items:center; justify-content:center; border:1px solid #E3EFF0; box-shadow:0 4px 14px rgba(13,79,92,0.10); flex-shrink:0; }
+//         .c-count { font-size:.8125rem; font-weight:800; color:#0d4f5c; background:#E3F4F1; padding:3px 11px; border-radius:20px; }
+//         .c-card { background:#fff; border:1px solid #E3EFF0; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(13,79,92,0.06); padding:16px; }
+//         .c-table { width:100%; border-collapse:separate; border-spacing:0; min-width:980px; }
+//         .c-th { padding:0 16px; height:50px; font-weight:800; font-size:.78rem; color:#0d4f5c; text-align:left; white-space:nowrap; background:#E4F1F2; letter-spacing:.06em; text-transform:uppercase; }
+//         .c-th:first-child { border-radius:10px 0 0 10px; }
+//         .c-th:last-child  { border-radius:0 10px 10px 0; }
+//         .c-tr { transition:background .12s; }
+//         .c-tr td { border-bottom:1px solid #EEF5F6; }
+//         .c-tr:last-child td { border-bottom:none; }
+//         .c-tr:hover td { background:#F3FAFA !important; }
+//         .c-td { padding:0 16px; height:58px; vertical-align:middle; font-size:.875rem; color:#24424a; }
+//         .c-mono { display:inline-block; padding:4px 11px; background:#E3F4F1; border-radius:8px; font-size:.8rem; color:#0d4f5c; font-weight:800; letter-spacing:.3px; }
+//         .c-footer { display:flex; align-items:center; justify-content:space-between; padding:0 16px; height:46px; margin-top:8px; border-radius:10px; background:#F2F9F9; font-size:.8125rem; color:#5f7f86; }
+//         .c-edit-btn { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:8px; font-size:.8rem; font-weight:700; border:1px solid #D3E4F8; background:#E8F1FD; color:#1F5FAD; cursor:pointer; transition:background .15s; }
+//         .c-edit-btn:hover { background:#D7E8FB !important; }
+//         .c-del-btn { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:8px; font-size:.8rem; font-weight:700; border:1px solid #F8D5D9; background:#FDECEE; color:#C62F3B; cursor:pointer; transition:background .15s; }
+//         .c-del-btn:hover:not(:disabled) { background:#FBDADE !important; }
+//         .c-del-btn:disabled { opacity:.5; cursor:not-allowed; }
+//         .c-ref-btn { display:inline-flex; align-items:center; gap:7px; padding:10px 18px; border:1.5px solid #BFDDE1; border-radius:12px; background:#fff; color:#187484; font-weight:800; font-size:.8125rem; cursor:pointer; box-shadow:0 2px 8px rgba(13,79,92,0.06); transition:background .15s, border-color .15s; }
+//         .c-ref-btn:hover { background:#F2F9F9 !important; border-color:#187484 !important; }
+//         .c-add-btn { display:inline-flex; align-items:center; gap:7px; padding:10px 20px; border:none; border-radius:12px; background:linear-gradient(135deg,#1f8a9b 0%,#187484 55%,#0d4f5c 100%); color:#fff; font-weight:800; font-size:.8125rem; cursor:pointer; box-shadow:0 6px 16px rgba(24,116,132,0.28); transition:transform .15s, box-shadow .15s; }
+//         .c-add-btn:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(24,116,132,0.36); }
+//         .c-search-input { width:100%; padding:10px 14px 10px 38px; font-size:.875rem; border:1px solid #D6E9EB; border-radius:12px; outline:none; background:#F2F9F9; color:#24424a; transition:border-color .2s, box-shadow .2s, background .2s; }
+//         .c-search-input::placeholder { color:#8AA6AB; }
+//         .c-search-input:focus { border-color:#187484 !important; background:#fff; box-shadow:0 0 0 3px rgba(24,116,132,.12) !important; }
+//         @media (max-width:640px) { .c-title { font-size:1.3rem !important; } .c-head-icon { width:46px; height:46px; } }
+//       `}</style>
+
+//       <div className="c-body" style={{ maxWidth:1280, margin:"0 auto" }}>
+
+//         {/* ── Page Header ── */}
+//         <div className="c-head" style={{ marginBottom:20 }}>
+//           <div className="c-head-icon"><FiUserCheck size={24} /></div>
+//           <div>
+//             <h1 className="c-title" style={{ fontSize:"1.6rem", fontWeight:800, color:"#0d4f5c", margin:0, display:"flex", alignItems:"center", gap:12, letterSpacing:"-0.3px" }}>
+//               Corporators
+//               <span className="c-count">{users.length}</span>
+//             </h1>
+//             <p style={{ color:"#5f7f86", fontSize:".9rem", fontWeight:500, margin:"4px 0 0" }}>
+//               General Body <strong style={{ color:"#187484" }}>{gbCount}</strong> · Standing Committee <strong style={{ color:"#187484" }}>{scCount}</strong>
+//             </p>
+//           </div>
+//         </div>
+
+//         {/* ── Action Bar ── */}
+//         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, marginBottom:16, flexWrap:"wrap" }}>
+//           <div style={{ position:"relative", flex:"1 1 300px", maxWidth:480 }}>
+//             <FiSearch size={16} style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", color:"#187484", pointerEvents:"none" }} />
+//             <input type="text" placeholder="Search by name, ward, mobile, designation..." value={search}
+//               onChange={(e) => setSearch(e.target.value)} className="c-search-input" />
+//           </div>
+//           <div style={{ display:"flex", gap:10, flexShrink:0 }}>
+//             <button onClick={fetchCorporators} className="c-ref-btn">
+//               <FiRefreshCw size={15} /> Refresh
+//             </button>
+//             <button onClick={() => setShowAdd(true)} className="c-add-btn">
+//               <FiPlus size={16} /> Add Corporator
+//             </button>
+//           </div>
+//         </div>
+
+//         {/* ── Table Card ── */}
+//         <div className="c-card">
+//           <div style={{ overflowX:"auto" }}>
+//             <table className="c-table">
+//               <thead>
+//                 <tr>
+//                   {["Sr. No.","Ward seat no.","Names of corporators","Mobile number","Designation","General Body","Standing Committee","Action"].map((h) => (
+//                     <th key={h} className="c-th">{h}</th>
+//                   ))}
+//                 </tr>
+//               </thead>
+//               <tbody>
+//                 {loading ? (
+//                   <tr><td colSpan={8} style={{ textAlign:"center", padding:"64px 0", color:"#5f7f86" }}>
+//                     <div style={{ width:32, height:32, margin:"0 auto 12px", border:"3px solid #BFDDE1", borderTopColor:"#187484", borderRadius:"50%", animation:"cspin .8s linear infinite" }} />
+//                     <div style={{ fontWeight:500 }}>Loading corporators…</div>
+//                   </td></tr>
+//                 ) : list.length === 0 ? (
+//                   <tr><td colSpan={8} style={{ textAlign:"center", padding:"64px 0", color:"#5f7f86" }}>
+//                     <div style={{ fontSize:40, marginBottom:8 }}>🏛</div>
+//                     <div style={{ fontWeight:500 }}>No corporators found — "+ Add Corporator" वर click करा</div>
+//                   </td></tr>
+//                 ) : list.map((u, i) => (
+//                   <tr key={u._id} className="c-tr">
+//                     <td className="c-td" style={{ width:70, fontWeight:700, color:"#5f7f86" }}>{i + 1}</td>
+//                     <td className="c-td" style={{ width:120 }}><span className="c-mono">{u.wardNo || "—"}</span></td>
+//                     <td className="c-td" style={{ minWidth:200, fontWeight:700, color:"#0d4f5c" }}>{u.fullName || "—"}</td>
+//                     <td className="c-td" style={{ width:140 }}>{u.mobileNumber || "—"}</td>
+//                     <td className="c-td" style={{ minWidth:140 }}>{designationBadge(u.designation)}</td>
+//                     <td className="c-td" style={{ width:120 }}>{pill(u.isGeneralBodyMember !== false)}</td>
+//                     <td className="c-td" style={{ width:150 }}>{pill(!!u.isStandingCommitteeMember)}</td>
+//                     <td className="c-td" style={{ width:200 }}>
+//                       <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+//                         <button className="c-edit-btn" onClick={() => setEditItem(u)}><FiEdit2 size={14} /> Edit</button>
+//                         <button className="c-del-btn" disabled={deletingId === u._id} onClick={() => handleDelete(u)}>
+//                           {deletingId === u._id ? (
+//                             <><span style={{ width:11, height:11, border:"2px solid #fca5a5", borderTopColor:"#dc2626", borderRadius:"50%", display:"inline-block", animation:"cspin .7s linear infinite" }} />Deleting…</>
+//                           ) : <><FiTrash2 size={14} /> Delete</>}
+//                         </button>
+//                       </div>
+//                     </td>
+//                   </tr>
+//                 ))}
+//               </tbody>
+//             </table>
+//           </div>
+
+//           {!loading && list.length > 0 && (
+//             <div className="c-footer">
+//               <span>Showing <strong style={{ color:"#187484" }}>{list.length}</strong> of <strong style={{ color:"#187484" }}>{users.length}</strong> corporators</span>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+
+//       {showAdd  && <CorporatorModal allUsers={users} onClose={() => setShowAdd(false)} onSuccess={fetchCorporators} />}
+//       {editItem && <CorporatorModal corporator={editItem} allUsers={users} onClose={() => setEditItem(null)} onSuccess={fetchCorporators} />}
+//     </div>
+//   );
+// }
+
+
 // import React, { useState, useEffect } from "react";
 // import axiosInstance from "../services/axiosInstance";
 // import { toast } from "react-toastify";
@@ -334,8 +1757,8 @@
 //         </div>
 //       </div>
 
-//       {showAdd  && <CorporatorModal onClose={() => setShowAdd(false)} onSuccess={fetchCorporators} />}
-//       {editItem && <CorporatorModal corporator={editItem} onClose={() => setEditItem(null)} onSuccess={fetchCorporators} />}
+//       {showAdd  && <CorporatorModal allUsers={users} onClose={() => setShowAdd(false)} onSuccess={fetchCorporators} />}
+//       {editItem && <CorporatorModal corporator={editItem} allUsers={users} onClose={() => setEditItem(null)} onSuccess={fetchCorporators} />}
 //     </div>
 //   );
 // }
@@ -348,6 +1771,10 @@ import React, { useState, useEffect } from "react";
 import axiosInstance from "../services/axiosInstance";
 import { toast } from "react-toastify";
 import { FiUserCheck, FiSearch, FiRefreshCw, FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
+import { getLang, translateText } from "../i18n/domTranslator";
+
+// Dynamic messages (name/value आत असलेले) — current language प्रमाणे पूर्ण वाक्य
+const msg = (en, mr) => (getLang() === "mr" ? mr : en);
 
 // ── Color Theme (Users page शी same) ──────────────────────────────────────────
 const G = {
@@ -365,17 +1792,24 @@ const isCorporator = (r) => ["corporator", "ward councillor"].includes(String(r 
 const normDesignation = (d) => String(d || "").trim().toLowerCase() === CORPORATOR ? CORPORATOR : (d || "");
 
 // Designation (backend PREDEFINED_DESIGNATIONS शी same) — value small, label display साठी
+// value = DB मध्ये save होणारी (backend शी same), label = screen वर दिसणारी
 const DESIGNATIONS = [
-  { value: "corporator",                  label: "Corporator" },
-  { value: "Mayor",                       label: "Mayor" },
-  { value: "Deputy Mayor",                label: "Deputy Mayor" },
-  { value: "Standing Committee Chairman", label: "Standing Committee Chairman" },
-  { value: "Leader of House",             label: "Leader of House" },
-  { value: "Leader of Opposition",        label: "Leader of Opposition" },
+  { value: "corporator",                  label: "Corporator",        color: "#2d5a45", bg: "transparent", bd: "transparent" },
+  { value: "Mayor",                       label: "Mayor",             color: "#8a5a00", bg: "#fff6e0",     bd: "#f2d48a" },
+  { value: "Deputy Mayor",                label: "Dy. Mayor",         color: "#5b3fa0", bg: "#f2edff",     bd: "#cfc2f2" },
+  { value: "Standing Committee Chairman", label: "Standing Chairman", color: "#0b6177", bg: "#e6f6fa",     bd: "#a9dbe6" },
 ];
-const designationLabel = (d) => {
-  const v = normDesignation(d) || CORPORATOR;
-  return DESIGNATIONS.find((x) => x.value === v)?.label || v;
+// Mayor / Dy. Mayor / Standing Chairman — प्रत्येकी फक्त एकच व्यक्ती
+const UNIQUE_POSTS = ["Mayor", "Deputy Mayor", "Standing Committee Chairman"];
+const findDesignation = (d) => DESIGNATIONS.find((x) => x.value === (normDesignation(d) || CORPORATOR));
+const designationLabel = (d) => findDesignation(d)?.label || d || "Corporator";
+const designationBadge = (d) => {
+  const x = findDesignation(d);
+  if (!x || x.value === CORPORATOR) return <span style={{ color:"#2d5a45" }}>{designationLabel(d)}</span>;
+  return (
+    <span style={{ display:"inline-block", padding:"3px 10px", borderRadius:20, fontSize:".78rem", fontWeight:700,
+      color:x.color, background:x.bg, border:`1px solid ${x.bd}`, whiteSpace:"nowrap" }}>{x.label}</span>
+  );
 };
 
 // ── Shared field styles (Users page शी same) ──────────────────────────────────
@@ -408,7 +1842,7 @@ const pill = (yes) => (
 );
 
 // ── Add / Edit Corporator Modal ───────────────────────────────────────────────
-function CorporatorModal({ corporator, onClose, onSuccess }) {
+function CorporatorModal({ corporator, allUsers = [], onClose, onSuccess }) {
   const isEdit = !!corporator;
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
@@ -428,7 +1862,18 @@ function CorporatorModal({ corporator, onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!canSave) { toast.warn("सर्व fields भरा ❌"); return; }
+    if (!canSave) { toast.warn("Please fill all required fields ❌"); return; }
+    if (UNIQUE_POSTS.includes(form.designation)) {
+      const holder = allUsers.find((u) => u._id !== corporator?._id && u.designation === form.designation);
+      if (holder) {
+        const post = designationLabel(form.designation);
+        toast.warn(msg(
+          `${post} is already assigned to "${holder.fullName}". Change their designation first ❌`,
+          `${translateText(post, "mr")} पद आधीच "${holder.fullName}" यांच्याकडे आहे. आधी त्यांचे पदनाम बदला ❌`,
+        ));
+        return;
+      }
+    }
     const mobile = form.mobileNumber.trim();
     const common = {
       role:                      CORPORATOR,
@@ -452,7 +1897,7 @@ function CorporatorModal({ corporator, onClose, onSuccess }) {
         res = await axiosInstance.post("/register", { ...common, userName: mobile, password: form.password });
       }
       if (!res.data.success) { toast.error(res.data.message || "Save failed ❌"); return; }
-      toast.success(isEdit ? "Corporator Updated Successfully ✅" : "Corporator Added Successfully ✅");
+      toast.success(isEdit ? "Member Updated Successfully ✅" : "Member Added Successfully ✅");
       onSuccess(); onClose();
     } catch (error) {
       toast.error(error?.response?.data?.message || "Server Error ❌");
@@ -465,8 +1910,8 @@ function CorporatorModal({ corporator, onClose, onSuccess }) {
       <div style={{ background:"#fff", borderRadius:16, boxShadow:"0 20px 60px rgba(0,0,0,.2)", width:"100%", maxWidth:460, maxHeight:"90vh", overflowY:"auto" }}>
         <div style={{ background:`linear-gradient(135deg, ${G.primary} 0%, ${G.primaryMid} 100%)`, borderRadius:"16px 16px 0 0", padding:"18px 24px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
           <div>
-            <p style={{ fontSize:".7rem", color:"rgba(255,255,255,.7)", fontWeight:600, letterSpacing:".08em", textTransform:"uppercase", marginBottom:2 }}>Corporators / नगरसेवक</p>
-            <h2 style={{ fontSize:"1.1rem", fontWeight:700, color:"#fff", margin:0 }}>{isEdit ? `Edit — ${corporator.fullName}` : "Add Corporator"}</h2>
+            <p style={{ fontSize:".7rem", color:"rgba(255,255,255,.7)", fontWeight:600, letterSpacing:".08em", textTransform:"uppercase", marginBottom:2 }}>Corporators & Office Bearers</p>
+            <h2 style={{ fontSize:"1.1rem", fontWeight:700, color:"#fff", margin:0 }}>{isEdit ? <>Edit — <span data-no-translate>{corporator.fullName}</span></> : "Add Member"}</h2>
           </div>
           <button onClick={onClose} style={{ width:30, height:30, borderRadius:"50%", background:"rgba(255,255,255,.2)", border:"none", color:"#fff", fontWeight:700, cursor:"pointer", fontSize:".875rem", display:"flex", alignItems:"center", justifyContent:"center" }}>✕</button>
         </div>
@@ -478,7 +1923,7 @@ function CorporatorModal({ corporator, onClose, onSuccess }) {
                 <input name="wardNo" value={form.wardNo} onChange={handleChange} placeholder="e.g. 1A" style={box} />
               </div>
               <div style={{ ...fieldCls, flex:1, minWidth:180 }}>
-                <label style={labelSt}>Name of corporator</label>
+                <label style={labelSt}>Name</label>
                 <input name="fullName" value={form.fullName} onChange={handleChange} placeholder="Enter full name" style={box} />
               </div>
             </div>
@@ -490,6 +1935,8 @@ function CorporatorModal({ corporator, onClose, onSuccess }) {
               <label style={labelSt}>Designation</label>
               <select name="designation" value={form.designation} onChange={handleChange} style={{ ...box, cursor:"pointer" }}>
                 {DESIGNATIONS.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+                {/* जुने designation (उदा. Leader of House) असेल तर edit करताना ते दिसावे */}
+                {!findDesignation(form.designation) && <option value={form.designation}>{form.designation}</option>}
               </select>
             </div>
             <div style={{ display:"flex", gap:12, flexWrap:"wrap" }}>
@@ -512,7 +1959,7 @@ function CorporatorModal({ corporator, onClose, onSuccess }) {
                 Cancel
               </button>
               <button type="submit" disabled={!canSave} style={{ flex:1, padding:"11px 0", borderRadius:8, border:"none", background: canSave ? G.primary : "#ccc", color:"#fff", fontWeight:600, fontSize:".875rem", cursor: canSave ? "pointer" : "not-allowed", opacity: canSave ? 1 : .65 }}>
-                {submitting ? "Saving..." : isEdit ? "💾 Save Changes" : "+ Add Corporator"}
+                {submitting ? "Saving..." : isEdit ? "💾 Save Changes" : "+ Add Member"}
               </button>
             </div>
           </form>
@@ -538,20 +1985,20 @@ export default function Corporators() {
       setLoading(true);
       const res = await axiosInstance.get("/getUsers");
       if (res.data.success) setUsers((res.data.users || []).filter((u) => isCorporator(u.role)));
-      else toast.error(res.data.message || "Corporators fetch failed ❌");
+      else toast.error(res.data.message || "Members fetch failed ❌");
     } catch {
-      toast.error("Corporators fetch करताना error आला ❌");
+      toast.error("Error while fetching members ❌");
     } finally { setLoading(false); }
   };
 
   const handleDelete = async (u) => {
-    if (!window.confirm(`"${u.fullName}" ला delete करायचे आहे का?`)) return;
+    if (!window.confirm(msg(`Do you want to delete "${u.fullName}"?`, `"${u.fullName}" यांना हटवायचे आहे का?`))) return;
     try {
       setDeletingId(u._id);
       const res = await axiosInstance.delete(`/deleteUser/${u._id}`);
       if (res.data.success) {
         setUsers((prev) => prev.filter((x) => x._id !== u._id));
-        toast.success(`"${u.fullName}" Deleted Successfully ✅`);
+        toast.success(msg(`"${u.fullName}" deleted successfully ✅`, `"${u.fullName}" यशस्वीरित्या हटवले ✅`));
       } else { toast.error(res.data.message || "Delete failed ❌"); }
     } catch (err) {
       toast.error(err?.response?.data?.message || "Server Error ❌");
@@ -564,11 +2011,14 @@ export default function Corporators() {
       || u.fullName?.toLowerCase().includes(q)
       || u.mobileNumber?.includes(q)
       || String(u.wardNo || "").toLowerCase().includes(q)
-      || designationLabel(u.designation).toLowerCase().includes(q))
+      || designationLabel(u.designation).toLowerCase().includes(q)
+      || String(translateText(designationLabel(u.designation), "mr")).includes(q))
     .sort((a, b) => String(a.wardNo || "").localeCompare(String(b.wardNo || ""), "en", { numeric: true }));
 
   const gbCount = users.filter((u) => u.isGeneralBodyMember !== false).length;
   const scCount = users.filter((u) => u.isStandingCommitteeMember).length;
+  // Mayor / Dy. Mayor / Standing Chairman — header मध्ये दाखवण्यासाठी
+  const officeBearers = UNIQUE_POSTS.map((p) => ({ ...findDesignation(p), holder: users.find((u) => u.designation === p) }));
 
   return (
     <div style={{ minHeight:"100vh", background:"linear-gradient(180deg, #F0F7F7 0%, #EAF4F5 100%)", padding:24 }}>
@@ -613,12 +2063,26 @@ export default function Corporators() {
           <div className="c-head-icon"><FiUserCheck size={24} /></div>
           <div>
             <h1 className="c-title" style={{ fontSize:"1.6rem", fontWeight:800, color:"#0d4f5c", margin:0, display:"flex", alignItems:"center", gap:12, letterSpacing:"-0.3px" }}>
-              Corporators
+              Corporators & Office Bearers
               <span className="c-count">{users.length}</span>
             </h1>
             <p style={{ color:"#5f7f86", fontSize:".9rem", fontWeight:500, margin:"4px 0 0" }}>
               General Body <strong style={{ color:"#187484" }}>{gbCount}</strong> · Standing Committee <strong style={{ color:"#187484" }}>{scCount}</strong>
             </p>
+            {!loading && (
+              <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginTop:10 }}>
+                {officeBearers.map((o) => (
+                  <span key={o.value} style={{ display:"inline-flex", alignItems:"center", gap:6, padding:"4px 12px", borderRadius:20, fontSize:".8rem",
+                    background:o.bg, border:`1px solid ${o.bd}`, color:o.color }}>
+                    <span style={{ fontWeight:800 }}>{o.label}</span>
+                    <span>:</span>
+                    {o.holder
+                      ? <span data-no-translate style={{ fontWeight:600, color:"#24424a" }}>{o.holder.fullName}</span>
+                      : <span style={{ fontWeight:500, color:"#8AA6AB", fontStyle:"italic" }}>Not assigned</span>}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -634,7 +2098,7 @@ export default function Corporators() {
               <FiRefreshCw size={15} /> Refresh
             </button>
             <button onClick={() => setShowAdd(true)} className="c-add-btn">
-              <FiPlus size={16} /> Add Corporator
+              <FiPlus size={16} /> Add Member
             </button>
           </div>
         </div>
@@ -645,7 +2109,7 @@ export default function Corporators() {
             <table className="c-table">
               <thead>
                 <tr>
-                  {["Sr. No.","Ward seat no.","Names of corporators","Mobile number","Designation","General Body","Standing Committee","Action"].map((h) => (
+                  {["Sr. No.","Ward seat no.","Name","Mobile number","Designation","General Body","Standing Committee","Action"].map((h) => (
                     <th key={h} className="c-th">{h}</th>
                   ))}
                 </tr>
@@ -654,20 +2118,20 @@ export default function Corporators() {
                 {loading ? (
                   <tr><td colSpan={8} style={{ textAlign:"center", padding:"64px 0", color:"#5f7f86" }}>
                     <div style={{ width:32, height:32, margin:"0 auto 12px", border:"3px solid #BFDDE1", borderTopColor:"#187484", borderRadius:"50%", animation:"cspin .8s linear infinite" }} />
-                    <div style={{ fontWeight:500 }}>Loading corporators…</div>
+                    <div style={{ fontWeight:500 }}>Loading members…</div>
                   </td></tr>
                 ) : list.length === 0 ? (
                   <tr><td colSpan={8} style={{ textAlign:"center", padding:"64px 0", color:"#5f7f86" }}>
                     <div style={{ fontSize:40, marginBottom:8 }}>🏛</div>
-                    <div style={{ fontWeight:500 }}>No corporators found — "+ Add Corporator" वर click करा</div>
+                    <div style={{ fontWeight:500 }}>No members found — click on "+ Add Member"</div>
                   </td></tr>
                 ) : list.map((u, i) => (
                   <tr key={u._id} className="c-tr">
                     <td className="c-td" style={{ width:70, fontWeight:700, color:"#5f7f86" }}>{i + 1}</td>
                     <td className="c-td" style={{ width:120 }}><span className="c-mono">{u.wardNo || "—"}</span></td>
-                    <td className="c-td" style={{ minWidth:200, fontWeight:700, color:"#0d4f5c" }}>{u.fullName || "—"}</td>
+                    <td className="c-td" style={{ minWidth:200, fontWeight:700, color:"#0d4f5c" }} data-no-translate>{u.fullName || "—"}</td>
                     <td className="c-td" style={{ width:140 }}>{u.mobileNumber || "—"}</td>
-                    <td className="c-td" style={{ minWidth:140 }}>{designationLabel(u.designation)}</td>
+                    <td className="c-td" style={{ minWidth:140 }}>{designationBadge(u.designation)}</td>
                     <td className="c-td" style={{ width:120 }}>{pill(u.isGeneralBodyMember !== false)}</td>
                     <td className="c-td" style={{ width:150 }}>{pill(!!u.isStandingCommitteeMember)}</td>
                     <td className="c-td" style={{ width:200 }}>
@@ -688,14 +2152,14 @@ export default function Corporators() {
 
           {!loading && list.length > 0 && (
             <div className="c-footer">
-              <span>Showing <strong style={{ color:"#187484" }}>{list.length}</strong> of <strong style={{ color:"#187484" }}>{users.length}</strong> corporators</span>
+              <span>Showing <strong style={{ color:"#187484" }}>{list.length}</strong> of <strong style={{ color:"#187484" }}>{users.length}</strong> members</span>
             </div>
           )}
         </div>
       </div>
 
-      {showAdd  && <CorporatorModal onClose={() => setShowAdd(false)} onSuccess={fetchCorporators} />}
-      {editItem && <CorporatorModal corporator={editItem} onClose={() => setEditItem(null)} onSuccess={fetchCorporators} />}
+      {showAdd  && <CorporatorModal allUsers={users} onClose={() => setShowAdd(false)} onSuccess={fetchCorporators} />}
+      {editItem && <CorporatorModal corporator={editItem} allUsers={users} onClose={() => setEditItem(null)} onSuccess={fetchCorporators} />}
     </div>
   );
 }
