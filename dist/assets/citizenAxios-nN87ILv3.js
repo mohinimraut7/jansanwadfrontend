@@ -1,0 +1,1 @@
+import{a}from"./vendor-utils-CRNBIpRx.js";const t=a.create({baseURL:"https://jansamvad.saavi.co.in/api",headers:{"Content-Type":"application/json"}});t.interceptors.request.use(e=>(e.data instanceof FormData&&delete e.headers["Content-Type"],e));export{t as c};
