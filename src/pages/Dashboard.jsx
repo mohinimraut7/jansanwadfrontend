@@ -1,3438 +1,3 @@
-
-
-// // // import React, { useState, useEffect, useCallback, useRef } from "react";
-// // // import { useSelector } from "react-redux";
-// // // import { useNavigate } from "react-router-dom";
-// // // import axiosInstance from "../services/axiosInstance";
-// // // import citizenAxios from "../services/citizenAxios";
-// // // import axios from "axios";
-
-// // // const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
-// // // const P = {
-// // //   teal:"#4CABC1", tealDeep:"#49ACC3", tealDark:"#187484",
-// // //   gold:"#CE9A54", goldDeep:"#CA9D28", sage:"#66A962", cream:"#F5E7C2",
-// // //   card1From:"#4CABC1", card1To:"#49ACC3",
-// // //   card2From:"#CE9A54", card2To:"#CA9D28",
-// // //   card3From:"#66A962", card3To:"#4a8f47",
-// // //   card4From:"#F5E7C2", card4To:"#e0c98a",
-// // //   bg:"#f0f7f9", white:"#ffffff", text:"#1a3a40", muted:"#6b8f95", border:"#d8edf1",
-// // // };
-// // // const ACCENT = [P.teal, P.gold, P.sage, P.tealDeep, P.goldDeep, P.tealDark, P.gold, P.teal];
-
-// // // const FULL_ACCESS_ROLES = ["Super Admin", "Guardian Minister", "Mayor", "Admin"];
-
-// // // const getAuthUser = () => {
-// // //   try { return JSON.parse(localStorage.getItem("authUser") || "{}"); } catch { return {}; }
-// // // };
-
-// // // const STATUS_CFG = {
-// // //   pending:      {bg:"#fef9c3",color:"#92400e",border:"#fde68a",dot:"#f59e0b",label:"Pending"},
-// // //   approved:     {bg:"#dcfce7",color:"#166534",border:"#86efac",dot:"#16a34a",label:"Approved"},
-// // //   rejected:     {bg:"#fee2e2",color:"#991b1b",border:"#fca5a5",dot:"#ef4444",label:"Rejected"},
-// // //   "in progress":{bg:"#dbeafe",color:"#1e40af",border:"#93c5fd",dot:"#3b82f6",label:"In Progress"},
-// // //   resolved:     {bg:"#f0fdf4",color:"#166534",border:"#bbf7d0",dot:"#22c55e",label:"Resolved"},
-// // // };
-// // // const sc = s => STATUS_CFG[(s||"pending").toLowerCase()] || STATUS_CFG.pending;
-
-// // // function Sparkline({ color="#fff", data=[30,45,35,60,40,70,55] }) {
-// // //   const w=90,h=36,max=Math.max(...data),min=Math.min(...data);
-// // //   const pts=data.map((v,i)=>`${(i/(data.length-1))*w},${h-((v-min)/(max-min+1))*(h-4)-2}`).join(" ");
-// // //   const gid=`sg${color.replace('#','')}`;
-// // //   return (
-// // //     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{opacity:.75}}>
-// // //       <defs><linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
-// // //         <stop offset="0%" stopColor={color} stopOpacity=".45"/>
-// // //         <stop offset="100%" stopColor={color} stopOpacity="0"/>
-// // //       </linearGradient></defs>
-// // //       <polygon points={`0,${h} ${pts} ${w},${h}`} fill={`url(#${gid})`}/>
-// // //       <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-// // //     </svg>
-// // //   );
-// // // }
-
-// // // function Donut({ pct=0 }) {
-// // //   const r=46,c=2*Math.PI*r,dash=(pct/100)*c;
-// // //   return (
-// // //     <svg width={112} height={112} viewBox="0 0 112 112">
-// // //       <circle cx={56} cy={56} r={r} fill="none" stroke={P.border} strokeWidth={12}/>
-// // //       <circle cx={56} cy={56} r={r} fill="none" stroke={P.teal} strokeWidth={12}
-// // //         strokeDasharray={`${dash} ${c-dash}`} strokeLinecap="round" transform="rotate(-90 56 56)"
-// // //         style={{transition:"stroke-dasharray 1s ease"}}/>
-// // //       <text x={56} y={52} textAnchor="middle" fontSize={20} fontWeight={900} fill={P.tealDark}>{pct}%</text>
-// // //       <text x={56} y={66} textAnchor="middle" fontSize={9} fill={P.muted} fontWeight={700} letterSpacing={.8}>RESOLVED</text>
-// // //     </svg>
-// // //   );
-// // // }
-
-// // // function MiniBar({ data=[], color=P.teal }) {
-// // //   const max=Math.max(...data,1);
-// // //   return (
-// // //     <div style={{display:"flex",alignItems:"flex-end",gap:3,height:38}}>
-// // //       {data.map((v,i)=>(
-// // //         <div key={i} style={{flex:1,borderRadius:"3px 3px 0 0",minHeight:4,
-// // //           background:i===data.length-1?color:`${color}66`,height:`${(v/max)*100}%`}}/>
-// // //       ))}
-// // //     </div>
-// // //   );
-// // // }
-
-// // // function Av({ name="", size=28, color=P.teal }) {
-// // //   const ini=name.split(" ").filter(Boolean).map(n=>n[0]).join("").slice(0,2).toUpperCase()||"?";
-// // //   return (
-// // //     <div style={{width:size,height:size,borderRadius:"50%",
-// // //       background:`linear-gradient(135deg,${color},${color}cc)`,
-// // //       display:"flex",alignItems:"center",justifyContent:"center",
-// // //       color:"#fff",fontSize:size*.34,fontWeight:800,flexShrink:0,
-// // //       border:"2.5px solid #fff",boxShadow:`0 2px 8px ${color}44`}}>
-// // //       {ini}
-// // //     </div>
-// // //   );
-// // // }
-
-// // // function toMin(t="08:00 AM") {
-// // //   if(!t) return 0;
-// // //   const [tp,per]=(t||"08:00 AM").split(" ");
-// // //   const [h,m]=(tp||"08:00").split(":").map(Number);
-// // //   let H=h||8; if(per==="PM"&&H!==12)H+=12; if(per==="AM"&&H===12)H=0;
-// // //   return Math.max(0,(H*60+(m||0))-(8*60));
-// // // }
-
-// // // function getWeekDates(base) {
-// // //   const d=new Date(base), day=d.getDay(), diff=day===0?-6:1-day;
-// // //   const mon=new Date(d); mon.setDate(d.getDate()+diff);
-// // //   return Array.from({length:7},(_,i)=>{ const dt=new Date(mon); dt.setDate(mon.getDate()+i); return dt; });
-// // // }
-// // // function isSameDay(a,b) {
-// // //   return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
-// // // }
-// // // const DAYS_SHORT=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-
-// // // function CompactPopup({ appt, color, onClose, anchorRect }) {
-// // //   const cfg    = sc(appt.status);
-// // //   const popRef = useRef(null);
-// // //   const [pos, setPos] = useState({ top:0, left:0, ready:false });
-// // //   const POPUP_W = 242;
-
-// // //   const calcPos = useCallback(() => {
-// // //     if (!anchorRect || !popRef.current) return;
-// // //     const PH  = popRef.current.offsetHeight || 320;
-// // //     const vw  = window.innerWidth;
-// // //     const vh  = window.innerHeight;
-// // //     const pad = 10;
-// // //     let left = anchorRect.right + 8;
-// // //     if (left + POPUP_W > vw - pad) left = anchorRect.left - POPUP_W - 8;
-// // //     left = Math.max(pad, Math.min(left, vw - POPUP_W - pad));
-// // //     let top = anchorRect.top;
-// // //     if (top + PH > vh - pad) top = vh - PH - pad;
-// // //     top = Math.max(pad, top);
-// // //     setPos({ top, left, ready: true });
-// // //   }, [anchorRect]);
-
-// // //   useEffect(() => { const raf = requestAnimationFrame(calcPos); return () => cancelAnimationFrame(raf); }, [calcPos]);
-// // //   useEffect(() => { window.addEventListener("resize", calcPos); return () => window.removeEventListener("resize", calcPos); }, [calcPos]);
-// // //   useEffect(() => {
-// // //     const fn = e => { if (popRef.current && !popRef.current.contains(e.target)) onClose(); };
-// // //     document.addEventListener("mousedown", fn);
-// // //     return () => document.removeEventListener("mousedown", fn);
-// // //   }, [onClose]);
-// // //   useEffect(() => {
-// // //     let t;
-// // //     const fn = () => { clearTimeout(t); t = setTimeout(onClose, 120); };
-// // //     window.addEventListener("scroll", fn, true);
-// // //     return () => { window.removeEventListener("scroll", fn, true); clearTimeout(t); };
-// // //   }, [onClose]);
-// // //   useEffect(() => {
-// // //     const fn = e => { if (e.key === "Escape") onClose(); };
-// // //     document.addEventListener("keydown", fn);
-// // //     return () => document.removeEventListener("keydown", fn);
-// // //   }, [onClose]);
-
-// // //   return (
-// // //     <div ref={popRef} style={{
-// // //       position:"fixed", top:pos.top, left:pos.left,
-// // //       opacity:pos.ready?1:0, transition:"opacity .1s", zIndex:99999,
-// // //       width:POPUP_W, background:P.white, borderRadius:14,
-// // //       boxShadow:"0 8px 36px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.10)",
-// // //       border:`1px solid ${P.border}`, overflow:"hidden",
-// // //       animation:"popIn .15s cubic-bezier(.34,1.4,.64,1)",
-// // //     }}>
-// // //       <div style={{background:`linear-gradient(135deg,${color},${color}dd)`,padding:"11px 12px 10px",display:"flex",alignItems:"center",gap:10}}>
-// // //         <Av name={appt.fullName} size={36} color={color}/>
-// // //         <div style={{flex:1,minWidth:0}}>
-// // //           <div style={{fontSize:13,fontWeight:900,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{appt.fullName||"—"}</div>
-// // //           <div style={{fontSize:10,color:"rgba(255,255,255,0.82)",marginTop:2,fontWeight:600}}>{appt.slotTime||"—"}</div>
-// // //         </div>
-// // //         <button onClick={e=>{e.stopPropagation();onClose();}} style={{background:"rgba(255,255,255,0.22)",border:"none",borderRadius:"50%",width:22,height:22,cursor:"pointer",color:"#fff",fontSize:13,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,lineHeight:1}}>✕</button>
-// // //       </div>
-// // //       <div style={{padding:"10px 13px 12px"}}>
-// // //         <PRow icon="📱" val={appt.mobileNumber||"—"} bold/>
-// // //         <PRow icon="📍" val={`Ward: ${appt.ward||"—"}`}/>
-// // //         {appt.purpose && <PRow icon="🎯" val={appt.purpose.slice(0,44)+(appt.purpose.length>44?"…":"")}/>}
-// // //         <PRow icon="👥" val={`Visitors: ${appt.numberOfVisitors||1}`}/>
-// // //         {appt.preferredDate && <PRow icon="📅" val={new Date(appt.preferredDate+"T00:00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})}/>}
-// // //         <div style={{marginTop:8,marginBottom:8}}>
-// // //           <span style={{display:"inline-flex",alignItems:"center",gap:6,background:cfg.bg,color:cfg.color,border:`1.5px solid ${cfg.border}`,padding:"4px 12px",borderRadius:20,fontSize:11,fontWeight:800}}>
-// // //             <span style={{width:7,height:7,borderRadius:"50%",background:cfg.dot,display:"inline-block"}}/>
-// // //             {cfg.label}
-// // //           </span>
-// // //         </div>
-// // //         {(appt.tokenId||appt._id)&&(
-// // //           <div style={{fontSize:9.5,color:P.muted,fontWeight:600,fontFamily:"monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-// // //             Token: {appt.tokenId||appt._id?.slice(-12)||"—"}
-// // //           </div>
-// // //         )}
-// // //         <div style={{borderTop:`1px solid ${P.border}`,marginTop:10,paddingTop:8,display:"flex",justifyContent:"flex-end"}}>
-// // //           <span style={{fontSize:11.5,color:P.teal,fontWeight:800,cursor:"pointer"}}>View Details ↗</span>
-// // //         </div>
-// // //       </div>
-// // //     </div>
-// // //   );
-// // // }
-
-// // // function PRow({ icon, val, bold=false }) {
-// // //   return (
-// // //     <div style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:6}}>
-// // //       <span style={{fontSize:13,flexShrink:0,marginTop:1}}>{icon}</span>
-// // //       <span style={{fontSize:11.5,fontWeight:bold?700:600,color:bold?P.text:P.muted,lineHeight:1.4}}>{val}</span>
-// // //     </div>
-// // //   );
-// // // }
-
-// // // function ApptCard({ appt, color }) {
-// // //   const [anchorRect, setAnchorRect] = useState(null);
-// // //   const cardRef = useRef(null);
-// // //   const isOpen  = !!anchorRect;
-
-// // //   const handleClick = useCallback(e => {
-// // //     e.stopPropagation();
-// // //     if (isOpen) { setAnchorRect(null); return; }
-// // //     const rect = cardRef.current?.getBoundingClientRect();
-// // //     if (rect) setAnchorRect({ ...rect });
-// // //   }, [isOpen]);
-
-// // //   const handleClose = useCallback(() => setAnchorRect(null), []);
-
-// // //   return (
-// // //     <>
-// // //       <div ref={cardRef} onClick={handleClick} style={{
-// // //         background:isOpen?`${color}22`:`${color}14`,
-// // //         border:`1.5px solid ${isOpen?color:color+"55"}`,
-// // //         borderLeft:`3px solid ${color}`,
-// // //         borderRadius:"0 8px 8px 0",
-// // //         padding:"5px 8px", cursor:"pointer", marginBottom:4,
-// // //         userSelect:"none", transition:"all .13s",
-// // //         boxShadow:isOpen?`0 4px 14px ${color}33`:"none",
-// // //       }}
-// // //         onMouseEnter={e=>{e.currentTarget.style.background=`${color}26`;e.currentTarget.style.borderColor=color;e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow=`0 4px 14px ${color}33`;}}
-// // //         onMouseLeave={e=>{e.currentTarget.style.background=isOpen?`${color}22`:`${color}14`;e.currentTarget.style.borderColor=isOpen?color:`${color}55`;e.currentTarget.style.borderLeftColor=color;e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow=isOpen?`0 4px 14px ${color}33`:"none";}}
-// // //       >
-// // //         <div style={{display:"flex",alignItems:"center",gap:6}}>
-// // //           <Av name={appt.fullName} size={20} color={color}/>
-// // //           <div style={{flex:1,minWidth:0}}>
-// // //             <div style={{fontSize:10.5,fontWeight:800,color:P.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{appt.fullName||"—"}</div>
-// // //             <div style={{fontSize:9,fontWeight:700,color:color,marginTop:1,display:"flex",alignItems:"center",gap:5}}>
-// // //               {appt.slotTime||"—"}
-// // //               <span style={{width:5,height:5,borderRadius:"50%",flexShrink:0,background:sc(appt.status).dot,display:"inline-block"}}/>
-// // //             </div>
-// // //           </div>
-// // //         </div>
-// // //       </div>
-// // //       {isOpen && <CompactPopup appt={appt} color={color} onClose={handleClose} anchorRect={anchorRect}/>}
-// // //     </>
-// // //   );
-// // // }
-
-// // // function CalendarPanel({ appointments=[], mayorSlots=[], loading=false }) {
-// // //   const [view,     setView]     = useState("week");
-// // //   const [weekBase, setWeekBase] = useState(new Date());
-// // //   const [search,   setSearch]   = useState("");
-
-// // //   const weekDates = getWeekDates(weekBase);
-// // //   const today     = new Date();
-
-// // //   const filtered = appointments.filter(a => {
-// // //     if (!search) return true;
-// // //     const q = search.toLowerCase();
-// // //     return (a.fullName||"").toLowerCase().includes(q)||(a.purpose||"").toLowerCase().includes(q)||(a.ward||"").toLowerCase().includes(q)||(a.mobileNumber||"").includes(q);
-// // //   });
-
-// // //   const ds = dt => `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,"0")}-${String(dt.getDate()).padStart(2,"0")}`;
-// // //   const appsForDate = dt => filtered.filter(a => (a.preferredDate||"").slice(0,10) === ds(dt));
-
-// // //   const todayStr = ds(today);
-// // //   const dayAppts = filtered.filter(a => (a.preferredDate||"").slice(0,10) === todayStr);
-// // //   const approvedCnt = filtered.filter(a => (a.status||"").toLowerCase() === "approved").length;
-// // //   const pendingCnt  = filtered.filter(a => (a.status||"").toLowerCase() === "pending").length;
-// // //   const monthLabel = weekDates[0].toLocaleDateString("en-IN",{month:"long",year:"numeric"});
-// // //   const hours = Array.from({length:10},(_,i) => 8+i);
-// // //   const fmtH = h => h<12?`${h} AM`:h===12?"12 PM":`${h-12} PM`;
-
-// // //   return (
-// // //     <div className="dc" style={{animationDelay:".3s",background:P.white,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 24px rgba(0,0,0,0.07)",border:`1px solid ${P.border}`,display:"flex",flexDirection:"column"}}>
-// // //       <div style={{padding:"13px 16px 10px",borderBottom:`1px solid ${P.border}`}}>
-// // //         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:10,gap:8,flexWrap:"wrap"}}>
-// // //           <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
-// // //             <div>
-// // //               <h3 style={{margin:0,fontSize:14,fontWeight:900,color:P.tealDark}}>📅 Today's Appointments</h3>
-// // //               <p style={{margin:"2px 0 0",fontSize:10,color:P.muted,fontWeight:600}}>{today.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</p>
-// // //             </div>
-// // //             <div style={{background:`linear-gradient(135deg,${P.teal},${P.tealDark})`,color:"#fff",fontSize:12,fontWeight:900,padding:"3px 12px",borderRadius:20,boxShadow:`0 3px 10px ${P.teal}44`,whiteSpace:"nowrap"}}>{filtered.length} All Appointments</div>
-// // //           </div>
-// // //           <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-// // //             <div style={{position:"relative"}}>
-// // //               <span style={{position:"absolute",left:9,top:"50%",transform:"translateY(-50%)",fontSize:11,color:P.muted}}>🔍</span>
-// // //               <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search..." style={{border:`1.5px solid ${P.border}`,borderRadius:8,padding:"5px 10px 5px 26px",fontSize:11,color:P.text,outline:"none",background:P.bg,width:130,fontFamily:"inherit"}}/>
-// // //             </div>
-// // //             <div style={{display:"flex",background:P.bg,border:`1px solid ${P.border}`,borderRadius:9,padding:2}}>
-// // //               {["Day","Week"].map(v=>(
-// // //                 <button key={v} onClick={()=>setView(v.toLowerCase())} style={{padding:"4px 12px",borderRadius:7,border:"none",background:view===v.toLowerCase()?`linear-gradient(135deg,${P.teal},${P.tealDark})`:"transparent",color:view===v.toLowerCase()?"#fff":P.muted,fontSize:11,fontWeight:800,cursor:"pointer",transition:"all .15s"}}>{v}</button>
-// // //               ))}
-// // //             </div>
-// // //           </div>
-// // //         </div>
-// // //         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:6}}>
-// // //           {view==="week"?(
-// // //             <div style={{display:"flex",alignItems:"center",gap:8}}>
-// // //               <button onClick={()=>{const d=new Date(weekBase);d.setDate(d.getDate()-7);setWeekBase(d);}} style={{background:P.bg,border:`1px solid ${P.border}`,borderRadius:7,width:28,height:28,cursor:"pointer",fontSize:14,color:P.tealDark,fontWeight:800}}>‹</button>
-// // //               <span style={{fontSize:12,fontWeight:800,color:P.tealDark,minWidth:120,textAlign:"center"}}>{monthLabel}</span>
-// // //               <button onClick={()=>{const d=new Date(weekBase);d.setDate(d.getDate()+7);setWeekBase(d);}} style={{background:P.bg,border:`1px solid ${P.border}`,borderRadius:7,width:28,height:28,cursor:"pointer",fontSize:14,color:P.tealDark,fontWeight:800}}>›</button>
-// // //             </div>
-// // //           ):<div/>}
-// // //           <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
-// // //             {[{l:"Today",v:dayAppts.length,c:P.teal},{l:"Approved",v:approvedCnt,c:P.sage},{l:"Pending",v:pendingCnt,c:P.gold}].map(({l,v,c})=>(
-// // //               <span key={l} style={{background:`${c}18`,border:`1px solid ${c}44`,borderRadius:20,padding:"2px 10px",fontSize:10,fontWeight:800,color:c,whiteSpace:"nowrap"}}>{v} {l}</span>
-// // //             ))}
-// // //           </div>
-// // //         </div>
-// // //       </div>
-
-// // //       {mayorSlots.length>0&&(
-// // //         <div style={{display:"flex",gap:6,flexWrap:"wrap",padding:"5px 16px",background:`${P.cream}88`,borderBottom:`1px solid ${P.border}`}}>
-// // //           <span style={{fontSize:9,fontWeight:800,color:P.tealDark,textTransform:"uppercase",letterSpacing:.8,alignSelf:"center"}}>Mayor Available:</span>
-// // //           {mayorSlots.map((s,i)=>(
-// // //             <span key={i} style={{fontSize:9.5,fontWeight:700,color:P.tealDark,background:`${P.teal}1a`,border:`1px solid ${P.teal}33`,borderRadius:20,padding:"2px 9px"}}>{s.start} – {s.end}</span>
-// // //           ))}
-// // //         </div>
-// // //       )}
-
-// // //       {loading?(
-// // //         <div style={{textAlign:"center",padding:"48px 0",color:P.muted}}>
-// // //           <div style={{width:26,height:26,border:`3px solid ${P.border}`,borderTopColor:P.teal,borderRadius:"50%",animation:"spin .8s linear infinite",margin:"0 auto 10px"}}/>
-// // //           Loading appointments…
-// // //         </div>
-// // //       ):view==="week"?(
-// // //         <div style={{overflowX:"auto",overflowY:"auto",maxHeight:380}}>
-// // //           <div style={{minWidth:560}}>
-// // //             <div style={{display:"grid",gridTemplateColumns:"50px repeat(7,1fr)",borderBottom:`1.5px solid ${P.border}`,background:P.bg,position:"sticky",top:0,zIndex:4}}>
-// // //               <div style={{borderRight:`1px solid ${P.border}`}}/>
-// // //               {weekDates.map((dt,i)=>{
-// // //                 const isToday=isSameDay(dt,today),cnt=appsForDate(dt).length;
-// // //                 return(
-// // //                   <div key={i} style={{padding:"7px 3px",textAlign:"center",borderRight:i<6?`1px solid ${P.border}`:undefined,background:isToday?`${P.teal}0e`:"transparent"}}>
-// // //                     <div style={{fontSize:9.5,fontWeight:700,color:isToday?P.teal:P.muted,letterSpacing:.4}}>{DAYS_SHORT[i]}</div>
-// // //                     <div style={{width:27,height:27,borderRadius:"50%",margin:"2px auto 0",background:isToday?`linear-gradient(135deg,${P.teal},${P.tealDark})`:"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:900,color:isToday?"#fff":P.text}}>{dt.getDate()}</div>
-// // //                     {cnt>0&&<div style={{marginTop:2,fontSize:8,fontWeight:800,color:isToday?"#fff":P.teal,background:isToday?`${P.teal}cc`:`${P.teal}18`,borderRadius:20,padding:"1px 5px",display:"inline-block"}}>{cnt}</div>}
-// // //                   </div>
-// // //                 );
-// // //               })}
-// // //             </div>
-// // //             {hours.map(hour=>(
-// // //               <div key={hour} style={{display:"grid",gridTemplateColumns:"50px repeat(7,1fr)",borderBottom:`1px solid ${P.border}55`,minHeight:54}}>
-// // //                 <div style={{borderRight:`1px solid ${P.border}`,padding:"4px 5px 0 0",textAlign:"right",fontSize:9,fontWeight:700,color:P.muted,background:P.bg,position:"sticky",left:0,zIndex:2}}>{fmtH(hour)}</div>
-// // //                 {weekDates.map((dt,di)=>{
-// // //                   const isToday=isSameDay(dt,today);
-// // //                   const slotAppts=appsForDate(dt).filter(a=>{const m=toMin(a.slotTime||"");return m>=(hour-8)*60&&m<(hour-8+1)*60;});
-// // //                   return(
-// // //                     <div key={di} style={{borderRight:di<6?`1px solid ${P.border}55`:undefined,padding:"3px 3px",background:isToday?`${P.teal}05`:"transparent"}}>
-// // //                       {slotAppts.map((appt,ai)=>{const gIdx=filtered.indexOf(appt);return <ApptCard key={ai} appt={appt} color={ACCENT[gIdx%ACCENT.length]}/>;
-// // //                       })}
-// // //                     </div>
-// // //                   );
-// // //                 })}
-// // //               </div>
-// // //             ))}
-// // //           </div>
-// // //         </div>
-// // //       ):(
-// // //         <div style={{overflowY:"auto",maxHeight:380}}>
-// // //           {dayAppts.length===0?(
-// // //             <div style={{textAlign:"center",padding:"44px 0",color:P.muted}}>
-// // //               <div style={{fontSize:32,marginBottom:8}}>📅</div>
-// // //               <div style={{fontWeight:700,fontSize:13,color:P.text,marginBottom:3}}>No appointments today</div>
-// // //               <div style={{fontSize:11}}>Switch to Week view to browse other days</div>
-// // //             </div>
-// // //           ):(
-// // //             <div style={{padding:"8px 16px"}}>
-// // //               {hours.map(hour=>{
-// // //                 const label=hour<12?`${hour}:00 AM`:hour===12?"12:00 PM":`${hour-12}:00 PM`;
-// // //                 const hAppts=dayAppts.filter(a=>{const m=toMin(a.slotTime||"");return m>=(hour-8)*60&&m<(hour-8+1)*60;});
-// // //                 return(
-// // //                   <div key={hour} style={{display:"flex",gap:10,marginBottom:hAppts.length?8:2}}>
-// // //                     <div style={{width:56,fontSize:9,fontWeight:hAppts.length?800:600,color:hAppts.length?P.teal:P.border,textAlign:"right",paddingTop:5,flexShrink:0,fontFamily:"monospace"}}>{label}</div>
-// // //                     <div style={{flex:1,borderTop:hAppts.length?"none":`1px solid ${P.border}33`,paddingTop:hAppts.length?0:5}}>
-// // //                       {hAppts.length>0&&(
-// // //                         <div style={{display:"grid",gridTemplateColumns:`repeat(${Math.min(hAppts.length,3)},1fr)`,gap:6}}>
-// // //                           {hAppts.map((appt,ai)=>{const gIdx=filtered.indexOf(appt);return <ApptCard key={ai} appt={appt} color={ACCENT[gIdx%ACCENT.length]}/>;
-// // //                           })}
-// // //                         </div>
-// // //                       )}
-// // //                     </div>
-// // //                   </div>
-// // //                 );
-// // //               })}
-// // //             </div>
-// // //           )}
-// // //         </div>
-// // //       )}
-
-// // //       <div style={{borderTop:`1px solid ${P.border}`,padding:"6px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",background:P.bg,flexWrap:"wrap",gap:4}}>
-// // //         <div style={{display:"flex",alignItems:"center",gap:5}}>
-// // //           <span style={{width:7,height:7,borderRadius:"50%",background:P.sage,display:"inline-block",animation:"pulse 2s infinite",boxShadow:`0 0 6px ${P.sage}`}}/>
-// // //           <span style={{fontSize:9.5,color:P.muted,fontWeight:700}}>Live · 8:00 AM – 6:00 PM</span>
-// // //         </div>
-// // //         <span style={{fontSize:9.5,color:P.muted}}>{filtered.length} total appointments</span>
-// // //       </div>
-// // //     </div>
-// // //   );
-// // // }
-
-// // // // ── Meeting Analytics Components ──────────────────────────────────────────────
-
-// // // function ProgressBar({ value, max, color }) {
-// // //   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
-// // //   return (
-// // //     <div style={{ height: 6, borderRadius: 99, background: P.bg, overflow: "hidden" }}>
-// // //       <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 99, transition: "width 1s ease" }}/>
-// // //     </div>
-// // //   );
-// // // }
-
-// // // // ─────────────────────────────────────────────────────────────────────────────
-// // // // Dashboard
-// // // // ─────────────────────────────────────────────────────────────────────────────
-// // // export default function Dashboard() {
-// // //   const navigate = useNavigate();
-// // //   const { user } = useSelector(s => s.auth);
-
-// // //   const [stats,        setStats]        = useState({total:0,pending:0,resolved:0,inProgress:0});
-// // //   const [recent,       setRecent]       = useState([]);
-// // //   const [talukaData,   setTalukaData]   = useState({});
-// // //   const [weeklyData,   setWeeklyData]   = useState([4,7,5,9,12,8,15]);
-// // //   const [loading,      setLoading]      = useState(true);
-// // //   const [activeTab,    setActiveTab]    = useState("all");
-
-// // //   const [appointments, setAppointments] = useState([]);
-// // //   const [apptLoading,  setApptLoading]  = useState(true);
-// // //   const [mayorSlots,   setMayorSlots]   = useState([]);
-// // //   const [peopleOnline, setPeopleOnline] = useState(0);
-
-// // //   // ── Meeting Analytics State ───────────────────────────────────────────────
-// // //   const [meetingStats, setMeetingStats] = useState({
-// // //     totalMeetings: 0,
-// // //     totalSubjects: 0,
-// // //     approved: 0,
-// // //     rejected: 0,
-// // //     onHold: 0,
-// // //     postponed: 0,
-// // //     notConducted: 0,
-// // //     actionTakenSubjects: 0,
-// // //     subjectsByType: { General: 0, Administrative: 0, Contract: 0 },
-// // //     actionProgress: {},
-// // //     departmentStats: {},
-// // //   });
-// // //   const [meetingLoading, setMeetingLoading] = useState(true);
-
-// // //   const fetchDashboard = useCallback(async () => {
-// // //     setLoading(true);
-// // //     try {
-// // //       const res  = await axiosInstance.get("/inwardAll");
-// // //       const data = res.data?.data || [];
-// // //       setStats({
-// // //         total:      data.length,
-// // //         pending:    data.filter(d => d.status==="Pending").length,
-// // //         resolved:   data.filter(d => d.status==="Resolved").length,
-// // //         inProgress: data.filter(d => d.status==="In Progress").length,
-// // //       });
-// // //       const tMap={};
-// // //       data.forEach(d => { if(d.taluka) tMap[d.taluka]=(tMap[d.taluka]||0)+1; });
-// // //       setTalukaData(tMap);
-// // //       const now=Date.now(), wk=Array(7).fill(0);
-// // //       data.forEach(d => { const diff=Math.floor((now-new Date(d.createdAt))/86400000); if(diff>=0&&diff<7)wk[6-diff]++; });
-// // //       setWeeklyData(wk.map(v=>v||Math.floor(2+Math.random()*6)));
-// // //       setRecent(data.slice(0,8));
-// // //     } catch(e) { console.error(e); }
-// // //     finally { setLoading(false); }
-// // //   }, []);
-
-// // //   const fetchAppointments = useCallback(async () => {
-// // //     setApptLoading(true);
-// // //     try {
-// // //       const res = await citizenAxios.get("/citizen/admin/all-appointments");
-// // //       if(res.data.success) setAppointments(res.data.appointments||[]);
-// // //     } catch(e) { console.error(e); setAppointments([]); }
-// // //     finally { setApptLoading(false); }
-// // //   }, []);
-
-// // //   const fetchMayorSlots = useCallback(async () => {
-// // //     try {
-// // //       const res = await axios.get(`${BASE_URL}/api/availability/get`);
-// // //       if(res.data.success) {
-// // //         const ts=new Date().toISOString().slice(0,10);
-// // //         const rec=res.data.data.find(a=>a.date===ts);
-// // //         setMayorSlots(rec?.timeSlots||[]);
-// // //       }
-// // //     } catch(e) { console.error(e); }
-// // //   }, []);
-
-// // //   // ── Fetch Meeting Analytics ───────────────────────────────────────────────
-// // //   const fetchMeetingStats = useCallback(async () => {
-// // //     setMeetingLoading(true);
-// // //     try {
-// // //       const res  = await axiosInstance.get("/getMeetings");
-// // //       const data = res.data?.data || [];
-
-// // //       const authUser   = getAuthUser();
-// // //       const userRole   = authUser?.role || "";
-// // //       const userDept   = authUser?.departmentName || "";
-// // //       const fullAccess = FULL_ACCESS_ROLES.includes(userRole);
-
-// // //       // Collect subjects based on role
-// // //       const allSubjects = [];
-// // //       data.forEach(m => {
-// // //         (m.subjects || []).forEach(sub => {
-// // //           if (fullAccess || (Array.isArray(sub.tagTo) && sub.tagTo.includes(userDept))) {
-// // //             allSubjects.push({ ...sub, meetingNumber: m.meetingNumber });
-// // //           }
-// // //         });
-// // //       });
-
-// // //       // Filter meetings based on role
-// // //       const meetings = fullAccess
-// // //         ? data
-// // //         : data.filter(m => (m.subjects || []).some(sub => Array.isArray(sub.tagTo) && sub.tagTo.includes(userDept)));
-
-// // //       // Decision counts
-// // //       const approved     = allSubjects.filter(s => s.decisionInMeeting === "Approved").length;
-// // //       const rejected     = allSubjects.filter(s => s.decisionInMeeting === "Rejected").length;
-// // //       const onHold       = allSubjects.filter(s => s.decisionInMeeting === "On-Hold").length;
-// // //       const postponed    = allSubjects.filter(s => s.decisionInMeeting === "Postponed").length;
-// // //       const notConducted = allSubjects.filter(s => s.decisionInMeeting === "Not Conducted").length;
-// // //       const actionTaken  = allSubjects.filter(s => s.actionTaken && s.actionTaken !== "").length;
-
-// // //       // Subject type breakdown
-// // //       const subjectsByType = {
-// // //         General:        allSubjects.filter(s => s.subjectType === "General").length,
-// // //         Administrative: allSubjects.filter(s => s.subjectType === "Administrative and Financial Approval").length,
-// // //         Contract:       allSubjects.filter(s => s.subjectType === "Contract Approval").length,
-// // //       };
-
-// // //       // Action taken progress breakdown
-// // //       const actionProgress = {};
-// // //       allSubjects.forEach(s => {
-// // //         if (s.actionTaken) actionProgress[s.actionTaken] = (actionProgress[s.actionTaken] || 0) + 1;
-// // //       });
-
-// // //       // Department wise stats (fullAccess only)
-// // //       const departmentStats = {};
-// // //       allSubjects.forEach(s => {
-// // //         (s.tagTo || []).forEach(dept => {
-// // //           if (!departmentStats[dept]) departmentStats[dept] = { total: 0, approved: 0, actionTaken: 0 };
-// // //           departmentStats[dept].total++;
-// // //           if (s.decisionInMeeting === "Approved") departmentStats[dept].approved++;
-// // //           if (s.actionTaken) departmentStats[dept].actionTaken++;
-// // //         });
-// // //       });
-
-// // //       setMeetingStats({
-// // //         totalMeetings: meetings.length,
-// // //         totalSubjects: allSubjects.length,
-// // //         approved, rejected, onHold, postponed, notConducted,
-// // //         actionTakenSubjects: actionTaken,
-// // //         subjectsByType,
-// // //         actionProgress,
-// // //         departmentStats,
-// // //       });
-// // //     } catch(e) { console.error(e); }
-// // //     finally { setMeetingLoading(false); }
-// // //   }, []);
-
-// // //   useEffect(() => {
-// // //     fetchDashboard(); fetchAppointments(); fetchMayorSlots(); fetchMeetingStats();
-// // //     const iv = setInterval(() => setPeopleOnline(Math.floor(12+Math.random()*8)), 4000);
-// // //     setPeopleOnline(Math.floor(12+Math.random()*8));
-// // //     return () => clearInterval(iv);
-// // //   }, [fetchDashboard, fetchAppointments, fetchMayorSlots, fetchMeetingStats]);
-
-// // //   const resRate = stats.total > 0 ? Math.round((stats.resolved/stats.total)*100) : 0;
-// // //   const statusColor = {"Pending":P.gold,"Resolved":P.sage,"In Progress":P.teal,"Rejected":"#d9534f"};
-// // //   const statusBg    = {"Pending":`${P.gold}22`,"Resolved":`${P.sage}22`,"In Progress":`${P.teal}22`,"Rejected":"#fde8e8"};
-// // //   const filteredRecent = activeTab==="all" ? recent : recent.filter(r=>r.status===activeTab);
-
-// // //   const cards = [
-// // //     {label:"TOTAL APPLICATIONS",value:stats.total.toLocaleString(),   sub:"▲ 12% last week",from:P.card1From,to:P.card1To,spark:[40,55,45,70,60,85,75],dark:false},
-// // //     {label:"PENDING",           value:stats.pending.toLocaleString(),  sub:"▼ 5% last week", from:P.card2From,to:P.card2To,spark:[30,50,35,60,40,70,55],dark:false},
-// // //     {label:"RESOLVED",          value:stats.resolved.toLocaleString(), sub:"▲ 8% last week", from:P.card3From,to:P.card3To,spark:[20,40,30,55,45,65,60],dark:false},
-// // //     {label:"IN PROGRESS",       value:stats.inProgress.toLocaleString(),sub:"— ongoing",     from:P.card4From,to:P.card4To,spark:[15,30,25,40,35,50,45],dark:true},
-// // //   ];
-
-// // //   const authUser   = getAuthUser();
-// // //   const isFullAccess = FULL_ACCESS_ROLES.includes(authUser?.role || "");
-
-// // //   return (
-// // //     <div style={{minHeight:"100vh",background:P.bg,fontFamily:"'Nunito','Segoe UI',sans-serif"}}>
-// // //       <style>{`
-// // //         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
-// // //         @keyframes fadeUp {from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-// // //         @keyframes popIn  {from{opacity:0;transform:scale(.92) translateY(-4px)}to{opacity:1;transform:none}}
-// // //         @keyframes pulse  {0%,100%{opacity:1}50%{opacity:.35}}
-// // //         @keyframes spin   {to{transform:rotate(360deg)}}
-// // //         .dc{animation:fadeUp .4s ease both;}
-// // //         .tbl-row:hover{background:${P.teal}12!important;cursor:pointer;}
-// // //         ::-webkit-scrollbar{width:5px;height:5px;}
-// // //         ::-webkit-scrollbar-track{background:transparent;}
-// // //         ::-webkit-scrollbar-thumb{background:${P.border};border-radius:99px;}
-// // //         *{box-sizing:border-box;}
-// // //         .dash-grid-4    {display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
-// // //         .dash-grid-cal  {display:grid;grid-template-columns:1fr 288px;gap:18px;}
-// // //         .dash-grid-track{display:grid;grid-template-columns:260px 1fr;gap:18px;}
-// // //         .mtg-grid-3     {display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
-// // //         @media(max-width:1100px){
-// // //           .dash-grid-cal  {grid-template-columns:1fr!important;}
-// // //           .dash-grid-track{grid-template-columns:1fr!important;}
-// // //           .mtg-grid-3     {grid-template-columns:1fr 1fr!important;}
-// // //         }
-// // //         @media(max-width:800px){
-// // //           .dash-grid-4{grid-template-columns:repeat(2,1fr)!important;gap:10px!important;}
-// // //           .mtg-grid-3 {grid-template-columns:1fr!important;}
-// // //         }
-// // //         @media(max-width:480px){
-// // //           .dash-grid-4{grid-template-columns:1fr!important;}
-// // //           .dash-pad{padding:12px 10px!important;}
-// // //         }
-// // //       `}</style>
-
-// // //       <div className="dash-pad" style={{padding:"20px 24px",maxWidth:1440,margin:"0 auto"}}>
-
-// // //         {/* Accent bar */}
-// // //         <div style={{height:4,background:`linear-gradient(90deg,${P.tealDark},${P.teal},${P.gold},${P.goldDeep},${P.cream},${P.goldDeep},${P.teal})`,borderRadius:99,marginBottom:20}}/>
-
-// // //         {/* Page header */}
-// // //         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20,flexWrap:"wrap",gap:10}}>
-// // //           <div>
-// // //             <h2 style={{margin:0,fontSize:19,fontWeight:900,color:P.tealDark,letterSpacing:-.3}}>Analytic Overview</h2>
-// // //             <p style={{margin:"3px 0 0",fontSize:11,color:P.muted}}>
-// // //               Good {new Date().getHours()<12?"Morning":new Date().getHours()<17?"Afternoon":"Evening"}, {user?.fullName?.split(" ")[0]||"Admin"} 👋
-// // //             </p>
-// // //           </div>
-// // //           <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-// // //             <button onClick={()=>{fetchDashboard();fetchAppointments();fetchMayorSlots();fetchMeetingStats();}}
-// // //               style={{background:P.white,border:`1px solid ${P.border}`,borderRadius:9,padding:"6px 13px",fontSize:11,fontWeight:700,color:P.tealDark,cursor:"pointer"}}>
-// // //               ↻ Refresh
-// // //             </button>
-// // //             <div style={{display:"flex",alignItems:"center",gap:6,background:P.white,border:`1px solid ${P.border}`,borderRadius:10,padding:"6px 12px"}}>
-// // //               <span style={{width:7,height:7,borderRadius:"50%",background:P.sage,display:"inline-block",animation:"pulse 2s infinite",boxShadow:`0 0 7px ${P.sage}`}}/>
-// // //               <span style={{fontSize:11,fontWeight:700,color:P.tealDark}}>{peopleOnline} Online</span>
-// // //             </div>
-// // //             <div style={{background:P.white,border:`1px solid ${P.border}`,borderRadius:9,padding:"6px 12px",fontSize:11,fontWeight:700,color:P.tealDark}}>THIS YEAR ▾</div>
-// // //           </div>
-// // //         </div>
-
-// // //         {loading ? (
-// // //           <div style={{textAlign:"center",padding:80,color:P.teal,fontWeight:700}}>Loading dashboard…</div>
-// // //         ) : (
-// // //           <>
-// // //             {/* ── 4 Stat Cards ── */}
-// // //             <div className="dash-grid-4" style={{marginBottom:18}}>
-// // //               {cards.map((card,i)=>(
-// // //                 <div key={i} className="dc" style={{animationDelay:`${i*.07}s`,borderRadius:16,background:`linear-gradient(135deg,${card.from},${card.to})`,padding:"16px 18px",boxShadow:`0 8px 28px ${card.from}55`,position:"relative",overflow:"hidden",minHeight:105}}>
-// // //                   <div style={{position:"absolute",top:-18,right:-18,width:72,height:72,borderRadius:"50%",background:"rgba(255,255,255,0.13)"}}/>
-// // //                   <div style={{position:"absolute",bottom:-12,right:8,width:44,height:44,borderRadius:"50%",background:"rgba(255,255,255,0.09)"}}/>
-// // //                   <div style={{fontSize:9,fontWeight:800,color:card.dark?"#6b5020":"rgba(255,255,255,.88)",letterSpacing:.9,textTransform:"uppercase",marginBottom:4}}>{card.label}</div>
-// // //                   <div style={{fontSize:26,fontWeight:900,color:card.dark?P.tealDark:"#fff",letterSpacing:-1,marginBottom:2}}>{card.value}</div>
-// // //                   <div style={{fontSize:9.5,color:card.dark?"#8a6830":"rgba(255,255,255,.72)",fontWeight:600,marginBottom:7}}>{card.sub}</div>
-// // //                   <Sparkline color={card.dark?"#9a7828":"#fff"} data={card.spark}/>
-// // //                 </div>
-// // //               ))}
-// // //             </div>
-
-// // //             {/* ── Calendar + Status ── */}
-// // //             <div className="dash-grid-cal" style={{marginBottom:18}}>
-// // //               <CalendarPanel appointments={appointments} mayorSlots={mayorSlots} loading={apptLoading}/>
-
-// // //               {/* Status Panel */}
-// // //               <div className="dc" style={{animationDelay:".37s",background:P.white,borderRadius:16,padding:"16px",boxShadow:"0 4px 20px rgba(0,0,0,0.05)",border:`1px solid ${P.border}`,display:"flex",flexDirection:"column"}}>
-// // //                 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-// // //                   <h3 style={{margin:0,fontSize:13,fontWeight:900,color:P.tealDark}}>Status</h3>
-// // //                   <div style={{background:P.bg,border:`1px solid ${P.border}`,borderRadius:7,padding:"3px 8px",fontSize:9.5,fontWeight:700,color:P.tealDark}}>TODAY ▾</div>
-// // //                 </div>
-// // //                 <div style={{display:"flex",justifyContent:"center",margin:"2px 0 6px"}}>
-// // //                   <Donut pct={resRate}/>
-// // //                 </div>
-// // //                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:10}}>
-// // //                   {[{l:"BOOKED",v:stats.total,c:P.teal},{l:"PROGRESS",v:stats.inProgress,c:P.gold},{l:"PENDING",v:stats.pending,c:"#d9534f"}].map(({l,v,c})=>(
-// // //                     <div key={l} style={{textAlign:"center",padding:"8px 3px",background:P.bg,borderRadius:9,border:`1px solid ${P.border}`}}>
-// // //                       <div style={{fontSize:15,fontWeight:900,color:c}}>{v}</div>
-// // //                       <div style={{fontSize:7,fontWeight:800,color:P.muted,letterSpacing:.4,textTransform:"uppercase",marginTop:2}}>{l}</div>
-// // //                     </div>
-// // //                   ))}
-// // //                 </div>
-
-// // //                 <div style={{borderTop:`1px solid ${P.border}`,paddingTop:8,marginBottom:8}}>
-// // //                   <div style={{fontSize:10,fontWeight:800,color:P.tealDark,marginBottom:6}}>📅 Appointments</div>
-// // //                   {[
-// // //                     {l:"Total",       v:appointments.length,                                                         c:P.teal},
-// // //                     {l:"Approved",    v:appointments.filter(a=>(a.status||"").toLowerCase()==="approved").length,    c:P.sage},
-// // //                     {l:"Pending",     v:appointments.filter(a=>(a.status||"").toLowerCase()==="pending").length,     c:P.gold},
-// // //                     {l:"In Progress", v:appointments.filter(a=>(a.status||"").toLowerCase()==="in progress").length, c:P.tealDeep},
-// // //                   ].map(({l,v,c})=>(
-// // //                     <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"2.5px 0"}}>
-// // //                       <span style={{display:"flex",alignItems:"center",gap:4,fontSize:9.5,color:P.muted,fontWeight:600}}>
-// // //                         <span style={{width:5,height:5,borderRadius:"50%",background:c,display:"inline-block"}}/>{l}
-// // //                       </span>
-// // //                       <span style={{fontSize:10.5,fontWeight:800,color:c}}>{v}</span>
-// // //                     </div>
-// // //                   ))}
-// // //                 </div>
-
-// // //                 {mayorSlots.length>0&&(
-// // //                   <div style={{borderTop:`1px solid ${P.border}`,paddingTop:7,marginBottom:8}}>
-// // //                     <div style={{fontSize:10,fontWeight:800,color:P.tealDark,marginBottom:5}}>🏛 Mayor Today</div>
-// // //                     {mayorSlots.map((s,i)=>(
-// // //                       <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"2px 0",fontSize:9.5,color:P.muted,fontWeight:600}}>
-// // //                         <span>Slot {i+1}</span>
-// // //                         <span style={{color:P.tealDark,fontWeight:800}}>{s.start} – {s.end}</span>
-// // //                       </div>
-// // //                     ))}
-// // //                   </div>
-// // //                 )}
-
-// // //                 <div style={{borderTop:`1px solid ${P.border}`,paddingTop:8}}>
-// // //                   <div style={{fontSize:10.5,fontWeight:800,color:P.tealDark,marginBottom:6}}>📈 Weekly Trend</div>
-// // //                   <MiniBar data={weeklyData} color={P.teal}/>
-// // //                   <div style={{display:"flex",justifyContent:"space-between",marginTop:3}}>
-// // //                     {["M","T","W","T","F","S","S"].map((d,i)=>(
-// // //                       <span key={i} style={{fontSize:8.5,color:P.muted,flex:1,textAlign:"center",fontWeight:700}}>{d}</span>
-// // //                     ))}
-// // //                   </div>
-// // //                 </div>
-// // //               </div>
-// // //             </div>
-
-// // //             {/* ── Tracking + Recent Applications ── */}
-// // //             <div className="dash-grid-track" style={{marginBottom:18}}>
-// // //               <div className="dc" style={{animationDelay:".44s",background:P.white,borderRadius:16,padding:"18px",boxShadow:"0 4px 20px rgba(0,0,0,0.05)",border:`1px solid ${P.border}`}}>
-// // //                 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-// // //                   <h3 style={{margin:0,fontSize:13,fontWeight:900,color:P.tealDark}}>Tracking</h3>
-// // //                   <div style={{background:P.bg,border:`1px solid ${P.border}`,borderRadius:7,padding:"3px 8px",fontSize:9.5,fontWeight:700,color:P.tealDark}}>THIS YEAR ▾</div>
-// // //                 </div>
-// // //                 <div style={{display:"flex",justifyContent:"space-between",padding:"0 2px 7px",borderBottom:`1px solid ${P.border}`,marginBottom:5}}>
-// // //                   <span style={{fontSize:9,fontWeight:800,color:P.muted,textTransform:"uppercase",letterSpacing:.5}}>Region</span>
-// // //                   <span style={{fontSize:9,fontWeight:800,color:P.muted,textTransform:"uppercase",letterSpacing:.5}}>Amount</span>
-// // //                 </div>
-// // //                 {Object.entries(talukaData).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([taluka,count],i)=>{
-// // //                   const cols=[P.teal,P.gold,P.sage,P.tealDeep,P.goldDeep,P.tealDark];
-// // //                   const c=cols[i%cols.length];
-// // //                   return(
-// // //                     <div key={taluka} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 2px",borderBottom:`1px solid ${P.border}55`}}>
-// // //                       <div style={{display:"flex",alignItems:"center",gap:7}}>
-// // //                         <div style={{width:7,height:7,borderRadius:"50%",background:c}}/>
-// // //                         <span style={{fontSize:11.5,fontWeight:600,color:P.text}}>{taluka}</span>
-// // //                       </div>
-// // //                       <span style={{fontSize:11.5,fontWeight:800,color:c}}>{count}</span>
-// // //                     </div>
-// // //                   );
-// // //                 })}
-// // //                 {!Object.keys(talukaData).length&&<div style={{textAlign:"center",color:P.muted,fontSize:12,padding:"18px 0"}}>No data yet</div>}
-// // //               </div>
-
-// // //               <div className="dc" style={{animationDelay:".51s",background:P.white,borderRadius:16,padding:"18px 20px",boxShadow:"0 4px 20px rgba(0,0,0,0.05)",border:`1px solid ${P.border}`}}>
-// // //                 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,flexWrap:"wrap",gap:8}}>
-// // //                   <div>
-// // //                     <h3 style={{margin:0,fontSize:14,fontWeight:900,color:P.tealDark}}>Recent Applications</h3>
-// // //                     <p style={{margin:"2px 0 0",fontSize:10,color:P.muted}}>Latest inward complaints</p>
-// // //                   </div>
-// // //                   <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
-// // //                     {["all","Pending","Resolved","In Progress"].map(tab=>(
-// // //                       <button key={tab} onClick={()=>setActiveTab(tab)} style={{
-// // //                         border:`1px solid ${activeTab===tab?P.teal:P.border}`,
-// // //                         background:activeTab===tab?`linear-gradient(135deg,${P.teal},${P.tealDark})`:P.white,
-// // //                         color:activeTab===tab?"#fff":P.muted,
-// // //                         borderRadius:8,padding:"4px 11px",fontSize:10.5,fontWeight:700,cursor:"pointer",
-// // //                         boxShadow:activeTab===tab?`0 4px 12px ${P.teal}44`:"none",transition:"all .2s"}}>
-// // //                         {tab==="all"?"All":tab}
-// // //                       </button>
-// // //                     ))}
-// // //                   </div>
-// // //                 </div>
-// // //                 <div style={{overflowX:"auto"}}>
-// // //                   <table style={{width:"100%",borderCollapse:"collapse",fontSize:11.5}}>
-// // //                     <thead>
-// // //                       <tr style={{background:P.bg}}>
-// // //                         {["Inward No","Applicant","Subject","Taluka","Department","Priority","Status","Date"].map(h=>(
-// // //                           <th key={h} style={{padding:"8px 10px",textAlign:"left",color:P.tealDark,fontWeight:800,fontSize:9.5,whiteSpace:"nowrap",letterSpacing:.3,textTransform:"uppercase",borderBottom:`2px solid ${P.border}`}}>{h}</th>
-// // //                         ))}
-// // //                       </tr>
-// // //                     </thead>
-// // //                     <tbody>
-// // //                       {filteredRecent.length===0?(
-// // //                         <tr><td colSpan={8} style={{textAlign:"center",padding:28,color:P.muted}}>No applications found</td></tr>
-// // //                       ):filteredRecent.map((item,i)=>(
-// // //                         <tr key={i} className="tbl-row" onClick={()=>navigate("/allapplication")} style={{borderBottom:`1px solid ${P.border}55`,transition:"background .15s"}}>
-// // //                           <td style={{padding:"8px 10px",color:P.teal,fontWeight:800,whiteSpace:"nowrap",fontFamily:"monospace",fontSize:10.5}}>{item.inwardNo||"—"}</td>
-// // //                           <td style={{padding:"8px 10px",fontWeight:700,color:P.text}}>{item.fullName||"—"}</td>
-// // //                           <td style={{padding:"8px 10px",color:P.muted,maxWidth:130,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.subject||"—"}</td>
-// // //                           <td style={{padding:"8px 10px",color:P.muted}}>{item.taluka||"—"}</td>
-// // //                           <td style={{padding:"8px 10px",color:P.muted,whiteSpace:"nowrap"}}>{item.mainDepartment||"—"}</td>
-// // //                           <td style={{padding:"8px 10px"}}>
-// // //                             <span style={{fontSize:9.5,fontWeight:800,padding:"2px 8px",borderRadius:20,background:item.priority==="Emergency"?"#fde8e8":item.priority==="Urgent"?`${P.gold}22`:`${P.sage}22`,color:item.priority==="Emergency"?"#d9534f":item.priority==="Urgent"?P.goldDeep:P.sage,border:`1px solid ${item.priority==="Emergency"?"#f5c6c6":item.priority==="Urgent"?P.gold+"44":P.sage+"44"}`}}>
-// // //                               {item.priority||"Normal"}
-// // //                             </span>
-// // //                           </td>
-// // //                           <td style={{padding:"8px 10px"}}>
-// // //                             <span style={{fontSize:9.5,fontWeight:800,padding:"2px 8px",borderRadius:20,background:statusBg[item.status]||`${P.border}55`,color:statusColor[item.status]||P.muted,border:`1px solid ${statusColor[item.status]||P.border}44`}}>
-// // //                               {item.status||"—"}
-// // //                             </span>
-// // //                           </td>
-// // //                           <td style={{padding:"8px 10px",color:P.muted,whiteSpace:"nowrap",fontSize:10.5}}>
-// // //                             {item.submissionDate||(item.createdAt?new Date(item.createdAt).toLocaleDateString("en-IN"):"—")}
-// // //                           </td>
-// // //                         </tr>
-// // //                       ))}
-// // //                     </tbody>
-// // //                   </table>
-// // //                 </div>
-// // //                 <div style={{marginTop:10,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
-// // //                   <span style={{fontSize:10.5,color:P.muted}}>Showing {filteredRecent.length} of {stats.total}</span>
-// // //                   <div style={{display:"flex",gap:8}}>
-// // //                     <button onClick={()=>navigate("/allapplication")} style={{background:`linear-gradient(135deg,${P.teal},${P.tealDark})`,color:"#fff",border:"none",borderRadius:9,padding:"6px 14px",fontSize:11,fontWeight:800,cursor:"pointer",boxShadow:`0 4px 14px ${P.teal}55`}}>All Applications →</button>
-// // //                     <button onClick={()=>navigate("/applicationcitizens")} style={{background:`linear-gradient(135deg,${P.gold},${P.goldDeep})`,color:"#fff",border:"none",borderRadius:9,padding:"6px 14px",fontSize:11,fontWeight:800,cursor:"pointer",boxShadow:`0 4px 14px ${P.gold}55`}}>Citizen Appts →</button>
-// // //                   </div>
-// // //                 </div>
-// // //               </div>
-// // //             </div>
-
-// // //             {/* ════════════════════════════════════════════════════════════════
-// // //                 ── MEETING ANALYTICS SECTION ──
-// // //             ════════════════════════════════════════════════════════════════ */}
-// // //             {!meetingLoading && (
-// // //               <div className="dc" style={{ animationDelay: ".58s", marginBottom: 18 }}>
-
-// // //                 {/* Section header with divider */}
-// // //                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
-// // //                   <div style={{ flex: 1, height: 1.5, background: `linear-gradient(90deg,${P.teal},${P.border})`, borderRadius: 99 }}/>
-// // //                   <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-// // //                     <span style={{ fontSize: 18 }}>🏛</span>
-// // //                     <span style={{ fontSize: 14, fontWeight: 900, color: P.tealDark, whiteSpace: "nowrap" }}>Meeting Proceedings Analytics</span>
-// // //                   </div>
-// // //                   <div style={{ flex: 1, height: 1.5, background: `linear-gradient(90deg,${P.border},${P.teal})`, borderRadius: 99 }}/>
-// // //                 </div>
-
-// // //                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
-// // //                   <p style={{ margin: 0, fontSize: 10.5, color: P.muted, fontWeight: 600 }}>
-// // //                     Sabha Kamkaj — Subject wise progress tracking
-// // //                   </p>
-// // //                   <button onClick={() => navigate("/meetings")} style={{
-// // //                     background: `linear-gradient(135deg,${P.teal},${P.tealDark})`,
-// // //                     color: "#fff", border: "none", borderRadius: 9, padding: "6px 14px",
-// // //                     fontSize: 11, fontWeight: 800, cursor: "pointer",
-// // //                     boxShadow: `0 4px 14px ${P.teal}55` }}>
-// // //                     View Meetings →
-// // //                   </button>
-// // //                 </div>
-
-// // //                 {/* Top 4 Meeting stat cards */}
-// // //                 <div className="dash-grid-4" style={{ marginBottom: 16 }}>
-// // //                   {[
-// // //                     { label: "TOTAL MEETINGS",  value: meetingStats.totalMeetings,      from: P.card1From, to: P.card1To,   spark: [2,3,1,4,2,5,3], dark: false },
-// // //                     { label: "TOTAL SUBJECTS",  value: meetingStats.totalSubjects,       from: P.card2From, to: P.card2To,   spark: [5,8,6,10,7,12,9], dark: false },
-// // //                     { label: "APPROVED",        value: meetingStats.approved,            from: P.card3From, to: P.card3To,   spark: [3,5,4,7,5,9,7], dark: false },
-// // //                     { label: "ACTION TAKEN",    value: meetingStats.actionTakenSubjects, from: P.tealDeep,  to: P.tealDark,  spark: [1,2,2,4,3,5,4], dark: false },
-// // //                   ].map((c, i) => (
-// // //                     <div key={i} style={{ borderRadius: 14, background: `linear-gradient(135deg,${c.from},${c.to})`,
-// // //                       padding: "14px 16px", boxShadow: `0 6px 20px ${c.from}44`,
-// // //                       position: "relative", overflow: "hidden", minHeight: 90 }}>
-// // //                       <div style={{ position: "absolute", top: -14, right: -14, width: 60, height: 60, borderRadius: "50%", background: "rgba(255,255,255,0.13)" }}/>
-// // //                       <div style={{ fontSize: 9, fontWeight: 800, color: "rgba(255,255,255,.85)", letterSpacing: .8, textTransform: "uppercase", marginBottom: 4 }}>{c.label}</div>
-// // //                       <div style={{ fontSize: 28, fontWeight: 900, color: "#fff", letterSpacing: -1, marginBottom: 4 }}>{c.value}</div>
-// // //                       <Sparkline color="#fff" data={c.spark}/>
-// // //                     </div>
-// // //                   ))}
-// // //                 </div>
-
-// // //                 {/* Middle row: 3 panels */}
-// // //                 <div className="mtg-grid-3" style={{ marginBottom: 14 }}>
-
-// // //                   {/* Decision Breakdown */}
-// // //                   <div style={{ background: P.white, borderRadius: 14, padding: "16px",
-// // //                     border: `1px solid ${P.border}`, boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-// // //                     <div style={{ fontSize: 11, fontWeight: 900, color: P.tealDark, marginBottom: 12 }}>📊 Decision Breakdown</div>
-// // //                     {[
-// // //                       { l: "Approved",      v: meetingStats.approved,      c: P.sage },
-// // //                       { l: "Rejected",      v: meetingStats.rejected,      c: "#d9534f" },
-// // //                       { l: "On-Hold",       v: meetingStats.onHold,        c: P.gold },
-// // //                       { l: "Postponed",     v: meetingStats.postponed,     c: P.tealDeep },
-// // //                       { l: "Not Conducted", v: meetingStats.notConducted,  c: P.muted },
-// // //                     ].map(({ l, v, c }) => {
-// // //                       const pct = meetingStats.totalSubjects > 0 ? Math.round((v / meetingStats.totalSubjects) * 100) : 0;
-// // //                       return (
-// // //                         <div key={l} style={{ marginBottom: 10 }}>
-// // //                           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-// // //                             <span style={{ fontSize: 11, fontWeight: 700, color: P.text }}>{l}</span>
-// // //                             <span style={{ fontSize: 11, fontWeight: 800, color: c }}>
-// // //                               {v} <span style={{ color: P.muted, fontWeight: 600, fontSize: 10 }}>({pct}%)</span>
-// // //                             </span>
-// // //                           </div>
-// // //                           <ProgressBar value={v} max={meetingStats.totalSubjects} color={c}/>
-// // //                         </div>
-// // //                       );
-// // //                     })}
-// // //                   </div>
-
-// // //                   {/* Action Taken Progress */}
-// // //                   <div style={{ background: P.white, borderRadius: 14, padding: "16px",
-// // //                     border: `1px solid ${P.border}`, boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-// // //                     <div style={{ fontSize: 11, fontWeight: 900, color: P.tealDark, marginBottom: 12 }}>⚡ Action Taken Progress</div>
-// // //                     {Object.keys(meetingStats.actionProgress).length === 0 ? (
-// // //                       <div style={{ textAlign: "center", color: P.muted, fontSize: 11, padding: "24px 0" }}>
-// // //                         <div style={{ fontSize: 28, marginBottom: 8 }}>⚡</div>
-// // //                         No action taken yet
-// // //                       </div>
-// // //                     ) : (
-// // //                       Object.entries(meetingStats.actionProgress)
-// // //                         .sort((a, b) => b[1] - a[1])
-// // //                         .map(([action, count], i) => {
-// // //                           const cols = [P.teal, P.gold, P.sage, P.tealDeep, P.goldDeep, P.tealDark];
-// // //                           const c = cols[i % cols.length];
-// // //                           return (
-// // //                             <div key={action} style={{ marginBottom: 10 }}>
-// // //                               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-// // //                                 <span style={{ fontSize: 10, fontWeight: 700, color: P.text,
-// // //                                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 140 }}>{action}</span>
-// // //                                 <span style={{ fontSize: 11, fontWeight: 800, color: c, flexShrink: 0, marginLeft: 6 }}>{count}</span>
-// // //                               </div>
-// // //                               <ProgressBar value={count} max={meetingStats.totalSubjects} color={c}/>
-// // //                             </div>
-// // //                           );
-// // //                         })
-// // //                     )}
-// // //                   </div>
-
-// // //                   {/* Subject Type */}
-// // //                   <div style={{ background: P.white, borderRadius: 14, padding: "16px",
-// // //                     border: `1px solid ${P.border}`, boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-// // //                     <div style={{ fontSize: 11, fontWeight: 900, color: P.tealDark, marginBottom: 12 }}>📋 Subject Type Breakdown</div>
-// // //                     {[
-// // //                       { l: "General",                    v: meetingStats.subjectsByType.General,        c: P.teal,    icon: "📄" },
-// // //                       { l: "Administrative & Financial", v: meetingStats.subjectsByType.Administrative,  c: P.gold,    icon: "💰" },
-// // //                       { l: "Contract Approval",          v: meetingStats.subjectsByType.Contract,        c: P.sage,    icon: "📝" },
-// // //                     ].map(({ l, v, c, icon }) => (
-// // //                       <div key={l} style={{ display: "flex", alignItems: "center", gap: 12,
-// // //                         padding: "12px 0", borderBottom: `1px solid ${P.border}55` }}>
-// // //                         <div style={{ width: 40, height: 40, borderRadius: 10,
-// // //                           background: `${c}18`, border: `1.5px solid ${c}33`,
-// // //                           display: "flex", alignItems: "center", justifyContent: "center",
-// // //                           fontSize: 18, flexShrink: 0 }}>{icon}</div>
-// // //                         <div style={{ flex: 1, minWidth: 0 }}>
-// // //                           <div style={{ fontSize: 10, fontWeight: 700, color: P.muted,
-// // //                             overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 2 }}>{l}</div>
-// // //                           <div style={{ fontSize: 20, fontWeight: 900, color: c }}>{v}</div>
-// // //                         </div>
-// // //                         <div style={{ fontSize: 9, fontWeight: 800, color: c,
-// // //                           background: `${c}18`, padding: "2px 8px", borderRadius: 20, flexShrink: 0 }}>
-// // //                           {meetingStats.totalSubjects > 0 ? Math.round((v / meetingStats.totalSubjects) * 100) : 0}%
-// // //                         </div>
-// // //                       </div>
-// // //                     ))}
-// // //                   </div>
-// // //                 </div>
-
-// // //                 {/* Department wise table — fullAccess only */}
-// // //                 {isFullAccess && Object.keys(meetingStats.departmentStats).length > 0 && (
-// // //                   <div style={{ background: P.white, borderRadius: 14, padding: "16px 18px",
-// // //                     border: `1px solid ${P.border}`, boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-// // //                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-// // //                       <div style={{ fontSize: 11, fontWeight: 900, color: P.tealDark }}>🏢 Department-wise Subject Progress</div>
-// // //                       <span style={{ fontSize: 9.5, color: P.muted, fontWeight: 600 }}>
-// // //                         {Object.keys(meetingStats.departmentStats).length} departments
-// // //                       </span>
-// // //                     </div>
-// // //                     <div style={{ overflowX: "auto" }}>
-// // //                       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11.5 }}>
-// // //                         <thead>
-// // //                           <tr style={{ background: P.bg }}>
-// // //                             {["Department", "Total Subjects", "Approved", "Action Taken", "Completion"].map(h => (
-// // //                               <th key={h} style={{ padding: "8px 12px", textAlign: "left", color: P.tealDark,
-// // //                                 fontWeight: 800, fontSize: 9.5, whiteSpace: "nowrap", letterSpacing: .3,
-// // //                                 textTransform: "uppercase", borderBottom: `2px solid ${P.border}` }}>{h}</th>
-// // //                             ))}
-// // //                           </tr>
-// // //                         </thead>
-// // //                         <tbody>
-// // //                           {Object.entries(meetingStats.departmentStats)
-// // //                             .sort((a, b) => b[1].total - a[1].total)
-// // //                             .map(([dept, stats], i) => {
-// // //                               const cols = [P.teal, P.gold, P.sage, P.tealDeep, P.goldDeep, P.tealDark];
-// // //                               const c = cols[i % cols.length];
-// // //                               const completionPct = stats.total > 0 ? Math.round((stats.actionTaken / stats.total) * 100) : 0;
-// // //                               return (
-// // //                                 <tr key={dept} style={{ borderBottom: `1px solid ${P.border}55`, transition: "background .15s" }}
-// // //                                   onMouseEnter={e => e.currentTarget.style.background = `${P.teal}08`}
-// // //                                   onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-// // //                                   <td style={{ padding: "10px 12px" }}>
-// // //                                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-// // //                                       <div style={{ width: 8, height: 8, borderRadius: "50%", background: c, flexShrink: 0 }}/>
-// // //                                       <span style={{ fontWeight: 700, color: P.text, fontSize: 12 }}>{dept}</span>
-// // //                                     </div>
-// // //                                   </td>
-// // //                                   <td style={{ padding: "10px 12px" }}>
-// // //                                     <span style={{ fontWeight: 800, color: c, fontSize: 13 }}>{stats.total}</span>
-// // //                                   </td>
-// // //                                   <td style={{ padding: "10px 12px" }}>
-// // //                                     <span style={{ display: "inline-flex", alignItems: "center", gap: 5,
-// // //                                       background: `${P.sage}18`, color: P.sage, border: `1px solid ${P.sage}33`,
-// // //                                       padding: "2px 8px", borderRadius: 20, fontSize: 10, fontWeight: 800 }}>
-// // //                                       ✓ {stats.approved}
-// // //                                     </span>
-// // //                                   </td>
-// // //                                   <td style={{ padding: "10px 12px" }}>
-// // //                                     <span style={{ display: "inline-flex", alignItems: "center", gap: 5,
-// // //                                       background: `${P.teal}18`, color: P.teal, border: `1px solid ${P.teal}33`,
-// // //                                       padding: "2px 8px", borderRadius: 20, fontSize: 10, fontWeight: 800 }}>
-// // //                                       ⚡ {stats.actionTaken}
-// // //                                     </span>
-// // //                                   </td>
-// // //                                   <td style={{ padding: "10px 12px", minWidth: 120 }}>
-// // //                                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-// // //                                       <div style={{ flex: 1, height: 6, borderRadius: 99, background: P.bg, overflow: "hidden" }}>
-// // //                                         <div style={{ height: "100%", width: `${completionPct}%`, background: c, borderRadius: 99, transition: "width 1s ease" }}/>
-// // //                                       </div>
-// // //                                       <span style={{ fontSize: 10, fontWeight: 800, color: c, minWidth: 30, textAlign: "right" }}>{completionPct}%</span>
-// // //                                     </div>
-// // //                                   </td>
-// // //                                 </tr>
-// // //                               );
-// // //                             })}
-// // //                         </tbody>
-// // //                       </table>
-// // //                     </div>
-// // //                   </div>
-// // //                 )}
-
-// // //                 {/* Department user — only their own stats */}
-// // //                 {!isFullAccess && (
-// // //                   <div style={{ background: P.white, borderRadius: 14, padding: "16px 18px",
-// // //                     border: `1px solid ${P.border}`, boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-// // //                     <div style={{ fontSize: 11, fontWeight: 900, color: P.tealDark, marginBottom: 12 }}>
-// // //                       🏢 Your Department Progress — {authUser?.departmentName || ""}
-// // //                     </div>
-// // //                     <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
-// // //                       {[
-// // //                         { l: "Your Subjects",  v: meetingStats.totalSubjects,         c: P.teal,    icon: "📋" },
-// // //                         { l: "Approved",       v: meetingStats.approved,               c: P.sage,    icon: "✅" },
-// // //                         { l: "Action Taken",   v: meetingStats.actionTakenSubjects,    c: P.gold,    icon: "⚡" },
-// // //                       ].map(({ l, v, c, icon }) => (
-// // //                         <div key={l} style={{ textAlign: "center", padding: "16px 12px",
-// // //                           background: `${c}10`, border: `1.5px solid ${c}30`, borderRadius: 12 }}>
-// // //                           <div style={{ fontSize: 24, marginBottom: 6 }}>{icon}</div>
-// // //                           <div style={{ fontSize: 22, fontWeight: 900, color: c }}>{v}</div>
-// // //                           <div style={{ fontSize: 10, fontWeight: 700, color: P.muted, marginTop: 3, textTransform: "uppercase", letterSpacing: .4 }}>{l}</div>
-// // //                         </div>
-// // //                       ))}
-// // //                     </div>
-// // //                   </div>
-// // //                 )}
-// // //               </div>
-// // //             )}
-
-// // //             {/* Footer */}
-// // //             <div style={{textAlign:"center",color:P.muted,fontSize:10.5,padding:"12px 0 4px"}}>
-// // //               © {new Date().getFullYear()} Vasai-Virar City Municipal Corporation · Janata Darbar System
-// // //               <span style={{margin:"0 8px",color:P.gold}}>◆</span>
-// // //               स्थापना : ३ जुलै २००९
-// // //             </div>
-// // //           </>
-// // //         )}
-// // //       </div>
-// // //     </div>
-// // //   );
-// // // }
-
-
-
-// // import React, { useState, useEffect, useCallback, useRef } from "react";
-// // import { useSelector } from "react-redux";
-// // import { useNavigate } from "react-router-dom";
-// // import axiosInstance from "../services/axiosInstance";
-// // import citizenAxios from "../services/citizenAxios";
-// // import axios from "axios";
-
-// // const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
-// // const P = {
-// //   teal:"#4CABC1", tealDeep:"#49ACC3", tealDark:"#187484",
-// //   gold:"#CE9A54", goldDeep:"#CA9D28", sage:"#66A962", cream:"#F5E7C2",
-// //   card1From:"#4CABC1", card1To:"#49ACC3",
-// //   card2From:"#CE9A54", card2To:"#CA9D28",
-// //   card3From:"#66A962", card3To:"#4a8f47",
-// //   card4From:"#F5E7C2", card4To:"#e0c98a",
-// //   bg:"#f0f7f9", white:"#ffffff", text:"#1a3a40", muted:"#6b8f95", border:"#d8edf1",
-// // };
-// // const ACCENT = [P.teal, P.gold, P.sage, P.tealDeep, P.goldDeep, P.tealDark, P.gold, P.teal];
-
-// // const FULL_ACCESS_ROLES = ["Super Admin", "Guardian Minister", "Mayor", "Admin"];
-
-// // const getAuthUser = () => {
-// //   try { return JSON.parse(localStorage.getItem("authUser") || "{}"); } catch { return {}; }
-// // };
-
-// // const STATUS_CFG = {
-// //   pending:      {bg:"#fef9c3",color:"#92400e",border:"#fde68a",dot:"#f59e0b",label:"Pending"},
-// //   approved:     {bg:"#dcfce7",color:"#166534",border:"#86efac",dot:"#16a34a",label:"Approved"},
-// //   rejected:     {bg:"#fee2e2",color:"#991b1b",border:"#fca5a5",dot:"#ef4444",label:"Rejected"},
-// //   "in progress":{bg:"#dbeafe",color:"#1e40af",border:"#93c5fd",dot:"#3b82f6",label:"In Progress"},
-// //   resolved:     {bg:"#f0fdf4",color:"#166534",border:"#bbf7d0",dot:"#22c55e",label:"Resolved"},
-// // };
-// // const sc = s => STATUS_CFG[(s||"pending").toLowerCase()] || STATUS_CFG.pending;
-
-// // function Sparkline({ color="#fff", data=[30,45,35,60,40,70,55] }) {
-// //   const w=90,h=36,max=Math.max(...data),min=Math.min(...data);
-// //   const pts=data.map((v,i)=>`${(i/(data.length-1))*w},${h-((v-min)/(max-min+1))*(h-4)-2}`).join(" ");
-// //   const gid=`sg${color.replace('#','')}`;
-// //   return (
-// //     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{opacity:.75}}>
-// //       <defs><linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
-// //         <stop offset="0%" stopColor={color} stopOpacity=".45"/>
-// //         <stop offset="100%" stopColor={color} stopOpacity="0"/>
-// //       </linearGradient></defs>
-// //       <polygon points={`0,${h} ${pts} ${w},${h}`} fill={`url(#${gid})`}/>
-// //       <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-// //     </svg>
-// //   );
-// // }
-
-// // function Donut({ pct=0 }) {
-// //   const r=46,c=2*Math.PI*r,dash=(pct/100)*c;
-// //   return (
-// //     <svg width={112} height={112} viewBox="0 0 112 112">
-// //       <circle cx={56} cy={56} r={r} fill="none" stroke={P.border} strokeWidth={12}/>
-// //       <circle cx={56} cy={56} r={r} fill="none" stroke={P.teal} strokeWidth={12}
-// //         strokeDasharray={`${dash} ${c-dash}`} strokeLinecap="round" transform="rotate(-90 56 56)"
-// //         style={{transition:"stroke-dasharray 1s ease"}}/>
-// //       <text x={56} y={52} textAnchor="middle" fontSize={20} fontWeight={900} fill={P.tealDark}>{pct}%</text>
-// //       <text x={56} y={66} textAnchor="middle" fontSize={9} fill={P.muted} fontWeight={700} letterSpacing={.8}>RESOLVED</text>
-// //     </svg>
-// //   );
-// // }
-
-// // function MiniBar({ data=[], color=P.teal }) {
-// //   const max=Math.max(...data,1);
-// //   return (
-// //     <div style={{display:"flex",alignItems:"flex-end",gap:3,height:38}}>
-// //       {data.map((v,i)=>(
-// //         <div key={i} style={{flex:1,borderRadius:"3px 3px 0 0",minHeight:4,
-// //           background:i===data.length-1?color:`${color}66`,height:`${(v/max)*100}%`}}/>
-// //       ))}
-// //     </div>
-// //   );
-// // }
-
-// // function Av({ name="", size=28, color=P.teal }) {
-// //   const ini=name.split(" ").filter(Boolean).map(n=>n[0]).join("").slice(0,2).toUpperCase()||"?";
-// //   return (
-// //     <div style={{width:size,height:size,borderRadius:"50%",
-// //       background:`linear-gradient(135deg,${color},${color}cc)`,
-// //       display:"flex",alignItems:"center",justifyContent:"center",
-// //       color:"#fff",fontSize:size*.34,fontWeight:800,flexShrink:0,
-// //       border:"2.5px solid #fff",boxShadow:`0 2px 8px ${color}44`}}>
-// //       {ini}
-// //     </div>
-// //   );
-// // }
-
-// // function toMin(t="08:00 AM") {
-// //   if(!t) return 0;
-// //   const [tp,per]=(t||"08:00 AM").split(" ");
-// //   const [h,m]=(tp||"08:00").split(":").map(Number);
-// //   let H=h||8; if(per==="PM"&&H!==12)H+=12; if(per==="AM"&&H===12)H=0;
-// //   return Math.max(0,(H*60+(m||0))-(8*60));
-// // }
-
-// // function getWeekDates(base) {
-// //   const d=new Date(base), day=d.getDay(), diff=day===0?-6:1-day;
-// //   const mon=new Date(d); mon.setDate(d.getDate()+diff);
-// //   return Array.from({length:7},(_,i)=>{ const dt=new Date(mon); dt.setDate(mon.getDate()+i); return dt; });
-// // }
-// // function isSameDay(a,b) {
-// //   return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
-// // }
-// // const DAYS_SHORT=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-
-// // function CompactPopup({ appt, color, onClose, anchorRect }) {
-// //   const cfg    = sc(appt.status);
-// //   const popRef = useRef(null);
-// //   const [pos, setPos] = useState({ top:0, left:0, ready:false });
-// //   const POPUP_W = 242;
-
-// //   const calcPos = useCallback(() => {
-// //     if (!anchorRect || !popRef.current) return;
-// //     const PH  = popRef.current.offsetHeight || 320;
-// //     const vw  = window.innerWidth;
-// //     const vh  = window.innerHeight;
-// //     const pad = 10;
-// //     let left = anchorRect.right + 8;
-// //     if (left + POPUP_W > vw - pad) left = anchorRect.left - POPUP_W - 8;
-// //     left = Math.max(pad, Math.min(left, vw - POPUP_W - pad));
-// //     let top = anchorRect.top;
-// //     if (top + PH > vh - pad) top = vh - PH - pad;
-// //     top = Math.max(pad, top);
-// //     setPos({ top, left, ready: true });
-// //   }, [anchorRect]);
-
-// //   useEffect(() => { const raf = requestAnimationFrame(calcPos); return () => cancelAnimationFrame(raf); }, [calcPos]);
-// //   useEffect(() => { window.addEventListener("resize", calcPos); return () => window.removeEventListener("resize", calcPos); }, [calcPos]);
-// //   useEffect(() => {
-// //     const fn = e => { if (popRef.current && !popRef.current.contains(e.target)) onClose(); };
-// //     document.addEventListener("mousedown", fn);
-// //     return () => document.removeEventListener("mousedown", fn);
-// //   }, [onClose]);
-// //   useEffect(() => {
-// //     let t;
-// //     const fn = () => { clearTimeout(t); t = setTimeout(onClose, 120); };
-// //     window.addEventListener("scroll", fn, true);
-// //     return () => { window.removeEventListener("scroll", fn, true); clearTimeout(t); };
-// //   }, [onClose]);
-// //   useEffect(() => {
-// //     const fn = e => { if (e.key === "Escape") onClose(); };
-// //     document.addEventListener("keydown", fn);
-// //     return () => document.removeEventListener("keydown", fn);
-// //   }, [onClose]);
-
-// //   return (
-// //     <div ref={popRef} style={{
-// //       position:"fixed", top:pos.top, left:pos.left,
-// //       opacity:pos.ready?1:0, transition:"opacity .1s", zIndex:99999,
-// //       width:POPUP_W, background:P.white, borderRadius:14,
-// //       boxShadow:"0 8px 36px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.10)",
-// //       border:`1px solid ${P.border}`, overflow:"hidden",
-// //       animation:"popIn .15s cubic-bezier(.34,1.4,.64,1)",
-// //     }}>
-// //       <div style={{background:`linear-gradient(135deg,${color},${color}dd)`,padding:"11px 12px 10px",display:"flex",alignItems:"center",gap:10}}>
-// //         <Av name={appt.fullName} size={36} color={color}/>
-// //         <div style={{flex:1,minWidth:0}}>
-// //           <div style={{fontSize:13,fontWeight:900,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{appt.fullName||"—"}</div>
-// //           <div style={{fontSize:10,color:"rgba(255,255,255,0.82)",marginTop:2,fontWeight:600}}>{appt.slotTime||"—"}</div>
-// //         </div>
-// //         <button onClick={e=>{e.stopPropagation();onClose();}} style={{background:"rgba(255,255,255,0.22)",border:"none",borderRadius:"50%",width:22,height:22,cursor:"pointer",color:"#fff",fontSize:13,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,lineHeight:1}}>✕</button>
-// //       </div>
-// //       <div style={{padding:"10px 13px 12px"}}>
-// //         <PRow icon="📱" val={appt.mobileNumber||"—"} bold/>
-// //         <PRow icon="📍" val={`Ward: ${appt.ward||"—"}`}/>
-// //         {appt.purpose && <PRow icon="🎯" val={appt.purpose.slice(0,44)+(appt.purpose.length>44?"…":"")}/>}
-// //         <PRow icon="👥" val={`Visitors: ${appt.numberOfVisitors||1}`}/>
-// //         {appt.preferredDate && <PRow icon="📅" val={new Date(appt.preferredDate+"T00:00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})}/>}
-// //         <div style={{marginTop:8,marginBottom:8}}>
-// //           <span style={{display:"inline-flex",alignItems:"center",gap:6,background:cfg.bg,color:cfg.color,border:`1.5px solid ${cfg.border}`,padding:"4px 12px",borderRadius:20,fontSize:11,fontWeight:800}}>
-// //             <span style={{width:7,height:7,borderRadius:"50%",background:cfg.dot,display:"inline-block"}}/>
-// //             {cfg.label}
-// //           </span>
-// //         </div>
-// //         {(appt.tokenId||appt._id)&&(
-// //           <div style={{fontSize:9.5,color:P.muted,fontWeight:600,fontFamily:"monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-// //             Token: {appt.tokenId||appt._id?.slice(-12)||"—"}
-// //           </div>
-// //         )}
-// //         <div style={{borderTop:`1px solid ${P.border}`,marginTop:10,paddingTop:8,display:"flex",justifyContent:"flex-end"}}>
-// //           <span style={{fontSize:11.5,color:P.teal,fontWeight:800,cursor:"pointer"}}>View Details ↗</span>
-// //         </div>
-// //       </div>
-// //     </div>
-// //   );
-// // }
-
-// // function PRow({ icon, val, bold=false }) {
-// //   return (
-// //     <div style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:6}}>
-// //       <span style={{fontSize:13,flexShrink:0,marginTop:1}}>{icon}</span>
-// //       <span style={{fontSize:11.5,fontWeight:bold?700:600,color:bold?P.text:P.muted,lineHeight:1.4}}>{val}</span>
-// //     </div>
-// //   );
-// // }
-
-// // function ApptCard({ appt, color }) {
-// //   const [anchorRect, setAnchorRect] = useState(null);
-// //   const cardRef = useRef(null);
-// //   const isOpen  = !!anchorRect;
-
-// //   const handleClick = useCallback(e => {
-// //     e.stopPropagation();
-// //     if (isOpen) { setAnchorRect(null); return; }
-// //     const rect = cardRef.current?.getBoundingClientRect();
-// //     if (rect) setAnchorRect({ ...rect });
-// //   }, [isOpen]);
-
-// //   const handleClose = useCallback(() => setAnchorRect(null), []);
-
-// //   return (
-// //     <>
-// //       <div ref={cardRef} onClick={handleClick} style={{
-// //         background:isOpen?`${color}22`:`${color}14`,
-// //         border:`1.5px solid ${isOpen?color:color+"55"}`,
-// //         borderLeft:`3px solid ${color}`,
-// //         borderRadius:"0 8px 8px 0",
-// //         padding:"5px 8px", cursor:"pointer", marginBottom:4,
-// //         userSelect:"none", transition:"all .13s",
-// //         boxShadow:isOpen?`0 4px 14px ${color}33`:"none",
-// //       }}
-// //         onMouseEnter={e=>{e.currentTarget.style.background=`${color}26`;e.currentTarget.style.borderColor=color;e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow=`0 4px 14px ${color}33`;}}
-// //         onMouseLeave={e=>{e.currentTarget.style.background=isOpen?`${color}22`:`${color}14`;e.currentTarget.style.borderColor=isOpen?color:`${color}55`;e.currentTarget.style.borderLeftColor=color;e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow=isOpen?`0 4px 14px ${color}33`:"none";}}
-// //       >
-// //         <div style={{display:"flex",alignItems:"center",gap:6}}>
-// //           <Av name={appt.fullName} size={20} color={color}/>
-// //           <div style={{flex:1,minWidth:0}}>
-// //             <div style={{fontSize:10.5,fontWeight:800,color:P.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{appt.fullName||"—"}</div>
-// //             <div style={{fontSize:9,fontWeight:700,color:color,marginTop:1,display:"flex",alignItems:"center",gap:5}}>
-// //               {appt.slotTime||"—"}
-// //               <span style={{width:5,height:5,borderRadius:"50%",flexShrink:0,background:sc(appt.status).dot,display:"inline-block"}}/>
-// //             </div>
-// //           </div>
-// //         </div>
-// //       </div>
-// //       {isOpen && <CompactPopup appt={appt} color={color} onClose={handleClose} anchorRect={anchorRect}/>}
-// //     </>
-// //   );
-// // }
-
-// // function CalendarPanel({ appointments=[], mayorSlots=[], loading=false }) {
-// //   const [view,     setView]     = useState("week");
-// //   const [weekBase, setWeekBase] = useState(new Date());
-// //   const [search,   setSearch]   = useState("");
-
-// //   const weekDates = getWeekDates(weekBase);
-// //   const today     = new Date();
-
-// //   const filtered = appointments.filter(a => {
-// //     if (!search) return true;
-// //     const q = search.toLowerCase();
-// //     return (a.fullName||"").toLowerCase().includes(q)||(a.purpose||"").toLowerCase().includes(q)||(a.ward||"").toLowerCase().includes(q)||(a.mobileNumber||"").includes(q);
-// //   });
-
-// //   const ds = dt => `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,"0")}-${String(dt.getDate()).padStart(2,"0")}`;
-// //   const appsForDate = dt => filtered.filter(a => (a.preferredDate||"").slice(0,10) === ds(dt));
-
-// //   const todayStr = ds(today);
-// //   const dayAppts = filtered.filter(a => (a.preferredDate||"").slice(0,10) === todayStr);
-// //   const approvedCnt = filtered.filter(a => (a.status||"").toLowerCase() === "approved").length;
-// //   const pendingCnt  = filtered.filter(a => (a.status||"").toLowerCase() === "pending").length;
-// //   const monthLabel = weekDates[0].toLocaleDateString("en-IN",{month:"long",year:"numeric"});
-// //   const hours = Array.from({length:10},(_,i) => 8+i);
-// //   const fmtH = h => h<12?`${h} AM`:h===12?"12 PM":`${h-12} PM`;
-
-// //   return (
-// //     <div className="dc" style={{animationDelay:".3s",background:P.white,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 24px rgba(0,0,0,0.07)",border:`1px solid ${P.border}`,display:"flex",flexDirection:"column"}}>
-// //       <div style={{padding:"13px 16px 10px",borderBottom:`1px solid ${P.border}`}}>
-// //         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:10,gap:8,flexWrap:"wrap"}}>
-// //           <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
-// //             <div>
-// //               <h3 style={{margin:0,fontSize:14,fontWeight:900,color:P.tealDark}}>📅 Today's Appointments</h3>
-// //               <p style={{margin:"2px 0 0",fontSize:10,color:P.muted,fontWeight:600}}>{today.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</p>
-// //             </div>
-// //             <div style={{background:`linear-gradient(135deg,${P.teal},${P.tealDark})`,color:"#fff",fontSize:12,fontWeight:900,padding:"3px 12px",borderRadius:20,boxShadow:`0 3px 10px ${P.teal}44`,whiteSpace:"nowrap"}}>{filtered.length} All Appointments</div>
-// //           </div>
-// //           <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-// //             <div style={{position:"relative"}}>
-// //               <span style={{position:"absolute",left:9,top:"50%",transform:"translateY(-50%)",fontSize:11,color:P.muted}}>🔍</span>
-// //               <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search..." style={{border:`1.5px solid ${P.border}`,borderRadius:8,padding:"5px 10px 5px 26px",fontSize:11,color:P.text,outline:"none",background:P.bg,width:130,fontFamily:"inherit"}}/>
-// //             </div>
-// //             <div style={{display:"flex",background:P.bg,border:`1px solid ${P.border}`,borderRadius:9,padding:2}}>
-// //               {["Day","Week"].map(v=>(
-// //                 <button key={v} onClick={()=>setView(v.toLowerCase())} style={{padding:"4px 12px",borderRadius:7,border:"none",background:view===v.toLowerCase()?`linear-gradient(135deg,${P.teal},${P.tealDark})`:"transparent",color:view===v.toLowerCase()?"#fff":P.muted,fontSize:11,fontWeight:800,cursor:"pointer",transition:"all .15s"}}>{v}</button>
-// //               ))}
-// //             </div>
-// //           </div>
-// //         </div>
-// //         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:6}}>
-// //           {view==="week"?(
-// //             <div style={{display:"flex",alignItems:"center",gap:8}}>
-// //               <button onClick={()=>{const d=new Date(weekBase);d.setDate(d.getDate()-7);setWeekBase(d);}} style={{background:P.bg,border:`1px solid ${P.border}`,borderRadius:7,width:28,height:28,cursor:"pointer",fontSize:14,color:P.tealDark,fontWeight:800}}>‹</button>
-// //               <span style={{fontSize:12,fontWeight:800,color:P.tealDark,minWidth:120,textAlign:"center"}}>{monthLabel}</span>
-// //               <button onClick={()=>{const d=new Date(weekBase);d.setDate(d.getDate()+7);setWeekBase(d);}} style={{background:P.bg,border:`1px solid ${P.border}`,borderRadius:7,width:28,height:28,cursor:"pointer",fontSize:14,color:P.tealDark,fontWeight:800}}>›</button>
-// //             </div>
-// //           ):<div/>}
-// //           <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
-// //             {[{l:"Today",v:dayAppts.length,c:P.teal},{l:"Approved",v:approvedCnt,c:P.sage},{l:"Pending",v:pendingCnt,c:P.gold}].map(({l,v,c})=>(
-// //               <span key={l} style={{background:`${c}18`,border:`1px solid ${c}44`,borderRadius:20,padding:"2px 10px",fontSize:10,fontWeight:800,color:c,whiteSpace:"nowrap"}}>{v} {l}</span>
-// //             ))}
-// //           </div>
-// //         </div>
-// //       </div>
-
-// //       {mayorSlots.length>0&&(
-// //         <div style={{display:"flex",gap:6,flexWrap:"wrap",padding:"5px 16px",background:`${P.cream}88`,borderBottom:`1px solid ${P.border}`}}>
-// //           <span style={{fontSize:9,fontWeight:800,color:P.tealDark,textTransform:"uppercase",letterSpacing:.8,alignSelf:"center"}}>Mayor Available:</span>
-// //           {mayorSlots.map((s,i)=>(
-// //             <span key={i} style={{fontSize:9.5,fontWeight:700,color:P.tealDark,background:`${P.teal}1a`,border:`1px solid ${P.teal}33`,borderRadius:20,padding:"2px 9px"}}>{s.start} – {s.end}</span>
-// //           ))}
-// //         </div>
-// //       )}
-
-// //       {loading?(
-// //         <div style={{textAlign:"center",padding:"48px 0",color:P.muted}}>
-// //           <div style={{width:26,height:26,border:`3px solid ${P.border}`,borderTopColor:P.teal,borderRadius:"50%",animation:"spin .8s linear infinite",margin:"0 auto 10px"}}/>
-// //           Loading appointments…
-// //         </div>
-// //       ):view==="week"?(
-// //         <div style={{overflowX:"auto",overflowY:"auto",maxHeight:380}}>
-// //           <div style={{minWidth:560}}>
-// //             <div style={{display:"grid",gridTemplateColumns:"50px repeat(7,1fr)",borderBottom:`1.5px solid ${P.border}`,background:P.bg,position:"sticky",top:0,zIndex:4}}>
-// //               <div style={{borderRight:`1px solid ${P.border}`}}/>
-// //               {weekDates.map((dt,i)=>{
-// //                 const isToday=isSameDay(dt,today),cnt=appsForDate(dt).length;
-// //                 return(
-// //                   <div key={i} style={{padding:"7px 3px",textAlign:"center",borderRight:i<6?`1px solid ${P.border}`:undefined,background:isToday?`${P.teal}0e`:"transparent"}}>
-// //                     <div style={{fontSize:9.5,fontWeight:700,color:isToday?P.teal:P.muted,letterSpacing:.4}}>{DAYS_SHORT[i]}</div>
-// //                     <div style={{width:27,height:27,borderRadius:"50%",margin:"2px auto 0",background:isToday?`linear-gradient(135deg,${P.teal},${P.tealDark})`:"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:900,color:isToday?"#fff":P.text}}>{dt.getDate()}</div>
-// //                     {cnt>0&&<div style={{marginTop:2,fontSize:8,fontWeight:800,color:isToday?"#fff":P.teal,background:isToday?`${P.teal}cc`:`${P.teal}18`,borderRadius:20,padding:"1px 5px",display:"inline-block"}}>{cnt}</div>}
-// //                   </div>
-// //                 );
-// //               })}
-// //             </div>
-// //             {hours.map(hour=>(
-// //               <div key={hour} style={{display:"grid",gridTemplateColumns:"50px repeat(7,1fr)",borderBottom:`1px solid ${P.border}55`,minHeight:54}}>
-// //                 <div style={{borderRight:`1px solid ${P.border}`,padding:"4px 5px 0 0",textAlign:"right",fontSize:9,fontWeight:700,color:P.muted,background:P.bg,position:"sticky",left:0,zIndex:2}}>{fmtH(hour)}</div>
-// //                 {weekDates.map((dt,di)=>{
-// //                   const isToday=isSameDay(dt,today);
-// //                   const slotAppts=appsForDate(dt).filter(a=>{const m=toMin(a.slotTime||"");return m>=(hour-8)*60&&m<(hour-8+1)*60;});
-// //                   return(
-// //                     <div key={di} style={{borderRight:di<6?`1px solid ${P.border}55`:undefined,padding:"3px 3px",background:isToday?`${P.teal}05`:"transparent"}}>
-// //                       {slotAppts.map((appt,ai)=>{const gIdx=filtered.indexOf(appt);return <ApptCard key={ai} appt={appt} color={ACCENT[gIdx%ACCENT.length]}/>;
-// //                       })}
-// //                     </div>
-// //                   );
-// //                 })}
-// //               </div>
-// //             ))}
-// //           </div>
-// //         </div>
-// //       ):(
-// //         <div style={{overflowY:"auto",maxHeight:380}}>
-// //           {dayAppts.length===0?(
-// //             <div style={{textAlign:"center",padding:"44px 0",color:P.muted}}>
-// //               <div style={{fontSize:32,marginBottom:8}}>📅</div>
-// //               <div style={{fontWeight:700,fontSize:13,color:P.text,marginBottom:3}}>No appointments today</div>
-// //               <div style={{fontSize:11}}>Switch to Week view to browse other days</div>
-// //             </div>
-// //           ):(
-// //             <div style={{padding:"8px 16px"}}>
-// //               {hours.map(hour=>{
-// //                 const label=hour<12?`${hour}:00 AM`:hour===12?"12:00 PM":`${hour-12}:00 PM`;
-// //                 const hAppts=dayAppts.filter(a=>{const m=toMin(a.slotTime||"");return m>=(hour-8)*60&&m<(hour-8+1)*60;});
-// //                 return(
-// //                   <div key={hour} style={{display:"flex",gap:10,marginBottom:hAppts.length?8:2}}>
-// //                     <div style={{width:56,fontSize:9,fontWeight:hAppts.length?800:600,color:hAppts.length?P.teal:P.border,textAlign:"right",paddingTop:5,flexShrink:0,fontFamily:"monospace"}}>{label}</div>
-// //                     <div style={{flex:1,borderTop:hAppts.length?"none":`1px solid ${P.border}33`,paddingTop:hAppts.length?0:5}}>
-// //                       {hAppts.length>0&&(
-// //                         <div style={{display:"grid",gridTemplateColumns:`repeat(${Math.min(hAppts.length,3)},1fr)`,gap:6}}>
-// //                           {hAppts.map((appt,ai)=>{const gIdx=filtered.indexOf(appt);return <ApptCard key={ai} appt={appt} color={ACCENT[gIdx%ACCENT.length]}/>;
-// //                           })}
-// //                         </div>
-// //                       )}
-// //                     </div>
-// //                   </div>
-// //                 );
-// //               })}
-// //             </div>
-// //           )}
-// //         </div>
-// //       )}
-
-// //       <div style={{borderTop:`1px solid ${P.border}`,padding:"6px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",background:P.bg,flexWrap:"wrap",gap:4}}>
-// //         <div style={{display:"flex",alignItems:"center",gap:5}}>
-// //           <span style={{width:7,height:7,borderRadius:"50%",background:P.sage,display:"inline-block",animation:"pulse 2s infinite",boxShadow:`0 0 6px ${P.sage}`}}/>
-// //           <span style={{fontSize:9.5,color:P.muted,fontWeight:700}}>Live · 8:00 AM – 6:00 PM</span>
-// //         </div>
-// //         <span style={{fontSize:9.5,color:P.muted}}>{filtered.length} total appointments</span>
-// //       </div>
-// //     </div>
-// //   );
-// // }
-
-// // function ProgressBar({ value, max, color }) {
-// //   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
-// //   return (
-// //     <div style={{ height: 6, borderRadius: 99, background: P.bg, overflow: "hidden" }}>
-// //       <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 99, transition: "width 1s ease" }}/>
-// //     </div>
-// //   );
-// // }
-
-// // // ─────────────────────────────────────────────────────────────────────────────
-// // // Dashboard
-// // // ─────────────────────────────────────────────────────────────────────────────
-// // export default function Dashboard() {
-// //   const navigate = useNavigate();
-// //   const { user } = useSelector(s => s.auth);
-
-// //   const [stats,        setStats]        = useState({total:0,pending:0,resolved:0,inProgress:0});
-// //   const [recent,       setRecent]       = useState([]);
-// //   const [talukaData,   setTalukaData]   = useState({});
-// //   const [weeklyData,   setWeeklyData]   = useState([4,7,5,9,12,8,15]);
-// //   const [loading,      setLoading]      = useState(true);
-// //   const [activeTab,    setActiveTab]    = useState("all");
-
-// //   const [appointments, setAppointments] = useState([]);
-// //   const [apptLoading,  setApptLoading]  = useState(true);
-// //   const [mayorSlots,   setMayorSlots]   = useState([]);
-// //   const [peopleOnline, setPeopleOnline] = useState(0);
-
-// //   const [meetingStats, setMeetingStats] = useState({
-// //     totalMeetings: 0,
-// //     totalSubjects: 0,
-// //     approved: 0,
-// //     rejected: 0,
-// //     onHold: 0,
-// //     postponed: 0,
-// //     notConducted: 0,
-// //     actionTakenSubjects: 0,
-// //     subjectsByType: { General: 0, Administrative: 0, Contract: 0 },
-// //     actionProgress: {},
-// //     departmentStats: {},
-// //   });
-// //   const [meetingLoading, setMeetingLoading] = useState(true);
-
-// //   // ── Role & dept helpers ───────────────────────────────────────────────────
-// //   const authUser     = getAuthUser();
-// //   const userRole     = authUser?.role || "";
-// //   const userDept     = authUser?.departmentName || "";
-// //   const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
-
-// //   // ── Fetch Inward (dept-filtered for dept users) ───────────────────────────
-// //   const fetchDashboard = useCallback(async () => {
-// //     setLoading(true);
-// //     try {
-// //       const res  = await axiosInstance.get("/inwardAll");
-// //       let data   = res.data?.data || [];
-
-// //       // For department users, filter inward records tagged to their department
-// //       if (!isFullAccess && userDept) {
-// //         data = data.filter(d =>
-// //           (d.mainDepartment && d.mainDepartment === userDept) ||
-// //           (d.departmentName && d.departmentName === userDept) ||
-// //           (Array.isArray(d.departments) && d.departments.includes(userDept))
-// //         );
-// //       }
-
-// //       setStats({
-// //         total:      data.length,
-// //         pending:    data.filter(d => d.status==="Pending").length,
-// //         resolved:   data.filter(d => d.status==="Resolved").length,
-// //         inProgress: data.filter(d => d.status==="In Progress").length,
-// //       });
-
-// //       // Taluka tracking — only for full access
-// //       if (isFullAccess) {
-// //         const tMap={};
-// //         data.forEach(d => { if(d.taluka) tMap[d.taluka]=(tMap[d.taluka]||0)+1; });
-// //         setTalukaData(tMap);
-// //       }
-
-// //       const now=Date.now(), wk=Array(7).fill(0);
-// //       data.forEach(d => { const diff=Math.floor((now-new Date(d.createdAt))/86400000); if(diff>=0&&diff<7)wk[6-diff]++; });
-// //       setWeeklyData(wk.map(v=>v||Math.floor(2+Math.random()*6)));
-// //       setRecent(data.slice(0,8));
-// //     } catch(e) { console.error(e); }
-// //     finally { setLoading(false); }
-// //   }, [isFullAccess, userDept]);
-
-// //   const fetchAppointments = useCallback(async () => {
-// //     // Appointments calendar only shown for full-access roles
-// //     if (!isFullAccess) { setApptLoading(false); return; }
-// //     setApptLoading(true);
-// //     try {
-// //       const res = await citizenAxios.get("/citizen/admin/all-appointments");
-// //       if(res.data.success) setAppointments(res.data.appointments||[]);
-// //     } catch(e) { console.error(e); setAppointments([]); }
-// //     finally { setApptLoading(false); }
-// //   }, [isFullAccess]);
-
-// //   const fetchMayorSlots = useCallback(async () => {
-// //     if (!isFullAccess) return;
-// //     try {
-// //       const res = await axios.get(`${BASE_URL}/api/availability/get`);
-// //       if(res.data.success) {
-// //         const ts=new Date().toISOString().slice(0,10);
-// //         const rec=res.data.data.find(a=>a.date===ts);
-// //         setMayorSlots(rec?.timeSlots||[]);
-// //       }
-// //     } catch(e) { console.error(e); }
-// //   }, [isFullAccess]);
-
-// //   // ── Fetch Meeting Analytics ───────────────────────────────────────────────
-// //   const fetchMeetingStats = useCallback(async () => {
-// //     setMeetingLoading(true);
-// //     try {
-// //       const res  = await axiosInstance.get("/getMeetings");
-// //       const data = res.data?.data || [];
-
-// //       // Collect subjects based on role
-// //       const allSubjects = [];
-// //       data.forEach(m => {
-// //         (m.subjects || []).forEach(sub => {
-// //           if (isFullAccess || (Array.isArray(sub.tagTo) && sub.tagTo.includes(userDept))) {
-// //             allSubjects.push({ ...sub, meetingNumber: m.meetingNumber });
-// //           }
-// //         });
-// //       });
-
-// //       // Filter meetings based on role
-// //       const meetings = isFullAccess
-// //         ? data
-// //         : data.filter(m => (m.subjects || []).some(sub => Array.isArray(sub.tagTo) && sub.tagTo.includes(userDept)));
-
-// //       const approved     = allSubjects.filter(s => s.decisionInMeeting === "Approved").length;
-// //       const rejected     = allSubjects.filter(s => s.decisionInMeeting === "Rejected").length;
-// //       const onHold       = allSubjects.filter(s => s.decisionInMeeting === "On-Hold").length;
-// //       const postponed    = allSubjects.filter(s => s.decisionInMeeting === "Postponed").length;
-// //       const notConducted = allSubjects.filter(s => s.decisionInMeeting === "Not Conducted").length;
-// //       const actionTaken  = allSubjects.filter(s => s.actionTaken && s.actionTaken !== "").length;
-
-// //       const subjectsByType = {
-// //         General:        allSubjects.filter(s => s.subjectType === "General").length,
-// //         Administrative: allSubjects.filter(s => s.subjectType === "Administrative and Financial Approval").length,
-// //         Contract:       allSubjects.filter(s => s.subjectType === "Contract Approval").length,
-// //       };
-
-// //       const actionProgress = {};
-// //       allSubjects.forEach(s => {
-// //         if (s.actionTaken) actionProgress[s.actionTaken] = (actionProgress[s.actionTaken] || 0) + 1;
-// //       });
-
-// //       // Department wise stats — all depts for full access, only own dept for dept user
-// //       const departmentStats = {};
-// //       allSubjects.forEach(s => {
-// //         (s.tagTo || []).forEach(dept => {
-// //           // For dept users, only include their own department
-// //           if (!isFullAccess && dept !== userDept) return;
-// //           if (!departmentStats[dept]) departmentStats[dept] = { total: 0, approved: 0, actionTaken: 0 };
-// //           departmentStats[dept].total++;
-// //           if (s.decisionInMeeting === "Approved") departmentStats[dept].approved++;
-// //           if (s.actionTaken) departmentStats[dept].actionTaken++;
-// //         });
-// //       });
-
-// //       setMeetingStats({
-// //         totalMeetings: meetings.length,
-// //         totalSubjects: allSubjects.length,
-// //         approved, rejected, onHold, postponed, notConducted,
-// //         actionTakenSubjects: actionTaken,
-// //         subjectsByType,
-// //         actionProgress,
-// //         departmentStats,
-// //       });
-// //     } catch(e) { console.error(e); }
-// //     finally { setMeetingLoading(false); }
-// //   }, [isFullAccess, userDept]);
-
-// //   useEffect(() => {
-// //     fetchDashboard(); fetchAppointments(); fetchMayorSlots(); fetchMeetingStats();
-// //     const iv = setInterval(() => setPeopleOnline(Math.floor(12+Math.random()*8)), 4000);
-// //     setPeopleOnline(Math.floor(12+Math.random()*8));
-// //     return () => clearInterval(iv);
-// //   }, [fetchDashboard, fetchAppointments, fetchMayorSlots, fetchMeetingStats]);
-
-// //   const resRate = stats.total > 0 ? Math.round((stats.resolved/stats.total)*100) : 0;
-// //   const statusColor = {"Pending":P.gold,"Resolved":P.sage,"In Progress":P.teal,"Rejected":"#d9534f"};
-// //   const statusBg    = {"Pending":`${P.gold}22`,"Resolved":`${P.sage}22`,"In Progress":`${P.teal}22`,"Rejected":"#fde8e8"};
-// //   const filteredRecent = activeTab==="all" ? recent : recent.filter(r=>r.status===activeTab);
-
-// //   // Stat cards — same structure for both, but values differ (dept-filtered above)
-// //   const cards = [
-// //     {label:"TOTAL APPLICATIONS",value:stats.total.toLocaleString(),   sub:"▲ 12% last week",from:P.card1From,to:P.card1To,spark:[40,55,45,70,60,85,75],dark:false},
-// //     {label:"PENDING",           value:stats.pending.toLocaleString(),  sub:"▼ 5% last week", from:P.card2From,to:P.card2To,spark:[30,50,35,60,40,70,55],dark:false},
-// //     {label:"RESOLVED",          value:stats.resolved.toLocaleString(), sub:"▲ 8% last week", from:P.card3From,to:P.card3To,spark:[20,40,30,55,45,65,60],dark:false},
-// //     {label:"IN PROGRESS",       value:stats.inProgress.toLocaleString(),sub:"— ongoing",     from:P.card4From,to:P.card4To,spark:[15,30,25,40,35,50,45],dark:true},
-// //   ];
-
-// //   return (
-// //     <div style={{minHeight:"100vh",background:P.bg,fontFamily:"'Nunito','Segoe UI',sans-serif"}}>
-// //       <style>{`
-// //         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
-// //         @keyframes fadeUp {from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-// //         @keyframes popIn  {from{opacity:0;transform:scale(.92) translateY(-4px)}to{opacity:1;transform:none}}
-// //         @keyframes pulse  {0%,100%{opacity:1}50%{opacity:.35}}
-// //         @keyframes spin   {to{transform:rotate(360deg)}}
-// //         .dc{animation:fadeUp .4s ease both;}
-// //         .tbl-row:hover{background:${P.teal}12!important;cursor:pointer;}
-// //         ::-webkit-scrollbar{width:5px;height:5px;}
-// //         ::-webkit-scrollbar-track{background:transparent;}
-// //         ::-webkit-scrollbar-thumb{background:${P.border};border-radius:99px;}
-// //         *{box-sizing:border-box;}
-// //         .dash-grid-4    {display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
-// //         .dash-grid-cal  {display:grid;grid-template-columns:1fr 288px;gap:18px;}
-// //         .dash-grid-track{display:grid;grid-template-columns:260px 1fr;gap:18px;}
-// //         .mtg-grid-3     {display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
-// //         @media(max-width:1100px){
-// //           .dash-grid-cal  {grid-template-columns:1fr!important;}
-// //           .dash-grid-track{grid-template-columns:1fr!important;}
-// //           .mtg-grid-3     {grid-template-columns:1fr 1fr!important;}
-// //         }
-// //         @media(max-width:800px){
-// //           .dash-grid-4{grid-template-columns:repeat(2,1fr)!important;gap:10px!important;}
-// //           .mtg-grid-3 {grid-template-columns:1fr!important;}
-// //         }
-// //         @media(max-width:480px){
-// //           .dash-grid-4{grid-template-columns:1fr!important;}
-// //           .dash-pad{padding:12px 10px!important;}
-// //         }
-// //       `}</style>
-
-// //       <div className="dash-pad" style={{padding:"20px 24px",maxWidth:1440,margin:"0 auto"}}>
-
-// //         {/* Accent bar */}
-// //         <div style={{height:4,background:`linear-gradient(90deg,${P.tealDark},${P.teal},${P.gold},${P.goldDeep},${P.cream},${P.goldDeep},${P.teal})`,borderRadius:99,marginBottom:20}}/>
-
-// //         {/* Page header */}
-// //         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20,flexWrap:"wrap",gap:10}}>
-// //           <div>
-// //             <h2 style={{margin:0,fontSize:19,fontWeight:900,color:P.tealDark,letterSpacing:-.3}}>Analytic Overview</h2>
-// //             <p style={{margin:"3px 0 0",fontSize:11,color:P.muted}}>
-// //               Good {new Date().getHours()<12?"Morning":new Date().getHours()<17?"Afternoon":"Evening"}, {user?.fullName?.split(" ")[0]||"Admin"} 👋
-// //               {!isFullAccess && userDept && (
-// //                 <span style={{marginLeft:8,background:`${P.teal}18`,color:P.tealDark,border:`1px solid ${P.teal}33`,borderRadius:20,padding:"1px 10px",fontSize:10,fontWeight:800}}>
-// //                   {userDept}
-// //                 </span>
-// //               )}
-// //             </p>
-// //           </div>
-// //           <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-// //             <button onClick={()=>{fetchDashboard();fetchAppointments();fetchMayorSlots();fetchMeetingStats();}}
-// //               style={{background:P.white,border:`1px solid ${P.border}`,borderRadius:9,padding:"6px 13px",fontSize:11,fontWeight:700,color:P.tealDark,cursor:"pointer"}}>
-// //               ↻ Refresh
-// //             </button>
-// //             {isFullAccess && (
-// //               <div style={{display:"flex",alignItems:"center",gap:6,background:P.white,border:`1px solid ${P.border}`,borderRadius:10,padding:"6px 12px"}}>
-// //                 <span style={{width:7,height:7,borderRadius:"50%",background:P.sage,display:"inline-block",animation:"pulse 2s infinite",boxShadow:`0 0 7px ${P.sage}`}}/>
-// //                 <span style={{fontSize:11,fontWeight:700,color:P.tealDark}}>{peopleOnline} Online</span>
-// //               </div>
-// //             )}
-// //             <div style={{background:P.white,border:`1px solid ${P.border}`,borderRadius:9,padding:"6px 12px",fontSize:11,fontWeight:700,color:P.tealDark}}>THIS YEAR ▾</div>
-// //           </div>
-// //         </div>
-
-// //         {loading ? (
-// //           <div style={{textAlign:"center",padding:80,color:P.teal,fontWeight:700}}>Loading dashboard…</div>
-// //         ) : (
-// //           <>
-// //             {/* ── 4 Stat Cards — always visible, dept users see their dept counts ── */}
-// //             {isFullAccess && (
-// //             <div className="dash-grid-4" style={{marginBottom:18}}>
-// //               {cards.map((card,i)=>(
-// //                 <div key={i} className="dc" style={{animationDelay:`${i*.07}s`,borderRadius:16,background:`linear-gradient(135deg,${card.from},${card.to})`,padding:"16px 18px",boxShadow:`0 8px 28px ${card.from}55`,position:"relative",overflow:"hidden",minHeight:105}}>
-// //                   <div style={{position:"absolute",top:-18,right:-18,width:72,height:72,borderRadius:"50%",background:"rgba(255,255,255,0.13)"}}/>
-// //                   <div style={{position:"absolute",bottom:-12,right:8,width:44,height:44,borderRadius:"50%",background:"rgba(255,255,255,0.09)"}}/>
-// //                   <div style={{fontSize:9,fontWeight:800,color:card.dark?"#6b5020":"rgba(255,255,255,.88)",letterSpacing:.9,textTransform:"uppercase",marginBottom:4}}>{card.label}</div>
-// //                   <div style={{fontSize:26,fontWeight:900,color:card.dark?P.tealDark:"#fff",letterSpacing:-1,marginBottom:2}}>{card.value}</div>
-// //                   <div style={{fontSize:9.5,color:card.dark?"#8a6830":"rgba(255,255,255,.72)",fontWeight:600,marginBottom:7}}>{card.sub}</div>
-// //                   <Sparkline color={card.dark?"#9a7828":"#fff"} data={card.spark}/>
-// //                 </div>
-// //               ))}
-// //             </div>
-// //             )}
-
-// //             {/* ══════════════════════════════════════════════════════════════
-// //                 FULL ACCESS ONLY: Calendar + Status panel
-// //             ══════════════════════════════════════════════════════════════ */}
-// //             {isFullAccess && (
-// //               <div className="dash-grid-cal" style={{marginBottom:18}}>
-// //                 <CalendarPanel appointments={appointments} mayorSlots={mayorSlots} loading={apptLoading}/>
-
-// //                 {/* Status Panel */}
-// //                 <div className="dc" style={{animationDelay:".37s",background:P.white,borderRadius:16,padding:"16px",boxShadow:"0 4px 20px rgba(0,0,0,0.05)",border:`1px solid ${P.border}`,display:"flex",flexDirection:"column"}}>
-// //                   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-// //                     <h3 style={{margin:0,fontSize:13,fontWeight:900,color:P.tealDark}}>Status</h3>
-// //                     <div style={{background:P.bg,border:`1px solid ${P.border}`,borderRadius:7,padding:"3px 8px",fontSize:9.5,fontWeight:700,color:P.tealDark}}>TODAY ▾</div>
-// //                   </div>
-// //                   <div style={{display:"flex",justifyContent:"center",margin:"2px 0 6px"}}>
-// //                     <Donut pct={resRate}/>
-// //                   </div>
-// //                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:10}}>
-// //                     {[{l:"BOOKED",v:stats.total,c:P.teal},{l:"PROGRESS",v:stats.inProgress,c:P.gold},{l:"PENDING",v:stats.pending,c:"#d9534f"}].map(({l,v,c})=>(
-// //                       <div key={l} style={{textAlign:"center",padding:"8px 3px",background:P.bg,borderRadius:9,border:`1px solid ${P.border}`}}>
-// //                         <div style={{fontSize:15,fontWeight:900,color:c}}>{v}</div>
-// //                         <div style={{fontSize:7,fontWeight:800,color:P.muted,letterSpacing:.4,textTransform:"uppercase",marginTop:2}}>{l}</div>
-// //                       </div>
-// //                     ))}
-// //                   </div>
-
-// //                   <div style={{borderTop:`1px solid ${P.border}`,paddingTop:8,marginBottom:8}}>
-// //                     <div style={{fontSize:10,fontWeight:800,color:P.tealDark,marginBottom:6}}>📅 Appointments</div>
-// //                     {[
-// //                       {l:"Total",       v:appointments.length,                                                         c:P.teal},
-// //                       {l:"Approved",    v:appointments.filter(a=>(a.status||"").toLowerCase()==="approved").length,    c:P.sage},
-// //                       {l:"Pending",     v:appointments.filter(a=>(a.status||"").toLowerCase()==="pending").length,     c:P.gold},
-// //                       {l:"In Progress", v:appointments.filter(a=>(a.status||"").toLowerCase()==="in progress").length, c:P.tealDeep},
-// //                     ].map(({l,v,c})=>(
-// //                       <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"2.5px 0"}}>
-// //                         <span style={{display:"flex",alignItems:"center",gap:4,fontSize:9.5,color:P.muted,fontWeight:600}}>
-// //                           <span style={{width:5,height:5,borderRadius:"50%",background:c,display:"inline-block"}}/>{l}
-// //                         </span>
-// //                         <span style={{fontSize:10.5,fontWeight:800,color:c}}>{v}</span>
-// //                       </div>
-// //                     ))}
-// //                   </div>
-
-// //                   {mayorSlots.length>0&&(
-// //                     <div style={{borderTop:`1px solid ${P.border}`,paddingTop:7,marginBottom:8}}>
-// //                       <div style={{fontSize:10,fontWeight:800,color:P.tealDark,marginBottom:5}}>🏛 Mayor Today</div>
-// //                       {mayorSlots.map((s,i)=>(
-// //                         <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"2px 0",fontSize:9.5,color:P.muted,fontWeight:600}}>
-// //                           <span>Slot {i+1}</span>
-// //                           <span style={{color:P.tealDark,fontWeight:800}}>{s.start} – {s.end}</span>
-// //                         </div>
-// //                       ))}
-// //                     </div>
-// //                   )}
-
-// //                   <div style={{borderTop:`1px solid ${P.border}`,paddingTop:8}}>
-// //                     <div style={{fontSize:10.5,fontWeight:800,color:P.tealDark,marginBottom:6}}>📈 Weekly Trend</div>
-// //                     <MiniBar data={weeklyData} color={P.teal}/>
-// //                     <div style={{display:"flex",justifyContent:"space-between",marginTop:3}}>
-// //                       {["M","T","W","T","F","S","S"].map((d,i)=>(
-// //                         <span key={i} style={{fontSize:8.5,color:P.muted,flex:1,textAlign:"center",fontWeight:700}}>{d}</span>
-// //                       ))}
-// //                     </div>
-// //                   </div>
-// //                 </div>
-// //               </div>
-// //             )}
-
-// //             {/* ══════════════════════════════════════════════════════════════
-// //                 FULL ACCESS ONLY: Tracking + Recent Applications
-// //             ══════════════════════════════════════════════════════════════ */}
-// //             {isFullAccess && (
-// //               <div className="dash-grid-track" style={{marginBottom:18}}>
-// //                 <div className="dc" style={{animationDelay:".44s",background:P.white,borderRadius:16,padding:"18px",boxShadow:"0 4px 20px rgba(0,0,0,0.05)",border:`1px solid ${P.border}`}}>
-// //                   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-// //                     <h3 style={{margin:0,fontSize:13,fontWeight:900,color:P.tealDark}}>Tracking</h3>
-// //                     <div style={{background:P.bg,border:`1px solid ${P.border}`,borderRadius:7,padding:"3px 8px",fontSize:9.5,fontWeight:700,color:P.tealDark}}>THIS YEAR ▾</div>
-// //                   </div>
-// //                   <div style={{display:"flex",justifyContent:"space-between",padding:"0 2px 7px",borderBottom:`1px solid ${P.border}`,marginBottom:5}}>
-// //                     <span style={{fontSize:9,fontWeight:800,color:P.muted,textTransform:"uppercase",letterSpacing:.5}}>Region</span>
-// //                     <span style={{fontSize:9,fontWeight:800,color:P.muted,textTransform:"uppercase",letterSpacing:.5}}>Amount</span>
-// //                   </div>
-// //                   {Object.entries(talukaData).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([taluka,count],i)=>{
-// //                     const cols=[P.teal,P.gold,P.sage,P.tealDeep,P.goldDeep,P.tealDark];
-// //                     const c=cols[i%cols.length];
-// //                     return(
-// //                       <div key={taluka} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 2px",borderBottom:`1px solid ${P.border}55`}}>
-// //                         <div style={{display:"flex",alignItems:"center",gap:7}}>
-// //                           <div style={{width:7,height:7,borderRadius:"50%",background:c}}/>
-// //                           <span style={{fontSize:11.5,fontWeight:600,color:P.text}}>{taluka}</span>
-// //                         </div>
-// //                         <span style={{fontSize:11.5,fontWeight:800,color:c}}>{count}</span>
-// //                       </div>
-// //                     );
-// //                   })}
-// //                   {!Object.keys(talukaData).length&&<div style={{textAlign:"center",color:P.muted,fontSize:12,padding:"18px 0"}}>No data yet</div>}
-// //                 </div>
-
-// //                 <div className="dc" style={{animationDelay:".51s",background:P.white,borderRadius:16,padding:"18px 20px",boxShadow:"0 4px 20px rgba(0,0,0,0.05)",border:`1px solid ${P.border}`}}>
-// //                   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,flexWrap:"wrap",gap:8}}>
-// //                     <div>
-// //                       <h3 style={{margin:0,fontSize:14,fontWeight:900,color:P.tealDark}}>Recent Applications</h3>
-// //                       <p style={{margin:"2px 0 0",fontSize:10,color:P.muted}}>Latest inward complaints</p>
-// //                     </div>
-// //                     <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
-// //                       {["all","Pending","Resolved","In Progress"].map(tab=>(
-// //                         <button key={tab} onClick={()=>setActiveTab(tab)} style={{
-// //                           border:`1px solid ${activeTab===tab?P.teal:P.border}`,
-// //                           background:activeTab===tab?`linear-gradient(135deg,${P.teal},${P.tealDark})`:P.white,
-// //                           color:activeTab===tab?"#fff":P.muted,
-// //                           borderRadius:8,padding:"4px 11px",fontSize:10.5,fontWeight:700,cursor:"pointer",
-// //                           boxShadow:activeTab===tab?`0 4px 12px ${P.teal}44`:"none",transition:"all .2s"}}>
-// //                           {tab==="all"?"All":tab}
-// //                         </button>
-// //                       ))}
-// //                     </div>
-// //                   </div>
-// //                   <div style={{overflowX:"auto"}}>
-// //                     <table style={{width:"100%",borderCollapse:"collapse",fontSize:11.5}}>
-// //                       <thead>
-// //                         <tr style={{background:P.bg}}>
-// //                           {["Inward No","Applicant","Subject","Taluka","Department","Priority","Status","Date"].map(h=>(
-// //                             <th key={h} style={{padding:"8px 10px",textAlign:"left",color:P.tealDark,fontWeight:800,fontSize:9.5,whiteSpace:"nowrap",letterSpacing:.3,textTransform:"uppercase",borderBottom:`2px solid ${P.border}`}}>{h}</th>
-// //                           ))}
-// //                         </tr>
-// //                       </thead>
-// //                       <tbody>
-// //                         {filteredRecent.length===0?(
-// //                           <tr><td colSpan={8} style={{textAlign:"center",padding:28,color:P.muted}}>No applications found</td></tr>
-// //                         ):filteredRecent.map((item,i)=>(
-// //                           <tr key={i} className="tbl-row" onClick={()=>navigate("/allapplication")} style={{borderBottom:`1px solid ${P.border}55`,transition:"background .15s"}}>
-// //                             <td style={{padding:"8px 10px",color:P.teal,fontWeight:800,whiteSpace:"nowrap",fontFamily:"monospace",fontSize:10.5}}>{item.inwardNo||"—"}</td>
-// //                             <td style={{padding:"8px 10px",fontWeight:700,color:P.text}}>{item.fullName||"—"}</td>
-// //                             <td style={{padding:"8px 10px",color:P.muted,maxWidth:130,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.subject||"—"}</td>
-// //                             <td style={{padding:"8px 10px",color:P.muted}}>{item.taluka||"—"}</td>
-// //                             <td style={{padding:"8px 10px",color:P.muted,whiteSpace:"nowrap"}}>{item.mainDepartment||"—"}</td>
-// //                             <td style={{padding:"8px 10px"}}>
-// //                               <span style={{fontSize:9.5,fontWeight:800,padding:"2px 8px",borderRadius:20,background:item.priority==="Emergency"?"#fde8e8":item.priority==="Urgent"?`${P.gold}22`:`${P.sage}22`,color:item.priority==="Emergency"?"#d9534f":item.priority==="Urgent"?P.goldDeep:P.sage,border:`1px solid ${item.priority==="Emergency"?"#f5c6c6":item.priority==="Urgent"?P.gold+"44":P.sage+"44"}`}}>
-// //                                 {item.priority||"Normal"}
-// //                               </span>
-// //                             </td>
-// //                             <td style={{padding:"8px 10px"}}>
-// //                               <span style={{fontSize:9.5,fontWeight:800,padding:"2px 8px",borderRadius:20,background:statusBg[item.status]||`${P.border}55`,color:statusColor[item.status]||P.muted,border:`1px solid ${statusColor[item.status]||P.border}44`}}>
-// //                                 {item.status||"—"}
-// //                               </span>
-// //                             </td>
-// //                             <td style={{padding:"8px 10px",color:P.muted,whiteSpace:"nowrap",fontSize:10.5}}>
-// //                               {item.submissionDate||(item.createdAt?new Date(item.createdAt).toLocaleDateString("en-IN"):"—")}
-// //                             </td>
-// //                           </tr>
-// //                         ))}
-// //                       </tbody>
-// //                     </table>
-// //                   </div>
-// //                   <div style={{marginTop:10,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
-// //                     <span style={{fontSize:10.5,color:P.muted}}>Showing {filteredRecent.length} of {stats.total}</span>
-// //                     <div style={{display:"flex",gap:8}}>
-// //                       <button onClick={()=>navigate("/allapplication")} style={{background:`linear-gradient(135deg,${P.teal},${P.tealDark})`,color:"#fff",border:"none",borderRadius:9,padding:"6px 14px",fontSize:11,fontWeight:800,cursor:"pointer",boxShadow:`0 4px 14px ${P.teal}55`}}>All Applications →</button>
-// //                       <button onClick={()=>navigate("/applicationcitizens")} style={{background:`linear-gradient(135deg,${P.gold},${P.goldDeep})`,color:"#fff",border:"none",borderRadius:9,padding:"6px 14px",fontSize:11,fontWeight:800,cursor:"pointer",boxShadow:`0 4px 14px ${P.gold}55`}}>Citizen Appts →</button>
-// //                     </div>
-// //                   </div>
-// //                 </div>
-// //               </div>
-// //             )}
-
-// //             {/* ════════════════════════════════════════════════════════════════
-// //                 MEETING ANALYTICS SECTION
-// //                 - Full access: everything shown
-// //                 - Dept user: only Subject Type Breakdown + own dept row
-// //             ════════════════════════════════════════════════════════════════ */}
-// //             {!meetingLoading && (
-// //               <div className="dc" style={{ animationDelay: ".58s", marginBottom: 18 }}>
-
-// //                 {/* Section header */}
-// //                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
-// //                   <div style={{ flex: 1, height: 1.5, background: `linear-gradient(90deg,${P.teal},${P.border})`, borderRadius: 99 }}/>
-// //                   <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-// //                     <span style={{ fontSize: 18 }}>🏛</span>
-// //                     <span style={{ fontSize: 14, fontWeight: 900, color: P.tealDark, whiteSpace: "nowrap" }}>Meeting Proceedings Analytics</span>
-// //                   </div>
-// //                   <div style={{ flex: 1, height: 1.5, background: `linear-gradient(90deg,${P.border},${P.teal})`, borderRadius: 99 }}/>
-// //                 </div>
-
-// //                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
-// //                   <p style={{ margin: 0, fontSize: 10.5, color: P.muted, fontWeight: 600 }}>
-// //                     Sabha Kamkaj — Subject wise progress tracking
-// //                     {!isFullAccess && userDept && (
-// //                       <span style={{marginLeft:8,background:`${P.teal}18`,color:P.tealDark,border:`1px solid ${P.teal}33`,borderRadius:20,padding:"1px 10px",fontSize:10,fontWeight:800}}>
-// //                         {userDept}
-// //                       </span>
-// //                     )}
-// //                   </p>
-// //                   <button onClick={() => navigate("/meetings")} style={{
-// //                     background: `linear-gradient(135deg,${P.teal},${P.tealDark})`,
-// //                     color: "#fff", border: "none", borderRadius: 9, padding: "6px 14px",
-// //                     fontSize: 11, fontWeight: 800, cursor: "pointer",
-// //                     boxShadow: `0 4px 14px ${P.teal}55` }}>
-// //                     View Meetings →
-// //                   </button>
-// //                 </div>
-
-// //                 {/* Top 4 Meeting stat cards — always visible (values are role-filtered) */}
-// //                 <div className="dash-grid-4" style={{ marginBottom: 16 }}>
-// //                   {[
-// //                     { label: "TOTAL MEETINGS",  value: meetingStats.totalMeetings,      from: P.card1From, to: P.card1To,   spark: [2,3,1,4,2,5,3] },
-// //                     { label: "TOTAL SUBJECTS",  value: meetingStats.totalSubjects,       from: P.card2From, to: P.card2To,   spark: [5,8,6,10,7,12,9] },
-// //                     { label: "APPROVED",        value: meetingStats.approved,            from: P.card3From, to: P.card3To,   spark: [3,5,4,7,5,9,7] },
-// //                     { label: "ACTION TAKEN",    value: meetingStats.actionTakenSubjects, from: P.tealDeep,  to: P.tealDark,  spark: [1,2,2,4,3,5,4] },
-// //                   ].map((c, i) => (
-// //                     <div key={i} style={{ borderRadius: 14, background: `linear-gradient(135deg,${c.from},${c.to})`,
-// //                       padding: "14px 16px", boxShadow: `0 6px 20px ${c.from}44`,
-// //                       position: "relative", overflow: "hidden", minHeight: 90 }}>
-// //                       <div style={{ position: "absolute", top: -14, right: -14, width: 60, height: 60, borderRadius: "50%", background: "rgba(255,255,255,0.13)" }}/>
-// //                       <div style={{ fontSize: 9, fontWeight: 800, color: "rgba(255,255,255,.85)", letterSpacing: .8, textTransform: "uppercase", marginBottom: 4 }}>{c.label}</div>
-// //                       <div style={{ fontSize: 28, fontWeight: 900, color: "#fff", letterSpacing: -1, marginBottom: 4 }}>{c.value}</div>
-// //                       <Sparkline color="#fff" data={c.spark}/>
-// //                     </div>
-// //                   ))}
-// //                 </div>
-
-// //                 {/* ── FULL ACCESS: Decision Breakdown + Action Progress + Subject Type ── */}
-// //                 {isFullAccess ? (
-// //                   <div className="mtg-grid-3" style={{ marginBottom: 14 }}>
-
-// //                     {/* Decision Breakdown */}
-// //                     <div style={{ background: P.white, borderRadius: 14, padding: "16px",
-// //                       border: `1px solid ${P.border}`, boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-// //                       <div style={{ fontSize: 11, fontWeight: 900, color: P.tealDark, marginBottom: 12 }}>📊 Decision Breakdown</div>
-// //                       {[
-// //                         { l: "Approved",      v: meetingStats.approved,      c: P.sage },
-// //                         { l: "Rejected",      v: meetingStats.rejected,      c: "#d9534f" },
-// //                         { l: "On-Hold",       v: meetingStats.onHold,        c: P.gold },
-// //                         { l: "Postponed",     v: meetingStats.postponed,     c: P.tealDeep },
-// //                         { l: "Not Conducted", v: meetingStats.notConducted,  c: P.muted },
-// //                       ].map(({ l, v, c }) => {
-// //                         const pct = meetingStats.totalSubjects > 0 ? Math.round((v / meetingStats.totalSubjects) * 100) : 0;
-// //                         return (
-// //                           <div key={l} style={{ marginBottom: 10 }}>
-// //                             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-// //                               <span style={{ fontSize: 11, fontWeight: 700, color: P.text }}>{l}</span>
-// //                               <span style={{ fontSize: 11, fontWeight: 800, color: c }}>
-// //                                 {v} <span style={{ color: P.muted, fontWeight: 600, fontSize: 10 }}>({pct}%)</span>
-// //                               </span>
-// //                             </div>
-// //                             <ProgressBar value={v} max={meetingStats.totalSubjects} color={c}/>
-// //                           </div>
-// //                         );
-// //                       })}
-// //                     </div>
-
-// //                     {/* Action Taken Progress */}
-// //                     <div style={{ background: P.white, borderRadius: 14, padding: "16px",
-// //                       border: `1px solid ${P.border}`, boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-// //                       <div style={{ fontSize: 11, fontWeight: 900, color: P.tealDark, marginBottom: 12 }}>⚡ Action Taken Progress</div>
-// //                       {Object.keys(meetingStats.actionProgress).length === 0 ? (
-// //                         <div style={{ textAlign: "center", color: P.muted, fontSize: 11, padding: "24px 0" }}>
-// //                           <div style={{ fontSize: 28, marginBottom: 8 }}>⚡</div>
-// //                           No action taken yet
-// //                         </div>
-// //                       ) : (
-// //                         Object.entries(meetingStats.actionProgress)
-// //                           .sort((a, b) => b[1] - a[1])
-// //                           .map(([action, count], i) => {
-// //                             const cols = [P.teal, P.gold, P.sage, P.tealDeep, P.goldDeep, P.tealDark];
-// //                             const c = cols[i % cols.length];
-// //                             return (
-// //                               <div key={action} style={{ marginBottom: 10 }}>
-// //                                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-// //                                   <span style={{ fontSize: 10, fontWeight: 700, color: P.text,
-// //                                     overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 140 }}>{action}</span>
-// //                                   <span style={{ fontSize: 11, fontWeight: 800, color: c, flexShrink: 0, marginLeft: 6 }}>{count}</span>
-// //                                 </div>
-// //                                 <ProgressBar value={count} max={meetingStats.totalSubjects} color={c}/>
-// //                               </div>
-// //                             );
-// //                           })
-// //                       )}
-// //                     </div>
-
-// //                     {/* Subject Type */}
-// //                     <div style={{ background: P.white, borderRadius: 14, padding: "16px",
-// //                       border: `1px solid ${P.border}`, boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-// //                       <div style={{ fontSize: 11, fontWeight: 900, color: P.tealDark, marginBottom: 12 }}>📋 Subject Type Breakdown</div>
-// //                       {[
-// //                         { l: "General",                    v: meetingStats.subjectsByType.General,        c: P.teal,    icon: "📄" },
-// //                         { l: "Administrative & Financial", v: meetingStats.subjectsByType.Administrative,  c: P.gold,    icon: "💰" },
-// //                         { l: "Contract Approval",          v: meetingStats.subjectsByType.Contract,        c: P.sage,    icon: "📝" },
-// //                       ].map(({ l, v, c, icon }) => (
-// //                         <div key={l} style={{ display: "flex", alignItems: "center", gap: 12,
-// //                           padding: "12px 0", borderBottom: `1px solid ${P.border}55` }}>
-// //                           <div style={{ width: 40, height: 40, borderRadius: 10,
-// //                             background: `${c}18`, border: `1.5px solid ${c}33`,
-// //                             display: "flex", alignItems: "center", justifyContent: "center",
-// //                             fontSize: 18, flexShrink: 0 }}>{icon}</div>
-// //                           <div style={{ flex: 1, minWidth: 0 }}>
-// //                             <div style={{ fontSize: 10, fontWeight: 700, color: P.muted,
-// //                               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 2 }}>{l}</div>
-// //                             <div style={{ fontSize: 20, fontWeight: 900, color: c }}>{v}</div>
-// //                           </div>
-// //                           <div style={{ fontSize: 9, fontWeight: 800, color: c,
-// //                             background: `${c}18`, padding: "2px 8px", borderRadius: 20, flexShrink: 0 }}>
-// //                             {meetingStats.totalSubjects > 0 ? Math.round((v / meetingStats.totalSubjects) * 100) : 0}%
-// //                           </div>
-// //                         </div>
-// //                       ))}
-// //                     </div>
-// //                   </div>
-// //                 ) : (
-// //                   /* ── DEPT USER: Only Subject Type Breakdown (their counts) ── */
-// //                   <div style={{ marginBottom: 14 }}>
-// //                     <div style={{ background: P.white, borderRadius: 14, padding: "16px",
-// //                       border: `1px solid ${P.border}`, boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
-// //                       maxWidth: 480 }}>
-// //                       <div style={{ fontSize: 11, fontWeight: 900, color: P.tealDark, marginBottom: 12 }}>📋 Subject Type Breakdown</div>
-// //                       {[
-// //                         { l: "General",                    v: meetingStats.subjectsByType.General,        c: P.teal,    icon: "📄" },
-// //                         { l: "Administrative & Financial", v: meetingStats.subjectsByType.Administrative,  c: P.gold,    icon: "💰" },
-// //                         { l: "Contract Approval",          v: meetingStats.subjectsByType.Contract,        c: P.sage,    icon: "📝" },
-// //                       ].map(({ l, v, c, icon }) => (
-// //                         <div key={l} style={{ display: "flex", alignItems: "center", gap: 12,
-// //                           padding: "12px 0", borderBottom: `1px solid ${P.border}55` }}>
-// //                           <div style={{ width: 40, height: 40, borderRadius: 10,
-// //                             background: `${c}18`, border: `1.5px solid ${c}33`,
-// //                             display: "flex", alignItems: "center", justifyContent: "center",
-// //                             fontSize: 18, flexShrink: 0 }}>{icon}</div>
-// //                           <div style={{ flex: 1, minWidth: 0 }}>
-// //                             <div style={{ fontSize: 10, fontWeight: 700, color: P.muted,
-// //                               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 2 }}>{l}</div>
-// //                             <div style={{ fontSize: 20, fontWeight: 900, color: c }}>{v}</div>
-// //                           </div>
-// //                           <div style={{ fontSize: 9, fontWeight: 800, color: c,
-// //                             background: `${c}18`, padding: "2px 8px", borderRadius: 20, flexShrink: 0 }}>
-// //                             {meetingStats.totalSubjects > 0 ? Math.round((v / meetingStats.totalSubjects) * 100) : 0}%
-// //                           </div>
-// //                         </div>
-// //                       ))}
-// //                     </div>
-// //                   </div>
-// //                 )}
-
-// //                 {/* ── Department-wise table ── */}
-// //                 {/* Full access: all departments */}
-// //                 {isFullAccess && Object.keys(meetingStats.departmentStats).length > 0 && (
-// //                   <div style={{ background: P.white, borderRadius: 14, padding: "16px 18px",
-// //                     border: `1px solid ${P.border}`, boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-// //                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-// //                       <div style={{ fontSize: 11, fontWeight: 900, color: P.tealDark }}>🏢 Department-wise Subject Progress</div>
-// //                       <span style={{ fontSize: 9.5, color: P.muted, fontWeight: 600 }}>
-// //                         {Object.keys(meetingStats.departmentStats).length} departments
-// //                       </span>
-// //                     </div>
-// //                     <div style={{ overflowX: "auto" }}>
-// //                       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11.5 }}>
-// //                         <thead>
-// //                           <tr style={{ background: P.bg }}>
-// //                             {["Department", "Total Subjects", "Approved", "Action Taken", "Completion"].map(h => (
-// //                               <th key={h} style={{ padding: "8px 12px", textAlign: "left", color: P.tealDark,
-// //                                 fontWeight: 800, fontSize: 9.5, whiteSpace: "nowrap", letterSpacing: .3,
-// //                                 textTransform: "uppercase", borderBottom: `2px solid ${P.border}` }}>{h}</th>
-// //                             ))}
-// //                           </tr>
-// //                         </thead>
-// //                         <tbody>
-// //                           {Object.entries(meetingStats.departmentStats)
-// //                             .sort((a, b) => b[1].total - a[1].total)
-// //                             .map(([dept, dStats], i) => {
-// //                               const cols = [P.teal, P.gold, P.sage, P.tealDeep, P.goldDeep, P.tealDark];
-// //                               const c = cols[i % cols.length];
-// //                               const completionPct = dStats.total > 0 ? Math.round((dStats.actionTaken / dStats.total) * 100) : 0;
-// //                               return (
-// //                                 <tr key={dept} style={{ borderBottom: `1px solid ${P.border}55`, transition: "background .15s" }}
-// //                                   onMouseEnter={e => e.currentTarget.style.background = `${P.teal}08`}
-// //                                   onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-// //                                   <td style={{ padding: "10px 12px" }}>
-// //                                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-// //                                       <div style={{ width: 8, height: 8, borderRadius: "50%", background: c, flexShrink: 0 }}/>
-// //                                       <span style={{ fontWeight: 700, color: P.text, fontSize: 12 }}>{dept}</span>
-// //                                     </div>
-// //                                   </td>
-// //                                   <td style={{ padding: "10px 12px" }}>
-// //                                     <span style={{ fontWeight: 800, color: c, fontSize: 13 }}>{dStats.total}</span>
-// //                                   </td>
-// //                                   <td style={{ padding: "10px 12px" }}>
-// //                                     <span style={{ display: "inline-flex", alignItems: "center", gap: 5,
-// //                                       background: `${P.sage}18`, color: P.sage, border: `1px solid ${P.sage}33`,
-// //                                       padding: "2px 8px", borderRadius: 20, fontSize: 10, fontWeight: 800 }}>
-// //                                       ✓ {dStats.approved}
-// //                                     </span>
-// //                                   </td>
-// //                                   <td style={{ padding: "10px 12px" }}>
-// //                                     <span style={{ display: "inline-flex", alignItems: "center", gap: 5,
-// //                                       background: `${P.teal}18`, color: P.teal, border: `1px solid ${P.teal}33`,
-// //                                       padding: "2px 8px", borderRadius: 20, fontSize: 10, fontWeight: 800 }}>
-// //                                       ⚡ {dStats.actionTaken}
-// //                                     </span>
-// //                                   </td>
-// //                                   <td style={{ padding: "10px 12px", minWidth: 120 }}>
-// //                                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-// //                                       <div style={{ flex: 1, height: 6, borderRadius: 99, background: P.bg, overflow: "hidden" }}>
-// //                                         <div style={{ height: "100%", width: `${completionPct}%`, background: c, borderRadius: 99, transition: "width 1s ease" }}/>
-// //                                       </div>
-// //                                       <span style={{ fontSize: 10, fontWeight: 800, color: c, minWidth: 30, textAlign: "right" }}>{completionPct}%</span>
-// //                                     </div>
-// //                                   </td>
-// //                                 </tr>
-// //                               );
-// //                             })}
-// //                         </tbody>
-// //                       </table>
-// //                     </div>
-// //                   </div>
-// //                 )}
-
-// //                 {/* Dept user: show ONLY their own department row in a focused card */}
-// //                 {!isFullAccess && userDept && meetingStats.departmentStats[userDept] && (
-// //                   <div style={{ background: P.white, borderRadius: 14, padding: "16px 18px",
-// //                     border: `1px solid ${P.border}`, boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-// //                     <div style={{ fontSize: 11, fontWeight: 900, color: P.tealDark, marginBottom: 14 }}>
-// //                       🏢 Your Department Progress
-// //                     </div>
-// //                     {(() => {
-// //                       const dStats = meetingStats.departmentStats[userDept];
-// //                       const completionPct = dStats.total > 0 ? Math.round((dStats.actionTaken / dStats.total) * 100) : 0;
-// //                       return (
-// //                         <>
-// //                           {/* Dept name badge */}
-// //                           <div style={{ marginBottom: 14, padding: "8px 12px", background: `${P.teal}10`,
-// //                             border: `1.5px solid ${P.teal}30`, borderRadius: 10,
-// //                             fontSize: 12, fontWeight: 800, color: P.tealDark }}>
-// //                             {userDept}
-// //                           </div>
-// //                           {/* 3 stat mini-cards */}
-// //                           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 14 }}>
-// //                             {[
-// //                               { l: "Total Subjects",  v: dStats.total,       c: P.teal,    icon: "📋" },
-// //                               { l: "Approved",        v: dStats.approved,    c: P.sage,    icon: "✅" },
-// //                               { l: "Action Taken",    v: dStats.actionTaken, c: P.gold,    icon: "⚡" },
-// //                             ].map(({ l, v, c, icon }) => (
-// //                               <div key={l} style={{ textAlign: "center", padding: "14px 10px",
-// //                                 background: `${c}10`, border: `1.5px solid ${c}30`, borderRadius: 12 }}>
-// //                                 <div style={{ fontSize: 22, marginBottom: 5 }}>{icon}</div>
-// //                                 <div style={{ fontSize: 22, fontWeight: 900, color: c }}>{v}</div>
-// //                                 <div style={{ fontSize: 9.5, fontWeight: 700, color: P.muted, marginTop: 3,
-// //                                   textTransform: "uppercase", letterSpacing: .4 }}>{l}</div>
-// //                               </div>
-// //                             ))}
-// //                           </div>
-// //                           {/* Completion progress bar */}
-// //                           <div>
-// //                             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-// //                               <span style={{ fontSize: 11, fontWeight: 700, color: P.text }}>Completion Rate</span>
-// //                               <span style={{ fontSize: 11, fontWeight: 800, color: P.teal }}>{completionPct}%</span>
-// //                             </div>
-// //                             <div style={{ height: 8, borderRadius: 99, background: P.bg, overflow: "hidden" }}>
-// //                               <div style={{ height: "100%", width: `${completionPct}%`,
-// //                                 background: `linear-gradient(90deg,${P.teal},${P.tealDark})`,
-// //                                 borderRadius: 99, transition: "width 1s ease" }}/>
-// //                             </div>
-// //                           </div>
-// //                         </>
-// //                       );
-// //                     })()}
-// //                   </div>
-// //                 )}
-
-// //                 {/* Dept user: no meeting data for their dept */}
-// //                 {!isFullAccess && userDept && !meetingStats.departmentStats[userDept] && meetingStats.totalSubjects === 0 && (
-// //                   <div style={{ background: P.white, borderRadius: 14, padding: "32px 18px",
-// //                     border: `1px solid ${P.border}`, boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
-// //                     textAlign: "center" }}>
-// //                     <div style={{ fontSize: 32, marginBottom: 8 }}>🏛</div>
-// //                     <div style={{ fontWeight: 700, fontSize: 13, color: P.text, marginBottom: 4 }}>
-// //                       No meeting subjects assigned yet
-// //                     </div>
-// //                     <div style={{ fontSize: 11, color: P.muted }}>
-// //                       Subjects tagged to <strong>{userDept}</strong> will appear here
-// //                     </div>
-// //                   </div>
-// //                 )}
-// //               </div>
-// //             )}
-
-// //             {/* Footer */}
-// //             <div style={{textAlign:"center",color:P.muted,fontSize:10.5,padding:"12px 0 4px"}}>
-// //               © {new Date().getFullYear()} Vasai-Virar City Municipal Corporation · Janata Darbar System
-// //               <span style={{margin:"0 8px",color:P.gold}}>◆</span>
-// //               स्थापना : ३ जुलै २००९
-// //             </div>
-// //           </>
-// //         )}
-// //       </div>
-// //     </div>
-// //   );
-// // }
-
-
-
-// // import React, { useState, useEffect, useCallback, useRef } from "react";
-// // import { useSelector } from "react-redux";
-// // import { useNavigate } from "react-router-dom";
-// // import axiosInstance from "../services/axiosInstance";
-// // import citizenAxios from "../services/citizenAxios";
-// // import axios from "axios";
-
-// // const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
-// // // ── Design tokens (visual only) ─────────────────────────────────────────────
-// // const P = {
-// //   teal:"#1fa5b9", tealDeep:"#1595ad", tealDark:"#0e6f80",
-// //   gold:"#f0a02a", goldDeep:"#e08a12", sage:"#4fae4a", cream:"#F5E7C2",
-// //   card1From:"#3cb6ca", card1To:"#1a93a8",
-// //   card2From:"#fbb53a", card2To:"#ec8a16",
-// //   card3From:"#66c25a", card3To:"#3a963a",
-// //   card4From:"#f6e6b8", card4To:"#e8c87e",
-// //   card5From:"#45bfd4", card5To:"#1690a8",
-// //   bg:"#f2f7f9", white:"#ffffff", text:"#0f3b44", ink:"#0f3b44", ink2:"#1c5f6b",
-// //   muted:"#6b8a90", border:"#e2edf0", soft:"#f4f9fa", red:"#e5534b",
-// // };
-// // const ACCENT = [P.teal, P.gold, P.sage, P.tealDeep, P.goldDeep, P.tealDark, P.gold, P.teal];
-
-// // const panel = {
-// //   background:P.white, borderRadius:16, border:`1px solid ${P.border}`,
-// //   boxShadow:"0 4px 18px rgba(15,59,68,0.06)",
-// // };
-// // const thStyle = {
-// //   padding:"10px 12px", textAlign:"left", color:P.ink2, fontWeight:800, fontSize:11,
-// //   whiteSpace:"nowrap", letterSpacing:.4, textTransform:"uppercase", background:"#eaf4f6",
-// // };
-// // const pillBtn = (from, to) => ({
-// //   background:`linear-gradient(135deg,${from},${to})`, color:"#fff", border:"none",
-// //   borderRadius:22, padding:"8px 18px", fontSize:12.5, fontWeight:800, cursor:"pointer",
-// //   boxShadow:`0 6px 16px ${from}55`, transition:"transform .15s, box-shadow .15s",
-// // });
-// // const ghostBtn = {
-// //   background:P.white, border:`1px solid ${P.border}`, borderRadius:10, padding:"8px 14px",
-// //   fontSize:12.5, fontWeight:700, color:P.ink, cursor:"pointer",
-// //   boxShadow:"0 2px 8px rgba(15,59,68,0.05)", display:"inline-flex", alignItems:"center", gap:6,
-// // };
-// // const Dot = ({ c, s=8 }) => <span style={{width:s,height:s,borderRadius:"50%",background:c,display:"inline-block",flexShrink:0}}/>;
-
-// // function PanelTitle({ icon, children, size=15, color=P.teal }) {
-// //   return (
-// //     <div style={{display:"flex",alignItems:"center",gap:9,minWidth:0}}>
-// //       {icon && (
-// //         <span style={{width:28,height:28,borderRadius:8,background:`${color}16`,border:`1px solid ${color}2e`,
-// //           display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0}}>{icon}</span>
-// //       )}
-// //       <span style={{fontSize:size,fontWeight:800,color:P.ink,letterSpacing:-.1}}>{children}</span>
-// //     </div>
-// //   );
-// // }
-
-// // const FULL_ACCESS_ROLES = ["Super Admin", "Guardian Minister", "Mayor", "Admin"];
-
-// // const getAuthUser = () => {
-// //   try { return JSON.parse(localStorage.getItem("authUser") || "{}"); } catch { return {}; }
-// // };
-
-// // const STATUS_CFG = {
-// //   pending:      {bg:"#fef9c3",color:"#92400e",border:"#fde68a",dot:"#f59e0b",label:"Pending"},
-// //   approved:     {bg:"#dcfce7",color:"#166534",border:"#86efac",dot:"#16a34a",label:"Approved"},
-// //   rejected:     {bg:"#fee2e2",color:"#991b1b",border:"#fca5a5",dot:"#ef4444",label:"Rejected"},
-// //   "in progress":{bg:"#dbeafe",color:"#1e40af",border:"#93c5fd",dot:"#3b82f6",label:"In Progress"},
-// //   resolved:     {bg:"#f0fdf4",color:"#166534",border:"#bbf7d0",dot:"#22c55e",label:"Resolved"},
-// // };
-// // const sc = s => STATUS_CFG[(s||"pending").toLowerCase()] || STATUS_CFG.pending;
-
-// // function Sparkline({ color="#fff", data=[30,45,35,60,40,70,55], w=90, h=36 }) {
-// //   const max=Math.max(...data),min=Math.min(...data);
-// //   const pts=data.map((v,i)=>`${(i/(data.length-1))*w},${h-((v-min)/(max-min+1))*(h-4)-2}`).join(" ");
-// //   const gid=`sg${color.replace('#','')}`;
-// //   return (
-// //     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{opacity:.9,display:"block"}}>
-// //       <defs><linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
-// //         <stop offset="0%" stopColor={color} stopOpacity=".45"/>
-// //         <stop offset="100%" stopColor={color} stopOpacity="0"/>
-// //       </linearGradient></defs>
-// //       <polygon points={`0,${h} ${pts} ${w},${h}`} fill={`url(#${gid})`}/>
-// //       <polyline points={pts} fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-// //     </svg>
-// //   );
-// // }
-
-// // function StatCard({ label, value, sub, from, to, spark, dark=false, delay=0 }) {
-// //   return (
-// //     <div className="dc hov" style={{animationDelay:`${delay}s`,borderRadius:16,
-// //       background:`linear-gradient(135deg,${from},${to})`,padding:"18px 20px",
-// //       boxShadow:`0 10px 26px ${from}55`,position:"relative",overflow:"hidden",minHeight:110}}>
-// //       <div style={{position:"absolute",top:-26,right:-26,width:86,height:86,borderRadius:"50%",background:"rgba(255,255,255,0.16)"}}/>
-// //       <div style={{position:"absolute",bottom:-18,left:-14,width:56,height:56,borderRadius:"50%",background:"rgba(255,255,255,0.08)"}}/>
-// //       <div style={{position:"relative",zIndex:1}}>
-// //         <div style={{fontSize:11.5,fontWeight:800,color:dark?"#7a5a1c":"rgba(255,255,255,.92)",letterSpacing:.7,textTransform:"uppercase",marginBottom:6}}>{label}</div>
-// //         <div style={{fontSize:32,fontWeight:900,color:dark?P.tealDark:"#fff",letterSpacing:-1,lineHeight:1.05}}>{value}</div>
-// //         {sub && <div style={{fontSize:11,color:dark?"#8a6830":"rgba(255,255,255,.82)",fontWeight:700,marginTop:6}}>{sub}</div>}
-// //       </div>
-// //       <div style={{position:"absolute",right:16,bottom:14}}>
-// //         <Sparkline color={dark?"#9a7828":"#fff"} data={spark} w={120} h={46}/>
-// //       </div>
-// //     </div>
-// //   );
-// // }
-
-// // function Donut({ pct=0 }) {
-// //   const r=50,c=2*Math.PI*r,dash=(pct/100)*c;
-// //   return (
-// //     <svg width={128} height={128} viewBox="0 0 128 128">
-// //       <defs>
-// //         <linearGradient id="donutGrad" x1="0" y1="0" x2="1" y2="1">
-// //           <stop offset="0%" stopColor={P.teal}/>
-// //           <stop offset="100%" stopColor={P.tealDark}/>
-// //         </linearGradient>
-// //       </defs>
-// //       <circle cx={64} cy={64} r={r} fill="none" stroke="#e3f1f4" strokeWidth={13}/>
-// //       <circle cx={64} cy={64} r={r} fill="none" stroke="url(#donutGrad)" strokeWidth={13}
-// //         strokeDasharray={`${dash} ${c-dash}`} strokeLinecap="round" transform="rotate(-90 64 64)"
-// //         style={{transition:"stroke-dasharray 1s ease"}}/>
-// //       <text x={64} y={62} textAnchor="middle" fontSize={24} fontWeight={900} fill={P.ink}>{pct}%</text>
-// //       <text x={64} y={78} textAnchor="middle" fontSize={9.5} fill={P.ink2} fontWeight={800} letterSpacing={.8}>RESOLVED</text>
-// //     </svg>
-// //   );
-// // }
-
-// // function MiniBar({ data=[], color=P.teal }) {
-// //   const max=Math.max(...data,1);
-// //   return (
-// //     <div style={{display:"flex",alignItems:"flex-end",gap:6,height:48}}>
-// //       {data.map((v,i)=>(
-// //         <div key={i} style={{flex:1,borderRadius:"4px 4px 0 0",minHeight:5,
-// //           background:i===data.length-1?`linear-gradient(180deg,${color},${P.tealDark})`:`${color}55`,
-// //           height:`${(v/max)*100}%`,transition:"height .6s ease"}}/>
-// //       ))}
-// //     </div>
-// //   );
-// // }
-
-// // function Av({ name="", size=28, color=P.teal }) {
-// //   const ini=name.split(" ").filter(Boolean).map(n=>n[0]).join("").slice(0,2).toUpperCase()||"?";
-// //   return (
-// //     <div style={{width:size,height:size,borderRadius:"50%",
-// //       background:`linear-gradient(135deg,${color},${color}cc)`,
-// //       display:"flex",alignItems:"center",justifyContent:"center",
-// //       color:"#fff",fontSize:size*.34,fontWeight:800,flexShrink:0,
-// //       border:"2px solid #fff",boxShadow:`0 2px 8px ${color}44`}}>
-// //       {ini}
-// //     </div>
-// //   );
-// // }
-
-// // function toMin(t="08:00 AM") {
-// //   if(!t) return 0;
-// //   const [tp,per]=(t||"08:00 AM").split(" ");
-// //   const [h,m]=(tp||"08:00").split(":").map(Number);
-// //   let H=h||8; if(per==="PM"&&H!==12)H+=12; if(per==="AM"&&H===12)H=0;
-// //   return Math.max(0,(H*60+(m||0))-(8*60));
-// // }
-
-// // function getWeekDates(base) {
-// //   const d=new Date(base), day=d.getDay(), diff=day===0?-6:1-day;
-// //   const mon=new Date(d); mon.setDate(d.getDate()+diff);
-// //   return Array.from({length:7},(_,i)=>{ const dt=new Date(mon); dt.setDate(mon.getDate()+i); return dt; });
-// // }
-// // function isSameDay(a,b) {
-// //   return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
-// // }
-// // const DAYS_SHORT=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-
-// // function CompactPopup({ appt, color, onClose, anchorRect }) {
-// //   const cfg    = sc(appt.status);
-// //   const popRef = useRef(null);
-// //   const [pos, setPos] = useState({ top:0, left:0, ready:false });
-// //   const POPUP_W = 252;
-
-// //   const calcPos = useCallback(() => {
-// //     if (!anchorRect || !popRef.current) return;
-// //     const PH  = popRef.current.offsetHeight || 320;
-// //     const vw  = window.innerWidth;
-// //     const vh  = window.innerHeight;
-// //     const pad = 10;
-// //     let left = anchorRect.right + 8;
-// //     if (left + POPUP_W > vw - pad) left = anchorRect.left - POPUP_W - 8;
-// //     left = Math.max(pad, Math.min(left, vw - POPUP_W - pad));
-// //     let top = anchorRect.top;
-// //     if (top + PH > vh - pad) top = vh - PH - pad;
-// //     top = Math.max(pad, top);
-// //     setPos({ top, left, ready: true });
-// //   }, [anchorRect]);
-
-// //   useEffect(() => { const raf = requestAnimationFrame(calcPos); return () => cancelAnimationFrame(raf); }, [calcPos]);
-// //   useEffect(() => { window.addEventListener("resize", calcPos); return () => window.removeEventListener("resize", calcPos); }, [calcPos]);
-// //   useEffect(() => {
-// //     const fn = e => { if (popRef.current && !popRef.current.contains(e.target)) onClose(); };
-// //     document.addEventListener("mousedown", fn);
-// //     return () => document.removeEventListener("mousedown", fn);
-// //   }, [onClose]);
-// //   useEffect(() => {
-// //     let t;
-// //     const fn = () => { clearTimeout(t); t = setTimeout(onClose, 120); };
-// //     window.addEventListener("scroll", fn, true);
-// //     return () => { window.removeEventListener("scroll", fn, true); clearTimeout(t); };
-// //   }, [onClose]);
-// //   useEffect(() => {
-// //     const fn = e => { if (e.key === "Escape") onClose(); };
-// //     document.addEventListener("keydown", fn);
-// //     return () => document.removeEventListener("keydown", fn);
-// //   }, [onClose]);
-
-// //   return (
-// //     <div ref={popRef} style={{
-// //       position:"fixed", top:pos.top, left:pos.left,
-// //       opacity:pos.ready?1:0, transition:"opacity .1s", zIndex:99999,
-// //       width:POPUP_W, background:P.white, borderRadius:14,
-// //       boxShadow:"0 12px 40px rgba(15,59,68,0.22), 0 2px 8px rgba(0,0,0,0.08)",
-// //       border:`1px solid ${P.border}`, overflow:"hidden",
-// //       animation:"popIn .15s cubic-bezier(.34,1.4,.64,1)",
-// //     }}>
-// //       <div style={{background:`linear-gradient(135deg,${color},${color}dd)`,padding:"12px 13px 11px",display:"flex",alignItems:"center",gap:10}}>
-// //         <Av name={appt.fullName} size={36} color={color}/>
-// //         <div style={{flex:1,minWidth:0}}>
-// //           <div style={{fontSize:13.5,fontWeight:900,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{appt.fullName||"—"}</div>
-// //           <div style={{fontSize:11,color:"rgba(255,255,255,0.85)",marginTop:2,fontWeight:600}}>{appt.slotTime||"—"}</div>
-// //         </div>
-// //         <button onClick={e=>{e.stopPropagation();onClose();}} style={{background:"rgba(255,255,255,0.22)",border:"none",borderRadius:"50%",width:24,height:24,cursor:"pointer",color:"#fff",fontSize:13,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,lineHeight:1}}>✕</button>
-// //       </div>
-// //       <div style={{padding:"11px 14px 12px"}}>
-// //         <PRow icon="📱" val={appt.mobileNumber||"—"} bold/>
-// //         <PRow icon="📍" val={`Ward: ${appt.ward||"—"}`}/>
-// //         {appt.purpose && <PRow icon="🎯" val={appt.purpose.slice(0,44)+(appt.purpose.length>44?"…":"")}/>}
-// //         <PRow icon="👥" val={`Visitors: ${appt.numberOfVisitors||1}`}/>
-// //         {appt.preferredDate && <PRow icon="📅" val={new Date(appt.preferredDate+"T00:00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})}/>}
-// //         <div style={{marginTop:8,marginBottom:8}}>
-// //           <span style={{display:"inline-flex",alignItems:"center",gap:6,background:cfg.bg,color:cfg.color,border:`1.5px solid ${cfg.border}`,padding:"4px 12px",borderRadius:20,fontSize:11,fontWeight:800}}>
-// //             <span style={{width:7,height:7,borderRadius:"50%",background:cfg.dot,display:"inline-block"}}/>
-// //             {cfg.label}
-// //           </span>
-// //         </div>
-// //         {(appt.tokenId||appt._id)&&(
-// //           <div style={{fontSize:10,color:P.muted,fontWeight:600,fontFamily:"monospace",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-// //             Token: {appt.tokenId||appt._id?.slice(-12)||"—"}
-// //           </div>
-// //         )}
-// //         <div style={{borderTop:`1px solid ${P.border}`,marginTop:10,paddingTop:8,display:"flex",justifyContent:"flex-end"}}>
-// //           <span style={{fontSize:12,color:P.teal,fontWeight:800,cursor:"pointer"}}>View Details ↗</span>
-// //         </div>
-// //       </div>
-// //     </div>
-// //   );
-// // }
-
-// // function PRow({ icon, val, bold=false }) {
-// //   return (
-// //     <div style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:6}}>
-// //       <span style={{fontSize:13,flexShrink:0,marginTop:1}}>{icon}</span>
-// //       <span style={{fontSize:12,fontWeight:bold?700:600,color:bold?P.text:P.muted,lineHeight:1.4}}>{val}</span>
-// //     </div>
-// //   );
-// // }
-
-// // function ApptCard({ appt, color }) {
-// //   const [anchorRect, setAnchorRect] = useState(null);
-// //   const cardRef = useRef(null);
-// //   const isOpen  = !!anchorRect;
-
-// //   const handleClick = useCallback(e => {
-// //     e.stopPropagation();
-// //     if (isOpen) { setAnchorRect(null); return; }
-// //     const rect = cardRef.current?.getBoundingClientRect();
-// //     if (rect) setAnchorRect({ ...rect });
-// //   }, [isOpen]);
-
-// //   const handleClose = useCallback(() => setAnchorRect(null), []);
-
-// //   const baseShadow = isOpen ? `0 6px 18px ${color}40` : "0 2px 8px rgba(15,59,68,0.08)";
-
-// //   return (
-// //     <>
-// //       <div ref={cardRef} onClick={handleClick} style={{
-// //         background:isOpen?`${color}14`:P.white,
-// //         border:`1px solid ${isOpen?color:color+"40"}`,
-// //         borderLeft:`3px solid ${color}`,
-// //         borderRadius:"4px 10px 10px 4px",
-// //         padding:"6px 9px", cursor:"pointer", marginBottom:4,
-// //         userSelect:"none", transition:"all .13s",
-// //         boxShadow:baseShadow,
-// //       }}
-// //         onMouseEnter={e=>{e.currentTarget.style.background=`${color}12`;e.currentTarget.style.borderColor=color;e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow=`0 6px 18px ${color}40`;}}
-// //         onMouseLeave={e=>{e.currentTarget.style.background=isOpen?`${color}14`:P.white;e.currentTarget.style.borderColor=isOpen?color:`${color}40`;e.currentTarget.style.borderLeftColor=color;e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow=baseShadow;}}
-// //       >
-// //         <div style={{display:"flex",alignItems:"center",gap:7}}>
-// //           <Av name={appt.fullName} size={22} color={color}/>
-// //           <div style={{flex:1,minWidth:0}}>
-// //             <div style={{fontSize:11.5,fontWeight:800,color:P.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{appt.fullName||"—"}</div>
-// //             <div style={{fontSize:10,fontWeight:700,color:color,marginTop:1,display:"flex",alignItems:"center",gap:5}}>
-// //               {appt.slotTime||"—"}
-// //               <span style={{width:6,height:6,borderRadius:"50%",flexShrink:0,background:sc(appt.status).dot,display:"inline-block"}}/>
-// //             </div>
-// //           </div>
-// //         </div>
-// //       </div>
-// //       {isOpen && <CompactPopup appt={appt} color={color} onClose={handleClose} anchorRect={anchorRect}/>}
-// //     </>
-// //   );
-// // }
-
-// // function CalendarPanel({ appointments=[], mayorSlots=[], loading=false }) {
-// //   const [view,     setView]     = useState("week");
-// //   const [weekBase, setWeekBase] = useState(new Date());
-// //   const [search,   setSearch]   = useState("");
-
-// //   const weekDates = getWeekDates(weekBase);
-// //   const today     = new Date();
-
-// //   const filtered = appointments.filter(a => {
-// //     if (!search) return true;
-// //     const q = search.toLowerCase();
-// //     return (a.fullName||"").toLowerCase().includes(q)||(a.purpose||"").toLowerCase().includes(q)||(a.ward||"").toLowerCase().includes(q)||(a.mobileNumber||"").includes(q);
-// //   });
-
-// //   const ds = dt => `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,"0")}-${String(dt.getDate()).padStart(2,"0")}`;
-// //   const appsForDate = dt => filtered.filter(a => (a.preferredDate||"").slice(0,10) === ds(dt));
-
-// //   const todayStr = ds(today);
-// //   const dayAppts = filtered.filter(a => (a.preferredDate||"").slice(0,10) === todayStr);
-// //   const approvedCnt = filtered.filter(a => (a.status||"").toLowerCase() === "approved").length;
-// //   const pendingCnt  = filtered.filter(a => (a.status||"").toLowerCase() === "pending").length;
-// //   const monthLabel = weekDates[0].toLocaleDateString("en-IN",{month:"long",year:"numeric"});
-// //   const hours = Array.from({length:10},(_,i) => 8+i);
-// //   const fmtH = h => h<12?`${h} AM`:h===12?"12 PM":`${h-12} PM`;
-
-// //   const navBtn = {background:P.white,border:`1px solid ${P.border}`,borderRadius:9,width:32,height:32,cursor:"pointer",fontSize:15,color:P.tealDark,fontWeight:800,boxShadow:"0 1px 4px rgba(15,59,68,0.06)"};
-
-// //   return (
-// //     <div className="dc" style={{animationDelay:".3s",...panel,overflow:"hidden",display:"flex",flexDirection:"column"}}>
-// //       <div style={{padding:"18px 20px 12px"}}>
-// //         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:12,gap:10,flexWrap:"wrap"}}>
-// //           <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
-// //             <div>
-// //               <h3 style={{margin:0,fontSize:12,fontWeight:900,color:P.ink2,letterSpacing:1.6,textTransform:"uppercase"}}>📅 Today's Appointments</h3>
-// //               <p style={{margin:"4px 0 0",fontSize:20,color:P.ink,fontWeight:900,letterSpacing:-.3}}>{today.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</p>
-// //             </div>
-// //             <div style={{background:`linear-gradient(135deg,${P.teal},${P.tealDark})`,color:"#fff",fontSize:12.5,fontWeight:800,padding:"7px 16px",borderRadius:22,boxShadow:`0 6px 16px ${P.teal}55`,whiteSpace:"nowrap"}}>{filtered.length} All Appointments</div>
-// //           </div>
-// //           <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-// //             <div style={{position:"relative"}}>
-// //               <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",fontSize:12,color:P.muted}}>🔍</span>
-// //               <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search..." style={{border:`1px solid ${P.border}`,borderRadius:10,padding:"7px 10px 7px 30px",fontSize:12,color:P.text,outline:"none",background:P.soft,width:150,fontFamily:"inherit"}}/>
-// //             </div>
-// //             <div style={{display:"flex",background:P.soft,border:`1px solid ${P.border}`,borderRadius:10,padding:3}}>
-// //               {["Day","Week"].map(v=>(
-// //                 <button key={v} onClick={()=>setView(v.toLowerCase())} style={{padding:"5px 14px",borderRadius:8,border:"none",background:view===v.toLowerCase()?`linear-gradient(135deg,${P.teal},${P.tealDark})`:"transparent",color:view===v.toLowerCase()?"#fff":P.muted,fontSize:12,fontWeight:800,cursor:"pointer",transition:"all .15s",boxShadow:view===v.toLowerCase()?`0 3px 10px ${P.teal}44`:"none"}}>{v}</button>
-// //               ))}
-// //             </div>
-// //           </div>
-// //         </div>
-// //         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
-// //           {view==="week"?(
-// //             <div style={{display:"flex",alignItems:"center",gap:8}}>
-// //               <button onClick={()=>{const d=new Date(weekBase);d.setDate(d.getDate()-7);setWeekBase(d);}} style={navBtn}>‹</button>
-// //               <span style={{fontSize:13,fontWeight:800,color:P.ink,minWidth:140,textAlign:"center",border:`1px solid ${P.border}`,borderRadius:9,padding:"6px 12px",background:P.white}}>{monthLabel}</span>
-// //               <button onClick={()=>{const d=new Date(weekBase);d.setDate(d.getDate()+7);setWeekBase(d);}} style={navBtn}>›</button>
-// //             </div>
-// //           ):<div/>}
-// //           <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
-// //             {[{l:"Today",v:dayAppts.length,c:P.teal},{l:"Approved",v:approvedCnt,c:P.sage},{l:"Pending",v:pendingCnt,c:P.goldDeep}].map(({l,v,c})=>(
-// //               <span key={l} style={{background:`${c}14`,border:`1px solid ${c}40`,borderRadius:20,padding:"4px 12px",fontSize:11.5,fontWeight:800,color:c,whiteSpace:"nowrap"}}>{v} {l}</span>
-// //             ))}
-// //           </div>
-// //         </div>
-// //       </div>
-
-// //       {mayorSlots.length>0&&(
-// //         <div style={{display:"flex",gap:6,flexWrap:"wrap",padding:"7px 20px",background:`${P.cream}88`,borderTop:`1px solid ${P.border}`,borderBottom:`1px solid ${P.border}`}}>
-// //           <span style={{fontSize:10,fontWeight:800,color:P.tealDark,textTransform:"uppercase",letterSpacing:.8,alignSelf:"center"}}>Mayor Available:</span>
-// //           {mayorSlots.map((s,i)=>(
-// //             <span key={i} style={{fontSize:10.5,fontWeight:700,color:P.tealDark,background:`${P.teal}1a`,border:`1px solid ${P.teal}33`,borderRadius:20,padding:"2px 10px"}}>{s.start} – {s.end}</span>
-// //           ))}
-// //         </div>
-// //       )}
-
-// //       {loading?(
-// //         <div style={{textAlign:"center",padding:"48px 0",color:P.muted}}>
-// //           <div style={{width:28,height:28,border:`3px solid ${P.border}`,borderTopColor:P.teal,borderRadius:"50%",animation:"spin .8s linear infinite",margin:"0 auto 10px"}}/>
-// //           Loading appointments…
-// //         </div>
-// //       ):view==="week"?(
-// //         <div style={{padding:"0 16px 12px"}}>
-// //           <div style={{overflowX:"auto",overflowY:"auto",maxHeight:380,border:`1px solid ${P.border}`,borderRadius:12}}>
-// //             <div style={{minWidth:560}}>
-// //               <div style={{display:"grid",gridTemplateColumns:"56px repeat(7,1fr)",borderBottom:`1px solid ${P.border}`,background:P.soft,position:"sticky",top:0,zIndex:4}}>
-// //                 <div style={{borderRight:`1px solid ${P.border}`}}/>
-// //                 {weekDates.map((dt,i)=>{
-// //                   const isToday=isSameDay(dt,today),cnt=appsForDate(dt).length;
-// //                   return(
-// //                     <div key={i} style={{padding:"9px 3px",textAlign:"center",borderRight:i<6?`1px solid ${P.border}`:undefined,background:isToday?`${P.teal}14`:"transparent"}}>
-// //                       <div style={{fontSize:11,fontWeight:700,color:isToday?P.tealDark:P.muted,letterSpacing:.3}}>{DAYS_SHORT[i]}</div>
-// //                       <div style={{width:30,height:30,borderRadius:"50%",margin:"3px auto 0",background:isToday?`linear-gradient(135deg,${P.teal},${P.tealDark})`:"transparent",boxShadow:isToday?`0 4px 12px ${P.teal}55`:"none",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:900,color:isToday?"#fff":P.ink}}>{dt.getDate()}</div>
-// //                       {cnt>0&&<div style={{marginTop:3,fontSize:9,fontWeight:800,color:isToday?"#fff":P.tealDark,background:isToday?`${P.teal}cc`:`${P.teal}1c`,borderRadius:20,padding:"1px 6px",display:"inline-block"}}>{cnt}</div>}
-// //                     </div>
-// //                   );
-// //                 })}
-// //               </div>
-// //               {hours.map(hour=>(
-// //                 <div key={hour} style={{display:"grid",gridTemplateColumns:"56px repeat(7,1fr)",borderBottom:`1px solid ${P.border}`,minHeight:56}}>
-// //                   <div style={{borderRight:`1px solid ${P.border}`,padding:"6px 7px 0 0",textAlign:"right",fontSize:10.5,fontWeight:700,color:P.muted,background:P.white,position:"sticky",left:0,zIndex:2}}>{fmtH(hour)}</div>
-// //                   {weekDates.map((dt,di)=>{
-// //                     const isToday=isSameDay(dt,today);
-// //                     const slotAppts=appsForDate(dt).filter(a=>{const m=toMin(a.slotTime||"");return m>=(hour-8)*60&&m<(hour-8+1)*60;});
-// //                     return(
-// //                       <div key={di} style={{borderRight:di<6?`1px solid ${P.border}`:undefined,padding:"4px 4px",background:isToday?`${P.teal}07`:"transparent"}}>
-// //                         {slotAppts.map((appt,ai)=>{const gIdx=filtered.indexOf(appt);return <ApptCard key={ai} appt={appt} color={ACCENT[gIdx%ACCENT.length]}/>;
-// //                         })}
-// //                       </div>
-// //                     );
-// //                   })}
-// //                 </div>
-// //               ))}
-// //             </div>
-// //           </div>
-// //         </div>
-// //       ):(
-// //         <div style={{overflowY:"auto",maxHeight:380}}>
-// //           {dayAppts.length===0?(
-// //             <div style={{textAlign:"center",padding:"44px 0",color:P.muted}}>
-// //               <div style={{fontSize:34,marginBottom:8}}>📅</div>
-// //               <div style={{fontWeight:800,fontSize:14,color:P.text,marginBottom:3}}>No appointments today</div>
-// //               <div style={{fontSize:12}}>Switch to Week view to browse other days</div>
-// //             </div>
-// //           ):(
-// //             <div style={{padding:"8px 20px"}}>
-// //               {hours.map(hour=>{
-// //                 const label=hour<12?`${hour}:00 AM`:hour===12?"12:00 PM":`${hour-12}:00 PM`;
-// //                 const hAppts=dayAppts.filter(a=>{const m=toMin(a.slotTime||"");return m>=(hour-8)*60&&m<(hour-8+1)*60;});
-// //                 return(
-// //                   <div key={hour} style={{display:"flex",gap:12,marginBottom:hAppts.length?8:2}}>
-// //                     <div style={{width:60,fontSize:10.5,fontWeight:hAppts.length?800:600,color:hAppts.length?P.teal:P.muted,textAlign:"right",paddingTop:5,flexShrink:0,fontFamily:"monospace"}}>{label}</div>
-// //                     <div style={{flex:1,borderTop:hAppts.length?"none":`1px solid ${P.border}`,paddingTop:hAppts.length?0:5}}>
-// //                       {hAppts.length>0&&(
-// //                         <div style={{display:"grid",gridTemplateColumns:`repeat(${Math.min(hAppts.length,3)},1fr)`,gap:6}}>
-// //                           {hAppts.map((appt,ai)=>{const gIdx=filtered.indexOf(appt);return <ApptCard key={ai} appt={appt} color={ACCENT[gIdx%ACCENT.length]}/>;
-// //                           })}
-// //                         </div>
-// //                       )}
-// //                     </div>
-// //                   </div>
-// //                 );
-// //               })}
-// //             </div>
-// //           )}
-// //         </div>
-// //       )}
-
-// //       <div style={{borderTop:`1px solid ${P.border}`,padding:"9px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",background:P.white,flexWrap:"wrap",gap:4,marginTop:"auto"}}>
-// //         <div style={{display:"flex",alignItems:"center",gap:6}}>
-// //           <span style={{width:8,height:8,borderRadius:"50%",background:P.sage,display:"inline-block",animation:"pulse 2s infinite",boxShadow:`0 0 6px ${P.sage}`}}/>
-// //           <span style={{fontSize:11,color:P.muted,fontWeight:700}}>Live · 8:00 AM – 6:00 PM</span>
-// //         </div>
-// //         <span style={{fontSize:11,color:P.muted,fontWeight:600}}>{filtered.length} total appointments</span>
-// //       </div>
-// //     </div>
-// //   );
-// // }
-
-// // function ProgressBar({ value, max, color, height=7 }) {
-// //   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
-// //   return (
-// //     <div style={{ height, borderRadius: 99, background: "#e9f2f4", overflow: "hidden" }}>
-// //       <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg,${color},${color}cc)`, borderRadius: 99, transition: "width 1s ease" }}/>
-// //     </div>
-// //   );
-// // }
-
-// // // ─────────────────────────────────────────────────────────────────────────────
-// // // Dashboard
-// // // ─────────────────────────────────────────────────────────────────────────────
-// // export default function Dashboard() {
-// //   const navigate = useNavigate();
-// //   const { user } = useSelector(s => s.auth);
-
-// //   const [stats,        setStats]        = useState({total:0,pending:0,resolved:0,inProgress:0});
-// //   const [recent,       setRecent]       = useState([]);
-// //   const [talukaData,   setTalukaData]   = useState({});
-// //   const [weeklyData,   setWeeklyData]   = useState([4,7,5,9,12,8,15]);
-// //   const [loading,      setLoading]      = useState(true);
-// //   const [activeTab,    setActiveTab]    = useState("all");
-
-// //   const [appointments, setAppointments] = useState([]);
-// //   const [apptLoading,  setApptLoading]  = useState(true);
-// //   const [mayorSlots,   setMayorSlots]   = useState([]);
-// //   const [peopleOnline, setPeopleOnline] = useState(0);
-
-// //   const [meetingStats, setMeetingStats] = useState({
-// //     totalMeetings: 0,
-// //     totalSubjects: 0,
-// //     approved: 0,
-// //     rejected: 0,
-// //     onHold: 0,
-// //     postponed: 0,
-// //     notConducted: 0,
-// //     actionTakenSubjects: 0,
-// //     subjectsByType: { General: 0, Administrative: 0, Contract: 0 },
-// //     actionProgress: {},
-// //     departmentStats: {},
-// //   });
-// //   const [meetingLoading, setMeetingLoading] = useState(true);
-
-// //   // ── Role & dept helpers ───────────────────────────────────────────────────
-// //   const authUser     = getAuthUser();
-// //   const userRole     = authUser?.role || "";
-// //   const userDept     = authUser?.departmentName || "";
-// //   const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
-
-// //   // ── Fetch Inward (dept-filtered for dept users) ───────────────────────────
-// //   const fetchDashboard = useCallback(async () => {
-// //     setLoading(true);
-// //     try {
-// //       const res  = await axiosInstance.get("/inwardAll");
-// //       let data   = res.data?.data || [];
-
-// //       // For department users, filter inward records tagged to their department
-// //       if (!isFullAccess && userDept) {
-// //         data = data.filter(d =>
-// //           (d.mainDepartment && d.mainDepartment === userDept) ||
-// //           (d.departmentName && d.departmentName === userDept) ||
-// //           (Array.isArray(d.departments) && d.departments.includes(userDept))
-// //         );
-// //       }
-
-// //       setStats({
-// //         total:      data.length,
-// //         pending:    data.filter(d => d.status==="Pending").length,
-// //         resolved:   data.filter(d => d.status==="Resolved").length,
-// //         inProgress: data.filter(d => d.status==="In Progress").length,
-// //       });
-
-// //       // Taluka tracking — only for full access
-// //       if (isFullAccess) {
-// //         const tMap={};
-// //         data.forEach(d => { if(d.taluka) tMap[d.taluka]=(tMap[d.taluka]||0)+1; });
-// //         setTalukaData(tMap);
-// //       }
-
-// //       const now=Date.now(), wk=Array(7).fill(0);
-// //       data.forEach(d => { const diff=Math.floor((now-new Date(d.createdAt))/86400000); if(diff>=0&&diff<7)wk[6-diff]++; });
-// //       setWeeklyData(wk.map(v=>v||Math.floor(2+Math.random()*6)));
-// //       setRecent(data.slice(0,8));
-// //     } catch(e) { console.error(e); }
-// //     finally { setLoading(false); }
-// //   }, [isFullAccess, userDept]);
-
-// //   const fetchAppointments = useCallback(async () => {
-// //     // Appointments calendar only shown for full-access roles
-// //     if (!isFullAccess) { setApptLoading(false); return; }
-// //     setApptLoading(true);
-// //     try {
-// //       const res = await citizenAxios.get("/citizen/admin/all-appointments");
-// //       if(res.data.success) setAppointments(res.data.appointments||[]);
-// //     } catch(e) { console.error(e); setAppointments([]); }
-// //     finally { setApptLoading(false); }
-// //   }, [isFullAccess]);
-
-// //   const fetchMayorSlots = useCallback(async () => {
-// //     if (!isFullAccess) return;
-// //     try {
-// //       const res = await axios.get(`${BASE_URL}/api/availability/get`);
-// //       if(res.data.success) {
-// //         const ts=new Date().toISOString().slice(0,10);
-// //         const rec=res.data.data.find(a=>a.date===ts);
-// //         setMayorSlots(rec?.timeSlots||[]);
-// //       }
-// //     } catch(e) { console.error(e); }
-// //   }, [isFullAccess]);
-
-// //   // ── Fetch Meeting Analytics ───────────────────────────────────────────────
-// //   const fetchMeetingStats = useCallback(async () => {
-// //     setMeetingLoading(true);
-// //     try {
-// //       const res  = await axiosInstance.get("/getMeetings");
-// //       const data = res.data?.data || [];
-
-// //       // Collect subjects based on role
-// //       const allSubjects = [];
-// //       data.forEach(m => {
-// //         (m.subjects || []).forEach(sub => {
-// //           if (isFullAccess || (Array.isArray(sub.tagTo) && sub.tagTo.includes(userDept))) {
-// //             allSubjects.push({ ...sub, meetingNumber: m.meetingNumber });
-// //           }
-// //         });
-// //       });
-
-// //       // Filter meetings based on role
-// //       const meetings = isFullAccess
-// //         ? data
-// //         : data.filter(m => (m.subjects || []).some(sub => Array.isArray(sub.tagTo) && sub.tagTo.includes(userDept)));
-
-// //       const approved     = allSubjects.filter(s => s.decisionInMeeting === "Approved").length;
-// //       const rejected     = allSubjects.filter(s => s.decisionInMeeting === "Rejected").length;
-// //       const onHold       = allSubjects.filter(s => s.decisionInMeeting === "On-Hold").length;
-// //       const postponed    = allSubjects.filter(s => s.decisionInMeeting === "Postponed").length;
-// //       const notConducted = allSubjects.filter(s => s.decisionInMeeting === "Not Conducted").length;
-// //       const actionTaken  = allSubjects.filter(s => s.actionTaken && s.actionTaken !== "").length;
-
-// //       const subjectsByType = {
-// //         General:        allSubjects.filter(s => s.subjectType === "General").length,
-// //         Administrative: allSubjects.filter(s => s.subjectType === "Administrative and Financial Approval").length,
-// //         Contract:       allSubjects.filter(s => s.subjectType === "Contract Approval").length,
-// //       };
-
-// //       const actionProgress = {};
-// //       allSubjects.forEach(s => {
-// //         if (s.actionTaken) actionProgress[s.actionTaken] = (actionProgress[s.actionTaken] || 0) + 1;
-// //       });
-
-// //       // Department wise stats — all depts for full access, only own dept for dept user
-// //       const departmentStats = {};
-// //       allSubjects.forEach(s => {
-// //         (s.tagTo || []).forEach(dept => {
-// //           // For dept users, only include their own department
-// //           if (!isFullAccess && dept !== userDept) return;
-// //           if (!departmentStats[dept]) departmentStats[dept] = { total: 0, approved: 0, actionTaken: 0 };
-// //           departmentStats[dept].total++;
-// //           if (s.decisionInMeeting === "Approved") departmentStats[dept].approved++;
-// //           if (s.actionTaken) departmentStats[dept].actionTaken++;
-// //         });
-// //       });
-
-// //       setMeetingStats({
-// //         totalMeetings: meetings.length,
-// //         totalSubjects: allSubjects.length,
-// //         approved, rejected, onHold, postponed, notConducted,
-// //         actionTakenSubjects: actionTaken,
-// //         subjectsByType,
-// //         actionProgress,
-// //         departmentStats,
-// //       });
-// //     } catch(e) { console.error(e); }
-// //     finally { setMeetingLoading(false); }
-// //   }, [isFullAccess, userDept]);
-
-// //   useEffect(() => {
-// //     fetchDashboard(); fetchAppointments(); fetchMayorSlots(); fetchMeetingStats();
-// //     const iv = setInterval(() => setPeopleOnline(Math.floor(12+Math.random()*8)), 4000);
-// //     setPeopleOnline(Math.floor(12+Math.random()*8));
-// //     return () => clearInterval(iv);
-// //   }, [fetchDashboard, fetchAppointments, fetchMayorSlots, fetchMeetingStats]);
-
-// //   const resRate = stats.total > 0 ? Math.round((stats.resolved/stats.total)*100) : 0;
-// //   const statusColor = {"Pending":P.goldDeep,"Resolved":P.sage,"In Progress":P.teal,"Rejected":"#d9534f"};
-// //   const statusBg    = {"Pending":`${P.gold}22`,"Resolved":`${P.sage}22`,"In Progress":`${P.teal}22`,"Rejected":"#fde8e8"};
-// //   const filteredRecent = activeTab==="all" ? recent : recent.filter(r=>r.status===activeTab);
-
-// //   // Stat cards — same structure for both, but values differ (dept-filtered above)
-// //   const cards = [
-// //     {label:"TOTAL APPLICATIONS",value:stats.total.toLocaleString(),   sub:"▲ 12% last week",from:P.card1From,to:P.card1To,spark:[40,55,45,70,60,85,75],dark:false},
-// //     {label:"PENDING",           value:stats.pending.toLocaleString(),  sub:"▼ 5% last week", from:P.card2From,to:P.card2To,spark:[30,50,35,60,40,70,55],dark:false},
-// //     {label:"RESOLVED",          value:stats.resolved.toLocaleString(), sub:"▲ 8% last week", from:P.card3From,to:P.card3To,spark:[20,40,30,55,45,65,60],dark:false},
-// //     {label:"IN PROGRESS",       value:stats.inProgress.toLocaleString(),sub:"— ongoing",     from:P.card4From,to:P.card4To,spark:[15,30,25,40,35,50,45],dark:true},
-// //   ];
-
-// //   const subjectTypeRows = [
-// //     { l: "General",                    v: meetingStats.subjectsByType.General,        c: P.teal,     icon: "📄" },
-// //     { l: "Administrative & Financial", v: meetingStats.subjectsByType.Administrative,  c: P.goldDeep, icon: "💰" },
-// //     { l: "Contract Approval",          v: meetingStats.subjectsByType.Contract,        c: P.sage,     icon: "📝" },
-// //   ];
-// //   const renderSubjectTypeRows = () => subjectTypeRows.map(({ l, v, c, icon }, idx) => (
-// //     <div key={l} style={{ display: "flex", alignItems: "center", gap: 12,
-// //       padding: "11px 0", borderBottom: idx < subjectTypeRows.length - 1 ? `1px solid ${P.border}` : "none" }}>
-// //       <div style={{ width: 44, height: 44, borderRadius: 12,
-// //         background: `${c}14`, border: `1px solid ${c}33`,
-// //         display: "flex", alignItems: "center", justifyContent: "center",
-// //         fontSize: 19, flexShrink: 0 }}>{icon}</div>
-// //       <div style={{ flex: 1, minWidth: 0 }}>
-// //         <div style={{ fontSize: 12.5, fontWeight: 700, color: P.ink2,
-// //           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 1 }}>{l}</div>
-// //         <div style={{ fontSize: 22, fontWeight: 900, color: c, lineHeight: 1.1 }}>{v}</div>
-// //       </div>
-// //       <div style={{ fontSize: 11, fontWeight: 800, color: c,
-// //         background: `${c}16`, padding: "3px 10px", borderRadius: 20, flexShrink: 0 }}>
-// //         {meetingStats.totalSubjects > 0 ? Math.round((v / meetingStats.totalSubjects) * 100) : 0}%
-// //       </div>
-// //     </div>
-// //   ));
-
-// //   return (
-// //     <div style={{minHeight:"100vh",background:P.bg,fontFamily:"'Nunito','Segoe UI',sans-serif",color:P.text}}>
-// //       <style>{`
-// //         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
-// //         @keyframes fadeUp {from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-// //         @keyframes popIn  {from{opacity:0;transform:scale(.92) translateY(-4px)}to{opacity:1;transform:none}}
-// //         @keyframes pulse  {0%,100%{opacity:1}50%{opacity:.35}}
-// //         @keyframes spin   {to{transform:rotate(360deg)}}
-// //         .dc{animation:fadeUp .4s ease both;}
-// //         .hov{transition:transform .18s ease, box-shadow .18s ease;}
-// //         .hov:hover{transform:translateY(-3px);}
-// //         .pnl{transition:box-shadow .18s ease;}
-// //         .pnl:hover{box-shadow:0 10px 28px rgba(15,59,68,0.10)!important;}
-// //         .pbtn:hover{transform:translateY(-1px);}
-// //         .gbtn:hover{border-color:${P.teal}!important;color:${P.tealDark}!important;}
-// //         .tbl-row:hover{background:${P.teal}0f!important;cursor:pointer;}
-// //         ::-webkit-scrollbar{width:6px;height:6px;}
-// //         ::-webkit-scrollbar-track{background:transparent;}
-// //         ::-webkit-scrollbar-thumb{background:#cfe2e7;border-radius:99px;}
-// //         *{box-sizing:border-box;}
-// //         .dash-grid-4    {display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
-// //         .dash-grid-cal  {display:grid;grid-template-columns:1fr 300px;gap:18px;}
-// //         .dash-grid-track{display:grid;grid-template-columns:280px 1fr;gap:18px;}
-// //         .mtg-grid-3     {display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;}
-// //         @media(max-width:1100px){
-// //           .dash-grid-cal  {grid-template-columns:1fr!important;}
-// //           .dash-grid-track{grid-template-columns:1fr!important;}
-// //           .mtg-grid-3     {grid-template-columns:1fr 1fr!important;}
-// //         }
-// //         @media(max-width:800px){
-// //           .dash-grid-4{grid-template-columns:repeat(2,1fr)!important;gap:12px!important;}
-// //           .mtg-grid-3 {grid-template-columns:1fr!important;}
-// //         }
-// //         @media(max-width:480px){
-// //           .dash-grid-4{grid-template-columns:1fr!important;}
-// //           .dash-pad{padding:12px 10px!important;}
-// //         }
-// //       `}</style>
-
-// //       <div className="dash-pad" style={{padding:"22px 26px",maxWidth:1440,margin:"0 auto"}}>
-
-// //         {/* Accent bar */}
-// //         <div style={{height:3,background:`linear-gradient(90deg,${P.tealDark},${P.teal},${P.gold},${P.goldDeep},${P.cream},${P.goldDeep},${P.teal})`,borderRadius:99,marginBottom:18,opacity:.85}}/>
-
-// //         {/* Page header */}
-// //         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20,flexWrap:"wrap",gap:10}}>
-// //           <div>
-// //             <h2 style={{margin:0,fontSize:24,fontWeight:900,color:P.tealDark,letterSpacing:-.4}}>Analytic Overview</h2>
-// //             <p style={{margin:"4px 0 0",fontSize:13,color:P.muted,fontWeight:600}}>
-// //               Good {new Date().getHours()<12?"Morning":new Date().getHours()<17?"Afternoon":"Evening"}, {user?.fullName?.split(" ")[0]||"Admin"} 👋
-// //               {!isFullAccess && userDept && (
-// //                 <span style={{marginLeft:8,background:`${P.teal}18`,color:P.tealDark,border:`1px solid ${P.teal}33`,borderRadius:20,padding:"2px 11px",fontSize:11,fontWeight:800}}>
-// //                   {userDept}
-// //                 </span>
-// //               )}
-// //             </p>
-// //           </div>
-// //           <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
-// //             <button className="gbtn" onClick={()=>{fetchDashboard();fetchAppointments();fetchMayorSlots();fetchMeetingStats();}}
-// //               style={ghostBtn}>
-// //               ↻ Refresh
-// //             </button>
-// //             {/* {isFullAccess && (
-// //               <div style={{display:"flex",alignItems:"center",gap:6,background:P.white,border:`1px solid ${P.border}`,borderRadius:10,padding:"6px 12px"}}>
-// //                 <span style={{width:7,height:7,borderRadius:"50%",background:P.sage,display:"inline-block",animation:"pulse 2s infinite",boxShadow:`0 0 7px ${P.sage}`}}/>
-
-// //                 <span style={{fontSize:11,fontWeight:700,color:P.tealDark}}>{peopleOnline} Online</span>
-
-// //               </div>
-// //             )} */}
-// //             <div style={{...ghostBtn,cursor:"default"}}>THIS YEAR ▾</div>
-// //           </div>
-// //         </div>
-
-// //         {loading ? (
-// //           <div style={{textAlign:"center",padding:80,color:P.teal,fontWeight:800,fontSize:14}}>Loading dashboard…</div>
-// //         ) : (
-// //           <>
-// //             {/* ════════════════════════════════════════════════════════════════
-// //                 MEETING ANALYTICS SECTION
-// //                 - Full access: everything shown
-// //                 - Dept user: only Subject Type Breakdown + own dept row
-// //             ════════════════════════════════════════════════════════════════ */}
-// //             {!meetingLoading && (
-// //               <div className="dc" style={{ animationDelay: "0s", marginBottom: 20 }}>
-
-// //                 {/* Section header */}
-// //                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
-// //                   <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
-// //                     <span style={{ width: 44, height: 44, borderRadius: 12, background: P.white, border: `1px solid ${P.border}`,
-// //                       boxShadow: "0 3px 10px rgba(15,59,68,0.08)", display: "inline-flex", alignItems: "center", justifyContent: "center",
-// //                       fontSize: 22, flexShrink: 0 }}>🏛</span>
-// //                     <div style={{ minWidth: 0 }}>
-// //                       <div style={{ fontSize: 20, fontWeight: 900, color: P.ink, letterSpacing: -.3 }}>Meeting Proceedings Analytics</div>
-// //                       <p style={{ margin: "2px 0 0", fontSize: 12.5, color: P.ink2, fontWeight: 600 }}>
-// //                         Sabha Kamkaj — Subject wise progress tracking
-// //                         {!isFullAccess && userDept && (
-// //                           <span style={{marginLeft:8,background:`${P.teal}18`,color:P.tealDark,border:`1px solid ${P.teal}33`,borderRadius:20,padding:"1px 10px",fontSize:10.5,fontWeight:800}}>
-// //                             {userDept}
-// //                           </span>
-// //                         )}
-// //                       </p>
-// //                     </div>
-// //                   </div>
-// //                   <button className="pbtn" onClick={() => navigate("/meetings")} style={pillBtn(P.teal, P.tealDark)}>
-// //                     View Meetings →
-// //                   </button>
-// //                 </div>
-
-// //                 {/* Top 4 Meeting stat cards — always visible (values are role-filtered) */}
-// //                 <div className="dash-grid-4" style={{ marginBottom: 18 }}>
-// //                   {[
-// //                     { label: "TOTAL MEETINGS",  value: meetingStats.totalMeetings,      from: P.card1From, to: P.card1To,   spark: [2,3,1,4,2,5,3] },
-// //                     { label: "TOTAL SUBJECTS",  value: meetingStats.totalSubjects,       from: P.card2From, to: P.card2To,   spark: [5,8,6,10,7,12,9] },
-// //                     { label: "APPROVED",        value: meetingStats.approved,            from: P.card3From, to: P.card3To,   spark: [3,5,4,7,5,9,7] },
-// //                     { label: "ACTION TAKEN",    value: meetingStats.actionTakenSubjects, from: P.card5From, to: P.card5To,   spark: [1,2,2,4,3,5,4] },
-// //                   ].map((c, i) => (
-// //                     <StatCard key={i} label={c.label} value={c.value} from={c.from} to={c.to} spark={c.spark} delay={i*.06}/>
-// //                   ))}
-// //                 </div>
-
-// //                 {/* ── FULL ACCESS: Decision Breakdown + Action Progress + Subject Type ── */}
-// //                 {isFullAccess ? (
-// //                   <div className="mtg-grid-3" style={{ marginBottom: 18 }}>
-
-// //                     {/* Decision Breakdown */}
-// //                     <div className="pnl" style={{ ...panel, padding: "18px 20px" }}>
-// //                       <div style={{ marginBottom: 14 }}><PanelTitle icon="📊">Decision Breakdown</PanelTitle></div>
-// //                       {[
-// //                         { l: "Approved",      v: meetingStats.approved,      c: P.sage },
-// //                         { l: "Rejected",      v: meetingStats.rejected,      c: "#d9534f" },
-// //                         { l: "On-Hold",       v: meetingStats.onHold,        c: P.goldDeep },
-// //                         { l: "Postponed",     v: meetingStats.postponed,     c: P.tealDeep },
-// //                         { l: "Not Conducted", v: meetingStats.notConducted,  c: P.tealDark },
-// //                       ].map(({ l, v, c }) => {
-// //                         const pct = meetingStats.totalSubjects > 0 ? Math.round((v / meetingStats.totalSubjects) * 100) : 0;
-// //                         return (
-// //                           <div key={l} style={{ marginBottom: 12 }}>
-// //                             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-// //                               <span style={{ fontSize: 13, fontWeight: 700, color: P.ink }}>{l}</span>
-// //                               <span style={{ fontSize: 13, fontWeight: 800, color: c }}>
-// //                                 {v} <span style={{ color: P.muted, fontWeight: 600, fontSize: 11.5 }}>({pct}%)</span>
-// //                               </span>
-// //                             </div>
-// //                             <ProgressBar value={v} max={meetingStats.totalSubjects} color={c}/>
-// //                           </div>
-// //                         );
-// //                       })}
-// //                     </div>
-
-// //                     {/* Action Taken Progress */}
-// //                     <div className="pnl" style={{ ...panel, padding: "18px 20px" }}>
-// //                       <div style={{ marginBottom: 14 }}><PanelTitle icon="⚡" color={P.gold}>Action Taken Progress</PanelTitle></div>
-// //                       {Object.keys(meetingStats.actionProgress).length === 0 ? (
-// //                         <div style={{ textAlign: "center", color: P.muted, fontSize: 12.5, padding: "28px 0" }}>
-// //                           <div style={{ fontSize: 30, marginBottom: 8 }}>⚡</div>
-// //                           No action taken yet
-// //                         </div>
-// //                       ) : (
-// //                         Object.entries(meetingStats.actionProgress)
-// //                           .sort((a, b) => b[1] - a[1])
-// //                           .map(([action, count], i) => {
-// //                             const cols = [P.teal, P.gold, P.sage, P.tealDeep, P.goldDeep, P.tealDark];
-// //                             const c = cols[i % cols.length];
-// //                             return (
-// //                               <div key={action} style={{ marginBottom: 12 }}>
-// //                                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-// //                                   <span style={{ fontSize: 13, fontWeight: 700, color: P.ink,
-// //                                     overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 180 }}>{action}</span>
-// //                                   <span style={{ fontSize: 13, fontWeight: 800, color: c, flexShrink: 0, marginLeft: 6 }}>{count}</span>
-// //                                 </div>
-// //                                 <ProgressBar value={count} max={meetingStats.totalSubjects} color={c} height={8}/>
-// //                               </div>
-// //                             );
-// //                           })
-// //                       )}
-// //                     </div>
-
-// //                     {/* Subject Type */}
-// //                     <div className="pnl" style={{ ...panel, padding: "18px 20px" }}>
-// //                       <div style={{ marginBottom: 6 }}><PanelTitle icon="📋">Subject Type Breakdown</PanelTitle></div>
-// //                       {renderSubjectTypeRows()}
-// //                     </div>
-// //                   </div>
-// //                 ) : (
-// //                   /* ── DEPT USER: Only Subject Type Breakdown (their counts) ── */
-// //                   <div style={{ marginBottom: 18 }}>
-// //                     <div className="pnl" style={{ ...panel, padding: "18px 20px", maxWidth: 480 }}>
-// //                       <div style={{ marginBottom: 6 }}><PanelTitle icon="📋">Subject Type Breakdown</PanelTitle></div>
-// //                       {renderSubjectTypeRows()}
-// //                     </div>
-// //                   </div>
-// //                 )}
-
-// //                 {/* ── Department-wise table ── */}
-// //                 {/* Full access: all departments */}
-// //                 {isFullAccess && Object.keys(meetingStats.departmentStats).length > 0 && (
-// //                   <div className="pnl" style={{ ...panel, padding: "18px 20px" }}>
-// //                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, gap: 8, flexWrap: "wrap" }}>
-// //                       <PanelTitle icon="🏢" color={P.gold}>Department-wise Subject Progress</PanelTitle>
-// //                       <span style={{ fontSize: 12, color: P.muted, fontWeight: 700 }}>
-// //                         {Object.keys(meetingStats.departmentStats).length} departments
-// //                       </span>
-// //                     </div>
-// //                     <div style={{ overflowX: "auto", borderRadius: 10 }}>
-// //                       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-// //                         <thead>
-// //                           <tr>
-// //                             {["Department", "Total Subjects", "Approved", "Action Taken", "Completion"].map((h, hi, arr) => (
-// //                               <th key={h} style={{ ...thStyle, padding: "11px 14px",
-// //                                 borderTopLeftRadius: hi === 0 ? 10 : 0, borderBottomLeftRadius: hi === 0 ? 10 : 0,
-// //                                 borderTopRightRadius: hi === arr.length - 1 ? 10 : 0, borderBottomRightRadius: hi === arr.length - 1 ? 10 : 0 }}>{h}</th>
-// //                             ))}
-// //                           </tr>
-// //                         </thead>
-// //                         <tbody>
-// //                           {Object.entries(meetingStats.departmentStats)
-// //                             .sort((a, b) => b[1].total - a[1].total)
-// //                             .map(([dept, dStats], i) => {
-// //                               const cols = [P.teal, P.gold, P.sage, P.tealDeep, P.goldDeep, P.tealDark];
-// //                               const c = cols[i % cols.length];
-// //                               const completionPct = dStats.total > 0 ? Math.round((dStats.actionTaken / dStats.total) * 100) : 0;
-// //                               return (
-// //                                 <tr key={dept} style={{ borderBottom: `1px solid ${P.border}`, transition: "background .15s" }}
-// //                                   onMouseEnter={e => e.currentTarget.style.background = `${P.teal}08`}
-// //                                   onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-// //                                   <td style={{ padding: "13px 14px" }}>
-// //                                     <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-// //                                       <div style={{ width: 9, height: 9, borderRadius: "50%", background: c, flexShrink: 0 }}/>
-// //                                       <span style={{ fontWeight: 800, color: P.ink, fontSize: 13.5 }}>{dept}</span>
-// //                                     </div>
-// //                                   </td>
-// //                                   <td style={{ padding: "13px 14px" }}>
-// //                                     <span style={{ fontWeight: 900, color: c, fontSize: 14 }}>{dStats.total}</span>
-// //                                   </td>
-// //                                   <td style={{ padding: "13px 14px" }}>
-// //                                     <span style={{ display: "inline-flex", alignItems: "center", gap: 5,
-// //                                       background: `${P.sage}16`, color: P.sage, border: `1px solid ${P.sage}40`,
-// //                                       padding: "3px 11px", borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
-// //                                       ✓ {dStats.approved}
-// //                                     </span>
-// //                                   </td>
-// //                                   <td style={{ padding: "13px 14px" }}>
-// //                                     <span style={{ display: "inline-flex", alignItems: "center", gap: 5,
-// //                                       background: `${P.teal}16`, color: P.tealDark, border: `1px solid ${P.teal}40`,
-// //                                       padding: "3px 11px", borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
-// //                                       ⚡ {dStats.actionTaken}
-// //                                     </span>
-// //                                   </td>
-// //                                   <td style={{ padding: "13px 14px", minWidth: 160 }}>
-// //                                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-// //                                       <div style={{ flex: 1, height: 8, borderRadius: 99, background: "#e9f2f4", overflow: "hidden" }}>
-// //                                         <div style={{ height: "100%", width: `${completionPct}%`, background: `linear-gradient(90deg,${c},${P.tealDark})`, borderRadius: 99, transition: "width 1s ease" }}/>
-// //                                       </div>
-// //                                       <span style={{ fontSize: 12.5, fontWeight: 900, color: c, minWidth: 36, textAlign: "right" }}>{completionPct}%</span>
-// //                                     </div>
-// //                                   </td>
-// //                                 </tr>
-// //                               );
-// //                             })}
-// //                         </tbody>
-// //                       </table>
-// //                     </div>
-// //                   </div>
-// //                 )}
-
-// //                 {/* Dept user: show ONLY their own department row in a focused card */}
-// //                 {!isFullAccess && userDept && meetingStats.departmentStats[userDept] && (
-// //                   <div className="pnl" style={{ ...panel, padding: "18px 20px" }}>
-// //                     <div style={{ marginBottom: 14 }}>
-// //                       <PanelTitle icon="🏢" color={P.gold}>Your Department Progress</PanelTitle>
-// //                     </div>
-// //                     {(() => {
-// //                       const dStats = meetingStats.departmentStats[userDept];
-// //                       const completionPct = dStats.total > 0 ? Math.round((dStats.actionTaken / dStats.total) * 100) : 0;
-// //                       return (
-// //                         <>
-// //                           {/* Dept name badge */}
-// //                           <div style={{ marginBottom: 14, padding: "9px 14px", background: `${P.teal}10`,
-// //                             border: `1px solid ${P.teal}30`, borderRadius: 10,
-// //                             fontSize: 13.5, fontWeight: 800, color: P.tealDark }}>
-// //                             {userDept}
-// //                           </div>
-// //                           {/* 3 stat mini-cards */}
-// //                           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 14 }}>
-// //                             {[
-// //                               { l: "Total Subjects",  v: dStats.total,       c: P.teal,     icon: "📋" },
-// //                               { l: "Approved",        v: dStats.approved,    c: P.sage,     icon: "✅" },
-// //                               { l: "Action Taken",    v: dStats.actionTaken, c: P.goldDeep, icon: "⚡" },
-// //                             ].map(({ l, v, c, icon }) => (
-// //                               <div key={l} style={{ textAlign: "center", padding: "16px 10px",
-// //                                 background: `${c}10`, border: `1px solid ${c}30`, borderRadius: 14 }}>
-// //                                 <div style={{ fontSize: 22, marginBottom: 5 }}>{icon}</div>
-// //                                 <div style={{ fontSize: 24, fontWeight: 900, color: c }}>{v}</div>
-// //                                 <div style={{ fontSize: 10.5, fontWeight: 800, color: P.ink2, marginTop: 3,
-// //                                   textTransform: "uppercase", letterSpacing: .4 }}>{l}</div>
-// //                               </div>
-// //                             ))}
-// //                           </div>
-// //                           {/* Completion progress bar */}
-// //                           <div>
-// //                             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-// //                               <span style={{ fontSize: 13, fontWeight: 700, color: P.ink }}>Completion Rate</span>
-// //                               <span style={{ fontSize: 13, fontWeight: 900, color: P.teal }}>{completionPct}%</span>
-// //                             </div>
-// //                             <div style={{ height: 9, borderRadius: 99, background: "#e9f2f4", overflow: "hidden" }}>
-// //                               <div style={{ height: "100%", width: `${completionPct}%`,
-// //                                 background: `linear-gradient(90deg,${P.teal},${P.tealDark})`,
-// //                                 borderRadius: 99, transition: "width 1s ease" }}/>
-// //                             </div>
-// //                           </div>
-// //                         </>
-// //                       );
-// //                     })()}
-// //                   </div>
-// //                 )}
-
-// //                 {/* Dept user: no meeting data for their dept */}
-// //                 {!isFullAccess && userDept && !meetingStats.departmentStats[userDept] && meetingStats.totalSubjects === 0 && (
-// //                   <div style={{ ...panel, padding: "34px 18px", textAlign: "center" }}>
-// //                     <div style={{ fontSize: 34, marginBottom: 8 }}>🏛</div>
-// //                     <div style={{ fontWeight: 800, fontSize: 14, color: P.text, marginBottom: 4 }}>
-// //                       No meeting subjects assigned yet
-// //                     </div>
-// //                     <div style={{ fontSize: 12, color: P.muted }}>
-// //                       Subjects tagged to <strong>{userDept}</strong> will appear here
-// //                     </div>
-// //                   </div>
-// //                 )}
-// //               </div>
-// //             )}
-
-// //             {/* ══════════════════════════════════════════════════════════════
-// //                 FULL ACCESS ONLY: Calendar + Status panel
-// //             ══════════════════════════════════════════════════════════════ */}
-// //             {isFullAccess && (
-// //               <div className="dash-grid-cal" style={{marginBottom:20}}>
-// //                 <CalendarPanel appointments={appointments} mayorSlots={mayorSlots} loading={apptLoading}/>
-
-// //                 {/* Status Panel */}
-// //                 <div className="dc" style={{animationDelay:".37s",...panel,padding:"18px",display:"flex",flexDirection:"column"}}>
-// //                   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-// //                     <h3 style={{margin:0,fontSize:17,fontWeight:900,color:P.ink}}>Status</h3>
-// //                     <div style={{background:P.white,border:`1px solid ${P.border}`,borderRadius:9,padding:"5px 11px",fontSize:11,fontWeight:800,color:P.tealDark,boxShadow:"0 1px 4px rgba(15,59,68,0.06)"}}>TODAY ▾</div>
-// //                   </div>
-// //                   <div style={{display:"flex",justifyContent:"center",margin:"2px 0 12px"}}>
-// //                     <Donut pct={resRate}/>
-// //                   </div>
-// //                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:14}}>
-// //                     {[{l:"BOOKED",v:stats.total,c:P.teal},{l:"PROGRESS",v:stats.inProgress,c:P.goldDeep},{l:"PENDING",v:stats.pending,c:P.red}].map(({l,v,c})=>(
-// //                       <div key={l} style={{textAlign:"center",padding:"11px 4px",background:`${c}10`,borderRadius:12,border:`1px solid ${c}2e`}}>
-// //                         <div style={{fontSize:19,fontWeight:900,color:c}}>{v}</div>
-// //                         <div style={{fontSize:8.5,fontWeight:800,color:P.ink2,letterSpacing:.4,textTransform:"uppercase",marginTop:2}}>{l}</div>
-// //                       </div>
-// //                     ))}
-// //                   </div>
-
-// //                   <div style={{borderTop:`1px solid ${P.border}`,paddingTop:12,marginBottom:12}}>
-// //                     <div style={{fontSize:13,fontWeight:900,color:P.ink,marginBottom:8}}>📅 Appointments</div>
-// //                     {[
-// //                       {l:"Total",       v:appointments.length,                                                         c:P.teal},
-// //                       {l:"Approved",    v:appointments.filter(a=>(a.status||"").toLowerCase()==="approved").length,    c:P.sage},
-// //                       {l:"Pending",     v:appointments.filter(a=>(a.status||"").toLowerCase()==="pending").length,     c:P.goldDeep},
-// //                       {l:"In Progress", v:appointments.filter(a=>(a.status||"").toLowerCase()==="in progress").length, c:P.tealDeep},
-// //                     ].map(({l,v,c})=>(
-// //                       <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"4px 0"}}>
-// //                         <span style={{display:"flex",alignItems:"center",gap:7,fontSize:12,color:P.ink2,fontWeight:600}}>
-// //                           <Dot c={c} s={7}/>{l}
-// //                         </span>
-// //                         <span style={{fontSize:12.5,fontWeight:900,color:c}}>{v}</span>
-// //                       </div>
-// //                     ))}
-// //                   </div>
-
-// //                   {mayorSlots.length>0&&(
-// //                     <div style={{borderTop:`1px solid ${P.border}`,paddingTop:10,marginBottom:12}}>
-// //                       <div style={{fontSize:13,fontWeight:900,color:P.ink,marginBottom:6}}>🏛 Mayor Today</div>
-// //                       {mayorSlots.map((s,i)=>(
-// //                         <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",fontSize:12,color:P.muted,fontWeight:600}}>
-// //                           <span>Slot {i+1}</span>
-// //                           <span style={{color:P.tealDark,fontWeight:800}}>{s.start} – {s.end}</span>
-// //                         </div>
-// //                       ))}
-// //                     </div>
-// //                   )}
-
-// //                   <div style={{borderTop:`1px solid ${P.border}`,paddingTop:12,marginTop:"auto"}}>
-// //                     <div style={{fontSize:13,fontWeight:900,color:P.ink,marginBottom:10}}>📈 Weekly Trend</div>
-// //                     <MiniBar data={weeklyData} color={P.teal}/>
-// //                     <div style={{display:"flex",justifyContent:"space-between",marginTop:5,gap:6}}>
-// //                       {["M","T","W","T","F","S","S"].map((d,i)=>(
-// //                         <span key={i} style={{fontSize:10.5,color:P.muted,flex:1,textAlign:"center",fontWeight:700}}>{d}</span>
-// //                       ))}
-// //                     </div>
-// //                   </div>
-// //                 </div>
-// //               </div>
-// //             )}
-
-// //             {/* ══════════════════════════════════════════════════════════════
-// //                 FULL ACCESS ONLY: Tracking + Recent Applications
-// //             ══════════════════════════════════════════════════════════════ */}
-// //             {isFullAccess && (
-// //               <div className="dash-grid-track" style={{marginBottom:20}}>
-// //                 <div className="dc pnl" style={{animationDelay:".44s",...panel,padding:"20px"}}>
-// //                   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
-// //                     <h3 style={{margin:0,fontSize:17,fontWeight:900,color:P.ink,display:"flex",alignItems:"center",gap:8}}><Dot c={P.gold}/>Tracking</h3>
-// //                     <div style={{background:P.white,border:`1px solid ${P.border}`,borderRadius:9,padding:"5px 11px",fontSize:11,fontWeight:800,color:P.tealDark,boxShadow:"0 1px 4px rgba(15,59,68,0.06)"}}>THIS YEAR ▾</div>
-// //                   </div>
-// //                   <div style={{display:"flex",justifyContent:"space-between",padding:"9px 12px",background:"#eaf4f6",borderRadius:9,marginBottom:6}}>
-// //                     <span style={{fontSize:11,fontWeight:800,color:P.ink2,textTransform:"uppercase",letterSpacing:.5}}>Region</span>
-// //                     <span style={{fontSize:11,fontWeight:800,color:P.ink2,textTransform:"uppercase",letterSpacing:.5}}>Amount</span>
-// //                   </div>
-// //                   {Object.entries(talukaData).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([taluka,count],i)=>{
-// //                     const cols=[P.teal,P.gold,P.sage,P.tealDeep,P.goldDeep,P.tealDark];
-// //                     const c=cols[i%cols.length];
-// //                     return(
-// //                       <div key={taluka} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 12px",borderBottom:`1px solid ${P.border}`}}>
-// //                         <div style={{display:"flex",alignItems:"center",gap:8}}>
-// //                           <Dot c={c}/>
-// //                           <span style={{fontSize:13,fontWeight:700,color:P.text}}>{taluka}</span>
-// //                         </div>
-// //                         <span style={{fontSize:13,fontWeight:900,color:c}}>{count}</span>
-// //                       </div>
-// //                     );
-// //                   })}
-// //                   {!Object.keys(talukaData).length&&<div style={{textAlign:"center",color:P.muted,fontSize:13.5,padding:"24px 0",fontWeight:600}}>No data yet</div>}
-// //                 </div>
-
-// //                 <div className="dc pnl" style={{animationDelay:".51s",...panel,padding:"20px 22px",display:"flex",flexDirection:"column"}}>
-// //                   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:8}}>
-// //                     <div>
-// //                       <h3 style={{margin:0,fontSize:17,fontWeight:900,color:P.ink,display:"flex",alignItems:"center",gap:8}}><Dot c={P.gold}/>Recent Applications</h3>
-// //                       <p style={{margin:"3px 0 0 16px",fontSize:12,color:P.muted,fontWeight:600}}>Latest inward complaints</p>
-// //                     </div>
-// //                     <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
-// //                       {["all","Pending","Resolved","In Progress"].map(tab=>(
-// //                         <button key={tab} onClick={()=>setActiveTab(tab)} style={{
-// //                           border:`1px solid ${activeTab===tab?P.tealDark:P.border}`,
-// //                           background:activeTab===tab?`linear-gradient(135deg,${P.tealDeep},${P.tealDark})`:P.white,
-// //                           color:activeTab===tab?"#fff":P.ink2,
-// //                           borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:800,cursor:"pointer",
-// //                           boxShadow:activeTab===tab?`0 4px 12px ${P.teal}44`:"none",transition:"all .2s"}}>
-// //                           {tab==="all"?"All":tab}
-// //                         </button>
-// //                       ))}
-// //                     </div>
-// //                   </div>
-// //                   <div style={{overflowX:"auto"}}>
-// //                     <table style={{width:"100%",borderCollapse:"collapse",fontSize:12.5}}>
-// //                       <thead>
-// //                         <tr>
-// //                           {["Inward No","Applicant","Subject","Taluka","Department","Priority","Status","Date"].map((h,hi,arr)=>(
-// //                             <th key={h} style={{...thStyle,
-// //                               borderTopLeftRadius:hi===0?10:0,borderBottomLeftRadius:hi===0?10:0,
-// //                               borderTopRightRadius:hi===arr.length-1?10:0,borderBottomRightRadius:hi===arr.length-1?10:0}}>{h}</th>
-// //                           ))}
-// //                         </tr>
-// //                       </thead>
-// //                       <tbody>
-// //                         {filteredRecent.length===0?(
-// //                           <tr><td colSpan={8} style={{textAlign:"center",padding:36,color:P.muted,fontSize:13.5,fontWeight:600}}>No applications found</td></tr>
-// //                         ):filteredRecent.map((item,i)=>(
-// //                           <tr key={i} className="tbl-row" onClick={()=>navigate("/allapplication")} style={{borderBottom:`1px solid ${P.border}`,transition:"background .15s"}}>
-// //                             <td style={{padding:"10px 12px",color:P.teal,fontWeight:800,whiteSpace:"nowrap",fontFamily:"monospace",fontSize:11.5}}>{item.inwardNo||"—"}</td>
-// //                             <td style={{padding:"10px 12px",fontWeight:700,color:P.text}}>{item.fullName||"—"}</td>
-// //                             <td style={{padding:"10px 12px",color:P.muted,maxWidth:150,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.subject||"—"}</td>
-// //                             <td style={{padding:"10px 12px",color:P.muted}}>{item.taluka||"—"}</td>
-// //                             <td style={{padding:"10px 12px",color:P.muted,whiteSpace:"nowrap"}}>{item.mainDepartment||"—"}</td>
-// //                             <td style={{padding:"10px 12px"}}>
-// //                               <span style={{fontSize:10.5,fontWeight:800,padding:"3px 10px",borderRadius:20,background:item.priority==="Emergency"?"#fde8e8":item.priority==="Urgent"?`${P.gold}22`:`${P.sage}22`,color:item.priority==="Emergency"?"#d9534f":item.priority==="Urgent"?P.goldDeep:P.sage,border:`1px solid ${item.priority==="Emergency"?"#f5c6c6":item.priority==="Urgent"?P.gold+"44":P.sage+"44"}`}}>
-// //                                 {item.priority||"Normal"}
-// //                               </span>
-// //                             </td>
-// //                             <td style={{padding:"10px 12px"}}>
-// //                               <span style={{fontSize:10.5,fontWeight:800,padding:"3px 10px",borderRadius:20,background:statusBg[item.status]||`${P.border}55`,color:statusColor[item.status]||P.muted,border:`1px solid ${statusColor[item.status]||P.border}44`}}>
-// //                                 {item.status||"—"}
-// //                               </span>
-// //                             </td>
-// //                             <td style={{padding:"10px 12px",color:P.muted,whiteSpace:"nowrap",fontSize:11.5}}>
-// //                               {item.submissionDate||(item.createdAt?new Date(item.createdAt).toLocaleDateString("en-IN"):"—")}
-// //                             </td>
-// //                           </tr>
-// //                         ))}
-// //                       </tbody>
-// //                     </table>
-// //                   </div>
-// //                   <div style={{marginTop:"auto",paddingTop:14,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
-// //                     <span style={{fontSize:12,color:P.muted,fontWeight:600}}>Showing {filteredRecent.length} of {stats.total}</span>
-// //                     <div style={{display:"flex",gap:10}}>
-// //                       <button className="pbtn" onClick={()=>navigate("/allapplication")} style={pillBtn(P.teal,P.tealDark)}>All Applications →</button>
-// //                       <button className="pbtn" onClick={()=>navigate("/applicationcitizens")} style={pillBtn(P.card2From,P.card2To)}>Citizen Appts →</button>
-// //                     </div>
-// //                   </div>
-// //                 </div>
-// //               </div>
-// //             )}
-
-// //             {/* Footer */}
-// //             <div style={{textAlign:"center",color:P.muted,fontSize:12,padding:"14px 0 4px",fontWeight:600}}>
-// //               © {new Date().getFullYear()} Vasai-Virar City Municipal Corporation · Janata Darbar System
-// //               <span style={{margin:"0 8px",color:P.gold}}>◆</span>
-// //               स्थापना : ३ जुलै २००९
-// //             </div>
-// //           </>
-// //         )}
-// //       </div>
-// //     </div>
-// //   );
-// // }
-
-
-
-
 // import React, { useState, useEffect, useCallback, useRef } from "react";
 // import { useSelector } from "react-redux";
 // import { useNavigate } from "react-router-dom";
@@ -3941,6 +506,211 @@
 // }
 
 // // ─────────────────────────────────────────────────────────────────────────────
+// // Meeting-wise progress (प्रत्येक meeting चे subjects + progress bar)
+// // Progress = Action Taken झालेले subjects / एकूण subjects
+// // ─────────────────────────────────────────────────────────────────────────────
+// const DECISION_CFG = {
+//   "Approved":      { bg:"#E4F3E8", color:"#2E7D4F" },
+//   "Rejected":      { bg:"#FBE7E4", color:"#C0392B" },
+//   "On-Hold":       { bg:"#FBF0DC", color:"#A8741F" },
+//   "Postponed":     { bg:"#DDF3F7", color:"#0A6B7B" },
+//   "Not Conducted": { bg:"#EEF2F3", color:"#5F7C88" },
+// };
+// const MP_FILTERS = [
+//   { k:"all",      l:"All" },
+//   { k:"progress", l:"In Progress" },
+//   { k:"done",     l:"Completed" },
+//   { k:"notstart", l:"Not Started" },
+// ];
+
+// function meetingProgress(m) {
+//   const subs     = m.subjects || [];
+//   const total    = subs.length;
+//   const action   = subs.filter(s => s.actionTaken && String(s.actionTaken).trim() !== "").length;
+//   const decided  = subs.filter(s => s.decisionInMeeting && !(s.actionTaken && String(s.actionTaken).trim() !== "")).length;
+//   const pending  = total - action - decided;
+//   const pct      = total > 0 ? Math.round((action / total) * 100) : 0;
+//   const status   = total === 0 ? "empty" : pct === 100 ? "done" : (action === 0 && decided === 0) ? "notstart" : "progress";
+//   return { total, action, decided, pending, pct, status };
+// }
+
+// const MP_STATUS = {
+//   done:     { l:"Completed",   bg:"#E4F3E8", color:"#2E7D4F" },
+//   progress: { l:"In Progress", bg:"#DDF3F7", color:"#0A6B7B" },
+//   notstart: { l:"Not Started", bg:"#FBF0DC", color:"#A8741F" },
+//   empty:    { l:"No Subjects", bg:"#EEF2F3", color:"#5F7C88" },
+// };
+
+// function StackedBar({ action, decided, total, height=10 }) {
+//   const w = v => total > 0 ? `${(v / total) * 100}%` : "0%";
+//   return (
+//     <div style={{ display:"flex", height, borderRadius:99, background:P.border, overflow:"hidden" }}>
+//       <div title={`Action taken: ${action}`} style={{ width:w(action), background:`linear-gradient(90deg,${P.teal},${P.cyan})`, transition:"width 1s cubic-bezier(.2,.7,.2,1)" }}/>
+//       <div title={`Decided, action pending: ${decided}`} style={{ width:w(decided), background:`${P.gold}cc`, transition:"width 1s cubic-bezier(.2,.7,.2,1)" }}/>
+//     </div>
+//   );
+// }
+
+// function MeetingProgressPanel({ meetings = [], scopeLabel, onOpen }) {
+//   const [filter,   setFilter]   = useState("all");
+//   const [search,   setSearch]   = useState("");
+//   const [openId,   setOpenId]   = useState(null);
+//   const [showAll,  setShowAll]  = useState(false);
+
+//   const rows = meetings.map(m => ({ m, p: meetingProgress(m) }));
+//   const counts = {
+//     all:      rows.length,
+//     progress: rows.filter(r => r.p.status === "progress").length,
+//     done:     rows.filter(r => r.p.status === "done").length,
+//     notstart: rows.filter(r => r.p.status === "notstart").length,
+//   };
+//   const q = search.trim().toLowerCase();
+//   const visible = rows
+//     .filter(r => filter === "all" || r.p.status === filter)
+//     .filter(r => !q
+//       || (r.m.meetingNumber || "").toLowerCase().includes(q)
+//       || (r.m.meetingType || "").toLowerCase().includes(q)
+//       || (r.m.subjects || []).some(s => (s.subjectName || "").toLowerCase().includes(q) || (s.subjectId || "").toLowerCase().includes(q)));
+//   const shown = showAll ? visible : visible.slice(0, 2);
+
+//   const fmtDate = d => d ? new Date(d).toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" }) : "—";
+
+//   return (
+//     <div className="pnl" style={{ ...panel, padding:"22px", marginBottom:18 }}>
+//       <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:10, flexWrap:"wrap", marginBottom:14 }}>
+//         <div>
+//           <PanelTitle icon="📈">Meeting-wise Subject Progress</PanelTitle>
+//           <p style={{ margin:"6px 0 0 48px", fontSize:12.5, color:P.muted }}>
+//             {scopeLabel || "Progress = subjects with action taken"}
+//           </p>
+//         </div>
+//         <div style={{ position:"relative" }}>
+//           <span style={{ position:"absolute", left:10, top:"50%", transform:"translateY(-50%)", fontSize:12, color:P.muted }}>🔍</span>
+//           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Meeting / subject…" aria-label="Search meetings"
+//             style={{ border:"1px solid transparent", borderRadius:12, padding:"8px 12px 8px 30px", fontSize:12.5, color:P.text, outline:"none", background:"#EEF6F8", width:200, fontFamily:"inherit" }}/>
+//         </div>
+//       </div>
+
+//       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:10, flexWrap:"wrap", marginBottom:14 }}>
+//         <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+//           {MP_FILTERS.map(({ k, l }) => (
+//             <button key={k} onClick={() => { setFilter(k); setShowAll(false); }} style={{
+//               border:`1px solid ${filter===k ? "transparent" : P.border}`,
+//               background: filter===k ? `linear-gradient(135deg,${P.teal},${P.cyan})` : P.white,
+//               color: filter===k ? "#fff" : P.ink2, borderRadius:20, padding:"6px 14px",
+//               fontSize:12.5, fontWeight:600, cursor:"pointer", transition:"all .2s",
+//               boxShadow: filter===k ? `0 4px 12px ${P.teal}47` : "none" }}>
+//               {l} <span style={{ opacity:.8 }}>({counts[k]})</span>
+//             </button>
+//           ))}
+//         </div>
+//         <div style={{ display:"flex", gap:12, fontSize:11.5, color:P.muted, fontWeight:600, flexWrap:"wrap" }}>
+//           <span style={{ display:"flex", alignItems:"center", gap:6 }}><Dot c={P.teal}/>Action taken</span>
+//           <span style={{ display:"flex", alignItems:"center", gap:6 }}><Dot c={P.gold}/>Decided, action pending</span>
+//           <span style={{ display:"flex", alignItems:"center", gap:6 }}><Dot c={P.border}/>Decision pending</span>
+//         </div>
+//       </div>
+
+//       {visible.length === 0 ? (
+//         <Empty icon="🏛" title={rows.length ? "No meetings match this filter" : "No meetings to show yet"}
+//           hint={rows.length ? "Try another filter or search." : "Meetings and their subjects will appear here."}/>
+//       ) : (
+//         <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+//           {shown.map(({ m, p }) => {
+//             const st = MP_STATUS[p.status];
+//             const isOpen = openId === m._id;
+//             return (
+//               <div key={m._id} style={{ border:`1px solid ${isOpen ? P.teal+"66" : P.border}`, borderRadius:14, background:isOpen ? P.soft : P.white, transition:"all .2s" }}>
+//                 <div onClick={() => setOpenId(isOpen ? null : m._id)} role="button" tabIndex={0}
+//                   onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenId(isOpen ? null : m._id); } }}
+//                   style={{ padding:"14px 16px", cursor:"pointer", display:"grid", gridTemplateColumns:"minmax(0,1.3fr) minmax(0,2fr) auto", gap:16, alignItems:"center" }}
+//                   className="mp-row">
+//                   <div style={{ minWidth:0 }}>
+//                     <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+//                       <span style={{ fontFamily:HF, fontSize:14.5, fontWeight:700, color:P.ink }}>{m.meetingNumber || "—"}</span>
+//                       <span style={{ fontSize:10.5, fontWeight:600, padding:"2px 9px", borderRadius:20,
+//                         background: m.meetingType === "Standing Committee" ? `${P.gold}1f` : `${P.teal}14`,
+//                         color: m.meetingType === "Standing Committee" ? "#A8741F" : P.tealDark }}>{m.meetingType || "—"}</span>
+//                     </div>
+//                     <div style={{ fontSize:12, color:P.muted, marginTop:3 }}>
+//                       📅 {fmtDate(m.meetingDate)}{m.meetingTime ? ` · ${m.meetingTime} ${m.meetingAmpm || ""}` : ""} · {p.total} subject{p.total === 1 ? "" : "s"}
+//                     </div>
+//                   </div>
+//                   <div style={{ minWidth:0 }}>
+//                     <div style={{ display:"flex", justifyContent:"space-between", fontSize:11.5, color:P.muted, fontWeight:600, marginBottom:6, gap:8 }}>
+//                       <span>{p.action}/{p.total} action taken</span>
+//                       <span style={{ color:P.teal, fontWeight:700, fontSize:13 }}>{p.pct}%</span>
+//                     </div>
+//                     <StackedBar action={p.action} decided={p.decided} total={p.total}/>
+//                   </div>
+//                   <div style={{ display:"flex", alignItems:"center", gap:10, justifyContent:"flex-end" }}>
+//                     <span style={{ fontSize:11, fontWeight:600, padding:"3px 10px", borderRadius:20, background:st.bg, color:st.color, whiteSpace:"nowrap" }}>{st.l}</span>
+//                     <span aria-hidden="true" style={{ color:P.muted, fontSize:12, transform:isOpen ? "rotate(180deg)" : "none", transition:"transform .2s" }}>▾</span>
+//                   </div>
+//                 </div>
+
+//                 {isOpen && (
+//                   <div style={{ padding:"0 16px 14px" }}>
+//                     {p.total === 0 ? (
+//                       <div style={{ fontSize:12.5, color:P.muted, padding:"8px 2px" }}>No subjects added to this meeting yet.</div>
+//                     ) : (
+//                       <div style={{ overflowX:"auto", border:`1px solid ${P.border}`, borderRadius:12, background:P.white }}>
+//                         <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12.5 }}>
+//                           <thead>
+//                             <tr>{["Subject ID","Subject","Type","Decision","Tagged To","Action Taken"].map(h => (
+//                               <th key={h} style={{ ...thStyle, padding:"10px 12px", fontSize:10.5 }}>{h}</th>))}</tr>
+//                           </thead>
+//                           <tbody>
+//                             {(m.subjects || []).map((s, i) => {
+//                               const dc = DECISION_CFG[s.decisionInMeeting];
+//                               const hasAction = s.actionTaken && String(s.actionTaken).trim() !== "";
+//                               return (
+//                                 <tr key={s._id || i} style={{ borderTop:`1px solid ${P.border}` }}>
+//                                   <td style={{ padding:"10px 12px", fontFamily:"monospace", fontSize:11.5, color:P.teal, fontWeight:700, whiteSpace:"nowrap" }}>{s.subjectId || "—"}</td>
+//                                   <td style={{ padding:"10px 12px", color:P.ink, fontWeight:500, minWidth:180 }}>{s.subjectName || "—"}</td>
+//                                   <td style={{ padding:"10px 12px", color:P.muted, whiteSpace:"nowrap" }}>{s.subjectType || "—"}</td>
+//                                   <td style={{ padding:"10px 12px" }}>
+//                                     {dc ? <span style={{ fontSize:10.5, fontWeight:600, padding:"3px 10px", borderRadius:20, background:dc.bg, color:dc.color, whiteSpace:"nowrap" }}>{s.decisionInMeeting}</span>
+//                                         : <span style={{ fontSize:11.5, color:P.muted }}>Pending</span>}
+//                                   </td>
+//                                   <td style={{ padding:"10px 12px", color:P.muted, maxWidth:220 }}>
+//                                     {(s.tagTo || []).length ? (s.tagTo || []).join(", ") : "—"}
+//                                   </td>
+//                                   <td style={{ padding:"10px 12px", minWidth:140 }}>
+//                                     {hasAction
+//                                       ? <span style={{ display:"inline-flex", alignItems:"center", gap:5, fontSize:12, fontWeight:600, color:"#2E7D4F" }}>✓ {s.actionTaken}</span>
+//                                       : <span style={{ fontSize:11.5, color:P.muted }}>Not yet</span>}
+//                                   </td>
+//                                 </tr>
+//                               );
+//                             })}
+//                           </tbody>
+//                         </table>
+//                       </div>
+//                     )}
+//                     <div style={{ display:"flex", justifyContent:"flex-end", marginTop:10 }}>
+//                       <button className="gbtn" onClick={() => onOpen(m)} style={{ ...ghostBtn, padding:"6px 14px", fontSize:12.5 }}>Open meeting ↗</button>
+//                     </div>
+//                   </div>
+//                 )}
+//               </div>
+//             );
+//           })}
+//         </div>
+//       )}
+
+//       {visible.length > 2 && (
+//         <div style={{ display:"flex", justifyContent:"center", marginTop:14 }}>
+//           <button className="gbtn" onClick={() => setShowAll(v => !v)} style={ghostBtn}>
+//             {showAll ? "Show less" : `Show all ${visible.length} meetings`}
+//           </button>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
+
+// // ─────────────────────────────────────────────────────────────────────────────
 // // Dashboard
 // // ─────────────────────────────────────────────────────────────────────────────
 // export default function Dashboard() {
@@ -3973,12 +743,19 @@
 //     departmentStats: {},
 //   });
 //   const [meetingLoading, setMeetingLoading] = useState(true);
+//   const [meetingList,    setMeetingList]    = useState([]);   // role नुसार दिसणाऱ्या meetings (subjects सह)
+//   const [meetingScope,   setMeetingScope]   = useState(null); // backend कडून आलेला scope
 
 //   // ── Role & dept helpers ───────────────────────────────────────────────────
 //   const authUser     = getAuthUser();
 //   const userRole     = authUser?.role || "";
 //   const userDept     = authUser?.departmentName || "";
 //   const isFullAccess = FULL_ACCESS_ROLES.includes(userRole);
+//   // नगरसेवक (Ward Councillor) — category All: सर्व विभागांचे meeting विषय दिसतात
+//   // const isCouncillor = userRole === "Ward Councillor";
+
+//     const isCouncillor = ["corporator", "ward councillor"].includes(String(userRole || "").toLowerCase());
+//   const seesAllDepts = isFullAccess || isCouncillor;
 
 //   // ── Fetch Inward (dept-filtered for dept users) ───────────────────────────
 //   const fetchDashboard = useCallback(async () => {
@@ -4045,23 +822,37 @@
 //   const fetchMeetingStats = useCallback(async () => {
 //     setMeetingLoading(true);
 //     try {
-//       const res  = await axiosInstance.get("/getMeetings");
-//       const data = res.data?.data || [];
+//       let meetings = [];
+//       try {
+//         // Backend role नुसार filter करून पाठवतो (Admin → all, नगरसेवक → General Body / Standing Committee, dept → tagged subjects)
+//         const res = await axiosInstance.get("/meetingProgress");
+//         meetings  = res.data?.data || [];
+//         setMeetingScope(res.data?.scope || null);
+//       } catch (err) {
+//         // Fallback (जुना token / backend update नसेल तर) — जुनी client-side filtering
+//         console.warn("meetingProgress unavailable, falling back to /getMeetings", err?.response?.status);
+//         const res  = await axiosInstance.get("/getMeetings");
+//         const data = res.data?.data || [];
+//         const visibleTypes = isCouncillor
+//           ? [...(authUser?.isGeneralBodyMember !== false ? ["General Body"] : []), ...(authUser?.isStandingCommitteeMember ? ["Standing Committee"] : [])]
+//           : null;
+//         meetings = isFullAccess ? data
+//           : isCouncillor ? data.filter(m => visibleTypes.includes(m.meetingType))
+//           : userDept ? data
+//               .map(m => ({ ...m, subjects: (m.subjects || []).filter(sub => Array.isArray(sub.tagTo) && sub.tagTo.includes(userDept)) }))
+//               .filter(m => m.subjects.length > 0)
+//           : [];
+//         setMeetingScope(null);
+//       }
+//       setMeetingList(meetings);
 
-//       // Collect subjects based on role
+//       // Collect subjects (meetings आधीच role नुसार filter झालेल्या आहेत)
 //       const allSubjects = [];
-//       data.forEach(m => {
+//       meetings.forEach(m => {
 //         (m.subjects || []).forEach(sub => {
-//           if (isFullAccess || (Array.isArray(sub.tagTo) && sub.tagTo.includes(userDept))) {
-//             allSubjects.push({ ...sub, meetingNumber: m.meetingNumber });
-//           }
+//           allSubjects.push({ ...sub, meetingNumber: m.meetingNumber });
 //         });
 //       });
-
-//       // Filter meetings based on role
-//       const meetings = isFullAccess
-//         ? data
-//         : data.filter(m => (m.subjects || []).some(sub => Array.isArray(sub.tagTo) && sub.tagTo.includes(userDept)));
 
 //       const approved     = allSubjects.filter(s => s.decisionInMeeting === "Approved").length;
 //       const rejected     = allSubjects.filter(s => s.decisionInMeeting === "Rejected").length;
@@ -4086,7 +877,7 @@
 //       allSubjects.forEach(s => {
 //         (s.tagTo || []).forEach(dept => {
 //           // For dept users, only include their own department
-//           if (!isFullAccess && dept !== userDept) return;
+//           if (!seesAllDepts && dept !== userDept) return;
 //           if (!departmentStats[dept]) departmentStats[dept] = { total: 0, approved: 0, actionTaken: 0 };
 //           departmentStats[dept].total++;
 //           if (s.decisionInMeeting === "Approved") departmentStats[dept].approved++;
@@ -4105,7 +896,7 @@
 //       });
 //     } catch(e) { console.error(e); }
 //     finally { setMeetingLoading(false); }
-//   }, [isFullAccess, userDept]);
+//   }, [isFullAccess, isCouncillor, seesAllDepts, userDept]);
 
 //   useEffect(() => {
 //     fetchDashboard(); fetchAppointments(); fetchMayorSlots(); fetchMeetingStats();
@@ -4144,9 +935,19 @@
 //   ));
 
 //   const greet = new Date().getHours()<12?"morning":new Date().getHours()<17?"afternoon":"evening";
-//   const deptBadge = (fs=11) => (!isFullAccess && userDept) ? (
-//     <span style={{marginLeft:8,background:`${P.teal}18`,color:P.tealDark,border:`1px solid ${P.teal}33`,borderRadius:20,padding:"2px 11px",fontSize:fs,fontWeight:600}}>{userDept}</span>
+//   const councillorTypes = meetingScope?.meetingTypes
+//     || [...(authUser?.isGeneralBodyMember !== false ? ["General Body"] : []), ...(authUser?.isStandingCommitteeMember ? ["Standing Committee"] : [])];
+//   const councillorWard = meetingScope?.wardNo || authUser?.wardNo;
+//   const badgeText = isCouncillor
+//     ? `${meetingScope?.designation || authUser?.designation || "corporator"}${councillorWard ? ` · Ward ${councillorWard}` : ""} · ${councillorTypes.join(" + ") || "No committee"}`
+//     : (!isFullAccess && userDept) ? userDept : null;
+//   const deptBadge = (fs=11) => badgeText ? (
+//     <span style={{marginLeft:8,background:`${P.teal}18`,color:P.tealDark,border:`1px solid ${P.teal}33`,borderRadius:20,padding:"2px 11px",fontSize:fs,fontWeight:600}}>{badgeText}</span>
 //   ) : null;
+//   const progressScopeLabel = isFullAccess ? "All meetings · progress = subjects with action taken"
+//     : isCouncillor ? (councillorTypes.length ? `${councillorTypes.join(" + ")} meetings · all departments` : "General Body / Standing Committee सदस्य नाही")
+//     : userDept ? `Subjects tagged to ${userDept}`
+//     : "Meetings assigned to you";
 
 //   return (
 //     <div style={{minHeight:"100vh",position:"relative",overflow:"hidden",
@@ -4180,6 +981,8 @@
 //         .dash-grid-cal  {display:grid;grid-template-columns:2.3fr 1fr;gap:18px;}
 //         .dash-grid-track{display:grid;grid-template-columns:1fr 2.3fr;gap:18px;}
 //         .mtg-grid-3     {display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;}
+//         .mp-row:hover   {background:${P.soft};border-radius:14px;}
+//         @media(max-width:800px){ .mp-row{grid-template-columns:1fr!important;gap:10px!important;} .mp-row > div:last-child{justify-content:flex-start!important;} }
 //         @media(max-width:1100px){
 //           .dash-grid-cal  {grid-template-columns:1fr!important;}
 //           .dash-grid-track{grid-template-columns:1fr!important;}
@@ -4278,8 +1081,15 @@
 //                   ))}
 //                 </div>
 
-//                 {/* ── FULL ACCESS: Decision Breakdown + Action Progress + Subject Type ── */}
-//                 {isFullAccess ? (
+//                 {/* ── Meeting-wise subject progress (सर्व roles — role नुसार filter) ── */}
+//                 <MeetingProgressPanel
+//                   meetings={meetingList}
+//                   scopeLabel={progressScopeLabel}
+//                   onOpen={m => navigate(`/proceedingsmeeting/${m._id}`)}
+//                 />
+
+//                 {/* ── FULL ACCESS + नगरसेवक: Decision Breakdown + Action Progress + Subject Type ── */}
+//                 {seesAllDepts ? (
 //                   <div className="mtg-grid-3" style={{ marginBottom: 18 }}>
 
 //                     {/* Decision Breakdown */}
@@ -4348,8 +1158,8 @@
 //                   </div>
 //                 )}
 
-//                 {/* ── Department-wise table (full access) ── */}
-//                 {isFullAccess && Object.keys(meetingStats.departmentStats).length > 0 && (
+//                 {/* ── Department-wise table (full access + नगरसेवक) ── */}
+//                 {seesAllDepts && Object.keys(meetingStats.departmentStats).length > 0 && (
 //                   <div className="pnl" style={{ ...panel, padding: "22px" }}>
 //                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 8, flexWrap: "wrap" }}>
 //                       <PanelTitle icon="🏢" color={P.gold}>Department-wise Subject Progress</PanelTitle>
@@ -4420,7 +1230,7 @@
 //                 )}
 
 //                 {/* Dept user: own department card */}
-//                 {!isFullAccess && userDept && meetingStats.departmentStats[userDept] && (
+//                 {!seesAllDepts && userDept && meetingStats.departmentStats[userDept] && (
 //                   <div className="pnl" style={{ ...panel, padding: "22px" }}>
 //                     <div style={{ marginBottom: 16 }}>
 //                       <PanelTitle icon="🏢" color={P.gold}>Your Department Progress</PanelTitle>
@@ -4464,7 +1274,7 @@
 //                 )}
 
 //                 {/* Dept user: no meeting data */}
-//                 {!isFullAccess && userDept && !meetingStats.departmentStats[userDept] && meetingStats.totalSubjects === 0 && (
+//                 {!seesAllDepts && userDept && !meetingStats.departmentStats[userDept] && meetingStats.totalSubjects === 0 && (
 //                   <div style={{ ...panel }}>
 //                     <Empty icon="🏛" title="No meeting subjects assigned yet"
 //                       hint={<>Subjects tagged to <strong>{userDept}</strong> will appear here.</>}/>
@@ -4777,7 +1587,7 @@ function StatCard({ label, value, sub, from, to, spark, dark=false, delay=0 }) {
         <div style={{fontFamily:HF,fontSize:40,fontWeight:700,color:dark?P.tealDark:"#fff",lineHeight:1.15,fontVariantNumeric:"tabular-nums"}}>{shown}</div>
         {sub && <div style={{fontSize:11,color:dark?"#8a6830":"rgba(255,255,255,.85)",fontWeight:600,marginTop:4}}>{sub}</div>}
       </div>
-      <div style={{position:"absolute",right:16,bottom:14,zIndex:1}}>
+      <div className="stat-spark" style={{position:"absolute",right:16,bottom:14,zIndex:1}}>
         <Sparkline color={dark?"#9a7828":"#fff"} data={spark} w={120} h={46}/>
       </div>
     </div>
@@ -5014,19 +1824,19 @@ function CalendarPanel({ appointments=[], mayorSlots=[], loading=false }) {
 
   return (
     <div className="dc" style={{animationDelay:".3s",...panel,overflow:"hidden",display:"flex",flexDirection:"column"}}>
-      <div style={{padding:"20px 22px 12px"}}>
+      <div className="cal-head" style={{padding:"20px 22px 12px"}}>
         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:14,gap:10,flexWrap:"wrap"}}>
           <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
             <div>
               <div style={eyebrow}>{eyebrowDash}Today's appointments</div>
-              <p style={{margin:"6px 0 0",fontFamily:HF,fontSize:22,color:P.ink,fontWeight:700}}>{today.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</p>
+              <p className="cal-date" style={{margin:"6px 0 0",fontFamily:HF,fontSize:22,color:P.ink,fontWeight:700}}>{today.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</p>
             </div>
             <div style={{background:`linear-gradient(135deg,${P.teal},${P.cyan})`,color:"#fff",fontSize:12.5,fontWeight:600,padding:"7px 16px",borderRadius:22,boxShadow:`0 6px 16px ${P.teal}47`,whiteSpace:"nowrap"}}>{filtered.length} All Appointments</div>
           </div>
-          <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-            <div style={{position:"relative"}}>
+          <div className="cal-tools" style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+            <div className="cal-search-wrap" style={{position:"relative"}}>
               <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",fontSize:12,color:P.muted}}>🔍</span>
-              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search…" aria-label="Search appointments" style={{border:`1px solid transparent`,borderRadius:12,padding:"8px 12px 8px 30px",fontSize:12.5,color:P.text,outline:"none",background:"#EEF6F8",width:160,fontFamily:"inherit",transition:"all .2s"}}/>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search…" aria-label="Search appointments" className="cal-search" style={{border:`1px solid transparent`,borderRadius:12,padding:"8px 12px 8px 30px",fontSize:12.5,color:P.text,outline:"none",background:"#EEF6F8",width:160,fontFamily:"inherit",transition:"all .2s"}}/>
             </div>
             <div style={{display:"flex",background:"#EEF6F8",borderRadius:12,padding:3}}>
               {["Day","Week"].map(v=>(
@@ -5066,9 +1876,9 @@ function CalendarPanel({ appointments=[], mayorSlots=[], loading=false }) {
           Loading appointments…
         </div>
       ):view==="week"?(
-        <div style={{padding:"0 18px 12px"}}>
+        <div className="cal-body" style={{padding:"0 18px 12px"}}>
           <div style={{overflowX:"auto",overflowY:"auto",maxHeight:380,border:`1px solid ${P.border}`,borderRadius:14}}>
-            <div style={{minWidth:560}}>
+            <div className="cal-inner" style={{minWidth:560}}>
               <div style={{display:"grid",gridTemplateColumns:"56px repeat(7,1fr)",borderBottom:`1px solid ${P.border}`,background:P.soft,position:"sticky",top:0,zIndex:4}}>
                 <div style={{borderRight:`1px solid ${P.border}`}}/>
                 {weekDates.map((dt,i)=>{
@@ -5239,19 +2049,19 @@ function MeetingProgressPanel({ meetings = [], scopeLabel, onOpen }) {
       <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:10, flexWrap:"wrap", marginBottom:14 }}>
         <div>
           <PanelTitle icon="📈">Meeting-wise Subject Progress</PanelTitle>
-          <p style={{ margin:"6px 0 0 48px", fontSize:12.5, color:P.muted }}>
+          <p className="mp-sub" style={{ margin:"6px 0 0 48px", fontSize:12.5, color:P.muted }}>
             {scopeLabel || "Progress = subjects with action taken"}
           </p>
         </div>
-        <div style={{ position:"relative" }}>
+        <div className="mp-search-wrap" style={{ position:"relative" }}>
           <span style={{ position:"absolute", left:10, top:"50%", transform:"translateY(-50%)", fontSize:12, color:P.muted }}>🔍</span>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Meeting / subject…" aria-label="Search meetings"
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Meeting / subject…" aria-label="Search meetings" className="mp-search"
             style={{ border:"1px solid transparent", borderRadius:12, padding:"8px 12px 8px 30px", fontSize:12.5, color:P.text, outline:"none", background:"#EEF6F8", width:200, fontFamily:"inherit" }}/>
         </div>
       </div>
 
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:10, flexWrap:"wrap", marginBottom:14 }}>
-        <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+        <div className="mp-chips" style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
           {MP_FILTERS.map(({ k, l }) => (
             <button key={k} onClick={() => { setFilter(k); setShowAll(false); }} style={{
               border:`1px solid ${filter===k ? "transparent" : P.border}`,
@@ -5314,7 +2124,7 @@ function MeetingProgressPanel({ meetings = [], scopeLabel, onOpen }) {
                       <div style={{ fontSize:12.5, color:P.muted, padding:"8px 2px" }}>No subjects added to this meeting yet.</div>
                     ) : (
                       <div style={{ overflowX:"auto", border:`1px solid ${P.border}`, borderRadius:12, background:P.white }}>
-                        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12.5 }}>
+                        <table className="subj-table" style={{ width:"100%", borderCollapse:"collapse", fontSize:12.5 }}>
                           <thead>
                             <tr>{["Subject ID","Subject","Type","Decision","Tagged To","Action Taken"].map(h => (
                               <th key={h} style={{ ...thStyle, padding:"10px 12px", fontSize:10.5 }}>{h}</th>))}</tr>
@@ -5609,7 +2419,7 @@ export default function Dashboard() {
     : "Meetings assigned to you";
 
   return (
-    <div style={{minHeight:"100vh",position:"relative",overflow:"hidden",
+    <div className="js-dash" style={{minHeight:"100vh",position:"relative",overflow:"hidden",
       background:"linear-gradient(to bottom,#F1F7F8,#FFFFFF 60%,#EAF5F7)",
       fontFamily:"Inter,'Segoe UI',sans-serif",color:P.text}}>
       <style>{`
@@ -5621,9 +2431,9 @@ export default function Dashboard() {
         @keyframes shimmer{to{background-position:-200% 0}}
         .dc{animation:fadeUp .5s ease both;}
         .hov{transition:transform .3s ease, box-shadow .3s ease;}
-        .hov:hover{transform:translateY(-3px);}
+        @media (hover:hover){ .hov:hover{transform:translateY(-3px);} }
         .pnl{transition:transform .3s ease, box-shadow .3s ease;}
-        .pnl:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(18,63,75,.12)!important;}
+        @media (hover:hover){ .pnl:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(18,63,75,.12)!important;} }
         .pbtn:hover{transform:translateY(-1px);filter:brightness(1.07);}
         .pbtn:active,.gbtn:active{opacity:.9;}
         .gbtn:hover{border-color:${P.teal}!important;color:${P.tealDark}!important;}
@@ -5641,19 +2451,92 @@ export default function Dashboard() {
         .dash-grid-track{display:grid;grid-template-columns:1fr 2.3fr;gap:18px;}
         .mtg-grid-3     {display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;}
         .mp-row:hover   {background:${P.soft};border-radius:14px;}
-        @media(max-width:800px){ .mp-row{grid-template-columns:1fr!important;gap:10px!important;} .mp-row > div:last-child{justify-content:flex-start!important;} }
-        @media(max-width:1100px){
+        /* ══════════════ RESPONSIVE (layout only — colors / data / logic untouched) ══════════════ */
+
+        /* Laptop 1025–1100px : existing behaviour kept exactly as before */
+        @media (min-width:1025px) and (max-width:1100px){
           .dash-grid-cal  {grid-template-columns:1fr!important;}
           .dash-grid-track{grid-template-columns:1fr!important;}
           .mtg-grid-3     {grid-template-columns:1fr 1fr!important;}
         }
-        @media(max-width:800px){
-          .dash-grid-4{grid-template-columns:repeat(2,1fr)!important;gap:12px!important;}
-          .mtg-grid-3 {grid-template-columns:1fr!important;}
+
+        /* ── TABLET (≤1024px) ── */
+        @media (max-width:1024px){
+          .js-dash .dash-pad{padding:20px 20px!important;}
+          .js-dash .dash-grid-cal  {grid-template-columns:1fr!important;}
+          .js-dash .dash-grid-track{grid-template-columns:1fr!important;}
+          /* grid children may shrink → wide tables scroll inside the card instead of pushing it off-screen */
+          .js-dash .dash-grid-4 > *,.js-dash .dash-grid-cal > *,.js-dash .dash-grid-track > *,.js-dash .mtg-grid-3 > *{min-width:0;}
+          /* wide tables keep every column and scroll inside their own card */
+          .js-dash .dept-table{min-width:640px;}
+          .js-dash .ra-table  {min-width:880px;}
+          .js-dash .subj-table{min-width:720px;}
+          .js-dash .ra-table td:nth-child(2),.js-dash .ra-table td:nth-child(4){white-space:nowrap;}
         }
-        @media(max-width:480px){
-          .dash-grid-4{grid-template-columns:1fr!important;}
-          .dash-pad{padding:12px 10px!important;}
+
+        /* Tablet landscape (iPad 1024) : calendar + status side by side */
+        @media (min-width:960px) and (max-width:1024px){
+          .js-dash .dash-grid-cal{grid-template-columns:minmax(0,1fr) 280px!important;}
+        }
+
+        /* Tablet 768–959 : status panel below calendar, its content in 2 columns */
+        @media (min-width:768px) and (max-width:959px){
+          .js-dash .status-pnl{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:28px;align-items:start;}
+          .js-dash .status-pnl > *{min-width:0;}
+          .js-dash .status-pnl > .status-hd{grid-column:1 / -1;}
+          .js-dash .status-pnl > div:nth-child(2){margin:0 0 14px!important;align-self:center;}
+          .js-dash .status-pnl > div:nth-child(3){align-self:center;}
+        }
+
+        /* Tablet portrait (768 / 820px) : 2-column layout */
+        @media (max-width:899px){
+          .js-dash .dash-grid-4{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important;}
+          .js-dash .mtg-grid-3{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+          .js-dash .mtg-grid-3 > :last-child{grid-column:1 / -1;}
+          .js-dash .mp-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;row-gap:10px!important;}
+          .js-dash .mp-row > div:last-child{grid-column:1 / -1;justify-content:flex-end!important;}
+        }
+
+        /* ── MOBILE (≤767px) ── */
+        @media (max-width:767px){
+          .js-dash .dash-pad{padding:16px 14px!important;}
+          .js-dash .pg-hd{align-items:flex-start!important;}
+          .js-dash .pg-title{font-size:24px!important;}
+          .js-dash .pg-actions{width:100%;}
+          .js-dash .pg-actions > *{flex:1 1 0;justify-content:center;}
+          .js-dash .mtg-sec-hd > div:first-child{flex:1 1 100%;}
+          .js-dash .mtg-view-btn{width:100%;}
+          .js-dash .mtg-grid-3{grid-template-columns:1fr!important;}
+          .js-dash .pnl{padding:16px!important;}
+          .js-dash .mp-sub{margin-left:0!important;}
+          .js-dash .mp-search-wrap{width:100%;}
+          .js-dash .mp-search{width:100%!important;}
+          .js-dash .mp-chips,.js-dash .ra-tabs{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;min-width:0;padding-bottom:2px;}
+          .js-dash .mp-chips > button,.js-dash .ra-tabs > button{flex-shrink:0;white-space:nowrap;}
+          .js-dash .mp-row{grid-template-columns:1fr!important;padding:12px!important;}
+          .js-dash .mp-row > div:last-child{justify-content:flex-start!important;}
+          .js-dash .cal-head{padding:16px 14px 10px!important;}
+          .js-dash .cal-date{font-size:18px!important;}
+          .js-dash .cal-tools{width:100%;}
+          .js-dash .cal-search-wrap{flex:1 1 150px;}
+          .js-dash .cal-search{width:100%!important;}
+          .js-dash .cal-body{padding:0 10px 10px!important;}
+          .js-dash .status-pnl{padding:16px!important;}
+          .js-dash .ra-actions{width:100%;flex-wrap:wrap;}
+          .js-dash .ra-actions > button{flex:1 1 150px;}
+          .js-dash .stat-spark svg{width:96px;height:auto;}
+        }
+
+        /* Small mobile (≤480px) */
+        @media (max-width:480px){
+          .js-dash .dash-grid-4{grid-template-columns:1fr!important;}
+          .js-dash .dash-pad{padding:12px 10px!important;}
+        }
+
+        /* Touch devices : comfortable tap targets */
+        @media (pointer:coarse) and (max-width:1024px){
+          .js-dash .mp-chips > button,.js-dash .ra-tabs > button{min-height:36px;}
+          .js-dash .gbtn{min-height:38px;}
         }
         @media (prefers-reduced-motion: reduce){
           *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important;}
@@ -5670,10 +2553,10 @@ export default function Dashboard() {
         <div style={{height:2,background:`linear-gradient(90deg,${P.teal},${P.gold})`,borderRadius:99,marginBottom:22}}/>
 
         {/* Page header */}
-        <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",marginBottom:24,flexWrap:"wrap",gap:10}}>
+        <div className="pg-hd" style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",marginBottom:24,flexWrap:"wrap",gap:10}}>
           <div className="dc">
             <div style={eyebrow}>{eyebrowDash}Analytic overview</div>
-            <h2 style={{margin:"6px 0 0",fontFamily:HF,fontSize:30,fontWeight:700,color:P.ink,lineHeight:1.2}}>
+            <h2 className="pg-title" style={{margin:"6px 0 0",fontFamily:HF,fontSize:30,fontWeight:700,color:P.ink,lineHeight:1.2}}>
               Good {greet}, <span style={{color:P.teal}}>{user?.fullName?.split(" ")[0]||"Admin"}</span>
             </h2>
             <div style={{width:64,height:4,borderRadius:4,background:P.gold,margin:"10px 0 6px"}}/>
@@ -5682,7 +2565,7 @@ export default function Dashboard() {
               {deptBadge(11)}
             </p>
           </div>
-          <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+          <div className="pg-actions" style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
             <button className="gbtn" onClick={()=>{fetchDashboard();fetchAppointments();fetchMayorSlots();fetchMeetingStats();}}
               style={ghostBtn}>
               ↻ Refresh
@@ -5708,7 +2591,7 @@ export default function Dashboard() {
               <div className="dc" style={{ animationDelay: "0s", marginBottom: 20 }}>
 
                 {/* Section header */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18, flexWrap: "wrap", gap: 10 }}>
+                <div className="mtg-sec-hd" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18, flexWrap: "wrap", gap: 10 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
                     <span style={{ width: 46, height: 46, borderRadius: 14, background: P.white, border: `1px solid ${P.border}`,
                       boxShadow: "0 1px 2px rgba(18,63,75,.04), 0 6px 16px rgba(18,63,75,.07)", display: "inline-flex", alignItems: "center", justifyContent: "center",
@@ -5723,7 +2606,7 @@ export default function Dashboard() {
                       </p>
                     </div>
                   </div>
-                  <button className="pbtn" onClick={() => navigate("/meetings")} style={pillBtn(P.teal, P.cyan)}>
+                  <button className="pbtn mtg-view-btn" onClick={() => navigate("/meetings")} style={pillBtn(P.teal, P.cyan)}>
                     View Meetings →
                   </button>
                 </div>
@@ -5827,7 +2710,7 @@ export default function Dashboard() {
                       </span>
                     </div>
                     <div style={{ overflowX: "auto", borderRadius: 12 }}>
-                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                      <table className="dept-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                         <thead>
                           <tr>
                             {["Department", "Total Subjects", "Approved", "Action Taken", "Completion"].map((h, hi, arr) => (
@@ -5950,8 +2833,8 @@ export default function Dashboard() {
                 <CalendarPanel appointments={appointments} mayorSlots={mayorSlots} loading={apptLoading}/>
 
                 {/* Status Panel */}
-                <div className="dc" style={{animationDelay:".37s",...panel,padding:"20px",display:"flex",flexDirection:"column"}}>
-                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+                <div className="dc status-pnl" style={{animationDelay:".37s",...panel,padding:"20px",display:"flex",flexDirection:"column"}}>
+                  <div className="status-hd" style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
                     <h3 style={{margin:0,fontFamily:HF,fontSize:18,fontWeight:700,color:P.ink}}>Status</h3>
                     <div style={{...ghostBtn,cursor:"default",padding:"4px 12px",fontSize:11.5}}>Today ▾</div>
                   </div>
@@ -6045,7 +2928,7 @@ export default function Dashboard() {
                       <h3 style={{margin:0,fontFamily:HF,fontSize:18,fontWeight:700,color:P.ink,display:"flex",alignItems:"center",gap:8}}><Dot c={P.gold}/>Recent Applications</h3>
                       <p style={{margin:"3px 0 0 16px",fontSize:12.5,color:P.muted}}>Latest inward complaints</p>
                     </div>
-                    <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+                    <div className="ra-tabs" style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
                       {["all","Pending","Resolved","In Progress"].map(tab=>(
                         <button key={tab} onClick={()=>setActiveTab(tab)} style={{
                           border:`1px solid ${activeTab===tab?"transparent":P.border}`,
@@ -6059,7 +2942,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div style={{overflowX:"auto"}}>
-                    <table style={{width:"100%",borderCollapse:"collapse",fontSize:12.5}}>
+                    <table className="ra-table" style={{width:"100%",borderCollapse:"collapse",fontSize:12.5}}>
                       <thead>
                         <tr>
                           {["Inward No","Applicant","Subject","Taluka","Department","Priority","Status","Date"].map((h,hi,arr)=>(
@@ -6101,7 +2984,7 @@ export default function Dashboard() {
                   </div>
                   <div style={{marginTop:"auto",paddingTop:16,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
                     <span style={{fontSize:12.5,color:P.muted}}>Showing {filteredRecent.length} of {stats.total}</span>
-                    <div style={{display:"flex",gap:10}}>
+                    <div className="ra-actions" style={{display:"flex",gap:10}}>
                       <button className="pbtn" onClick={()=>navigate("/allapplication")} style={pillBtn(P.teal,P.cyan)}>All Applications →</button>
                       <button className="pbtn" onClick={()=>navigate("/applicationcitizens")} style={{...pillBtn(P.gold,P.gold),color:"#3A2600",boxShadow:`0 6px 16px ${P.gold}4d`}}>Citizen Appts →</button>
                     </div>
